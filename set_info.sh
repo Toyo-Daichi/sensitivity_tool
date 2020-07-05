@@ -1,11 +1,13 @@
 #!/bin/csh -f
+alias wgrib1='/usr/bin/wgrib'
+ 
 set datapath = '/work3/daichi/Data/GSM_EnData/'
 
 # set date
-set s_yy = 2019; set e_yy = 2019
-set s_mm = 10  ; set e_mm = 10
-set s_dd = 1   ; set e_dd = 30
-set s_hh = 0   ; set e_hh = 18
+set s_yy = 2005; set e_yy = 2005
+set s_mm = 9   ; set e_mm = 9
+set s_dd = 2   ; set e_dd = 2
+set s_hh = 0   ; set e_hh = 0
 
 # set your target info.
 set ft = 72 
@@ -37,15 +39,15 @@ while ( ${s_yy} <= ${e_yy} )
         set il     = 1
 
         while ( ${il} <= 4 )
-        set ifile = ${i_list[${il}]}
+        set i_file = ${i_list[${il}]}
 
-        wgrib -v ${i_file} | grep "UGRD" | wgrib ${i_file} -i -no_header -append -ieee ${o_file}/uwnd_${s_yy}${m0}${d0}${h0}.grd
-        wgrib -v ${i_file} | grep "VGRD" | wgrib ${i_file} -i -no_header -append -ieee ${o_file}/vwnd_${s_yy}${m0}${d0}${h0}.grd
-        wgrib -v ${i_file} | grep "TMP"  | wgrib ${i_file} -i -no_header -append -ieee ${o_file}/tmp_${s_yy}${m0}${d0}${h0}.grd
+        wgrib -v ${i_file} | grep "UGRD" | wgrib ${i_file} -i -no_header -append -ieee ${o_dir}/uwnd_${s_yy}${m0}${d0}${h0}.grd
+        wgrib -v ${i_file} | grep "VGRD" | wgrib ${i_file} -i -no_header -append -ieee ${o_dir}/vwnd_${s_yy}${m0}${d0}${h0}.grd
+        wgrib -v ${i_file} | grep "TMP"  | wgrib ${i_file} -i -no_header -append -ieee ${o_dir}/tmp_${s_yy}${m0}${d0}${h0}.grd
 
-        if ( ${il} == 1 ) wgrib -v ${i_file} | grep "sfc" | wgrib ${i_file} -i -no_header -append -ieee ${o_file}/hgt_${s_yy}${m0}${d0}${h0}.grd
+        if ( ${il} == 1 ) wgrib -v ${i_file} | grep "sfc" | wgrib ${i_file} -i -no_header -append -ieee ${o_dir}/hgt_${s_yy}${m0}${d0}${h0}.grd
 
-        if ( ${il} != 1 ) wgrib -v ${i_file} | grep "HGT" | wgrib ${i_file} -i -no_header -append -ieee ${o_file}/hgt_${s_yy}${m0}${d0}${h0}.grd
+        if ( ${il} != 1 ) wgrib -v ${i_file} | grep "HGT" | wgrib ${i_file} -i -no_header -append -ieee ${o_dir}/hgt_${s_yy}${m0}${d0}${h0}.grd
 
       else
         # Leaving the scalability.
@@ -68,10 +70,10 @@ while ( ${s_yy} <= ${e_yy} )
 
       endif
 
-      cat ${o_file}/uwnd_${s_yy}${m0}${d0}${h0}.bin ${o_file}/vwnd_${s_yy}${m0}${d0}${h0}.bin ${o_file}/vvel_${s_yy}${m0}${d0}${h0}.bin ${o_file}/tmp_${s_yy}${m0}${d0}${h0}.bin ${o_file}/hgt_${s_yy}${m0}${d0}${h0}.bin >! ${o_file}/${s_yy}${m0}${d0}${h0}.bin
+      cat ${o_file}/uwnd_${s_yy}${m0}${d0}${h0}.grd ${o_file}/vwnd_${s_yy}${m0}${d0}${h0}.grd ${o_file}/vvel_${s_yy}${m0}${d0}${h0}.grd ${o_file}/tmp_${s_yy}${m0}${d0}${h0}.grd ${o_file}/hgt_${s_yy}${m0}${d0}${h0}.grd >! ${o_file}/${s_yy}${m0}${d0}${h0}.grd
 
       #rm -f ${i_file}
-      rm -f ${o_file}/*_*
+      #rm -f ${o_file}/*_*
  
       @ s_hh = ${s_hh} + 6
     end
