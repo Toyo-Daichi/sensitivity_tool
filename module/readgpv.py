@@ -19,7 +19,7 @@ class ReadGPV:
     for ix in range(self.nx):
       lon += [ float('{:.2f}'.format(dx*ix)) ]
     for iy in range(self.ny):
-      lat += [ float('{:.2f}'.format(dy*iy)) ]
+      lat += [ float('{:.2f}'.format(90.0-dy*iy)) ]
     X, Y = np.meshgrid(lon, lat)
     return X, Y
     
@@ -31,5 +31,24 @@ class ReadGPV:
     with open(gpv_file, 'rb') as ifile:
       if mode == 'default':
         data = np.fromfile(ifile, dtype='<f', sep = '')
-      return data
+    return data
 
+  def calc_prime(self, ctrl_run, ensm_run):
+    return ensm_run - ctrl_run
+
+
+class Energy_norm:
+  def __init__(self):
+    pass
+
+  def dry_energy_norm(self,
+    #pertubaton var
+    u_prime, v_prime, tmp_prime,  slp_prime,
+    
+    #parameter
+    cp:float=0.24, R:float=8.314 
+  ):
+    pass
+
+  def humid_energy_norm(self):
+    pass

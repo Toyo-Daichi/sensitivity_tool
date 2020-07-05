@@ -6,6 +6,7 @@ Created from 2020.7.15
 
 import os, sys
 sys.path.append(os.path.join(os.path.dirname(__file__), './module'))
+import matplotlib.pyplot as plt
 
 #import my_module
 import mapping
@@ -17,21 +18,27 @@ class Anl_basem:
     pass
 
   def main_driver(self, data_path):
-    mp = mapping.Mapping('WJPN')
-    elem, surf_elem = rg.data_kind()
-    data, surf_data = rg.open_grd_letkf(data_path, len(elem), len(surf_elem))
-    lon, lat = rg.data_coord(self.indir)
+    """Set parm. """
+    surf_elem, elem = RG.data_kind()
+    lon, lat = RG.set_coordinate()
+    elem_num = len(elem)
+    
+    """Set data. & Making pertubation"""
+
+    full_data = RG.read_gpv(data_path, elem_num)
+
+
+
+
 
     fig, ax = plt.subplots()
-    mapp = mp.base(projection_mode='lcc')
-    x, y = mp.coord_change(mapp, lon, lat)
+    mapp = MP.base(projection_mode='lcc')
+    x, y = MP.coord_change(mapp, lon, lat)
 
-    mp.rain_contourf(mapp, x, y, surf_data[surf_elem['RAIN']], hr='default')
-    mp.contour(mapp, x, y, data[elem['P']][5]*0.01)
-    mp.vector(mapp, x, y, surf_data[surf_elem['US']], surf_data[surf_elem['VS']], skip=5)
-
-    mp.title(self.exp_name + ':: 201807061800, ft:6hr, mem:Mean')		
-    #mp.saving('201807061800ft6hr', self.indir + 'Nhm-letkf/fig/' + self.exp_name + '/')
+    MP.rain_contourf(mapp, x, y, full_data[surf_elem['APCP'],0,24], hr='default')
+    MP.contour(mapp, x, y, full_data[surf_elem['PRMSL'],0,24]*0.01)
+    #MP.vector(mapp, x, y, surf_data[surf_elem['US']], surf_data[surf_elem['VS']], skip=5)
+    #MP.title(self.exp_name + ':: 201807061800, ft:6hr, mem:Mean')		
 
     plt.show()
 
@@ -39,17 +46,16 @@ if __name__ == "__main__":
   """Set basic info. """
   yyyy, mm, dd, hh = 2005, 9, 2, 0
   nx, ny, nz = 144, 37, 4
-  ft, ensemble_size = 72, 25
+  ft, mem = 72, 25
 
-  indir = '/work3/daichi/Data/GSM_EnData/'
-  indata = indir + '/bin/{0}{1}{2}/'.format(yyyy,mm,dd) + '{0}{1}{2}{3}_{4}hr_{5}mem.grd'.format(yyyy,mm,dd,hh,ft,ensemble_size)
+  indir = '/work3/daichi/Data/GSM_EnData'
+  indata = indir + '/bin/{}{:02}{:02}/'.format(yyyy,mm,dd) + '{}{:02}{:02}{:02}_{:02}hr_{:02}mem.grd'.format(yyyy,mm,dd,hh,ft,mem)
 
   """Class set"""
-  RG = readgpv.ReadGPV(nx,ny,nz)
-  MP = mapping.Mapping('NH')
+  RG = readgpv.ReadGPV(nx,ny,nz,mem)
+  MP = mapping.Mapping('JPN')
   #Main_driver
   DR = Anl_basem()
 
-  data = RG.read_gpv(indata)
-
+  DR.main_driver(indata)
   print('Normal END')

@@ -19,25 +19,29 @@ class Mapping:
     if area == 'JPN':
       self.lon_min, self.lon_max = 120, 155
       self.lat_min, self.lat_max = 17, 50
+      self.lat_0, self.lon_0 = 35, 140
     
     elif area == 'EJPN':
       self.lon_min, self.lon_max = 120, 155
       self.lat_min, self.lat_max = 17, 50
+      self.lat_0, self.lon_0 = 35, 140
 
     elif area == 'WJPN':
       self.lon_min, self.lon_max = 129, 141
       self.lat_min, self.lat_max = 29, 38
+      self.lat_0, self.lon_0 = 35, 140
 
     elif area == 'NH':
-      self.lon_min, self.lon_max = 0, 360
-      self.lat_min, self.lat_max = 15, 45
+      self.lon_min, self.lon_max = 120, 55
+      self.lat_min, self.lat_max = 25, 40
+      self.lat_0, self.lon_0 = 35, 140
 
   def base(self, *, projection_mode='lcc'):
     
     mapping = Basemap( 
-      projection='lcc',
+      projection=projection_mode,
       resolution="i", 
-      lat_0=35, lon_0=140, fix_aspect=(1,1),
+      lat_0=self.lat_0, lon_0=self.lon_0, fix_aspect=(1,1),
       llcrnrlat=self.lat_min, urcrnrlat=self.lat_max, 
       llcrnrlon=self.lon_min, urcrnrlon=self.lon_max
     )
