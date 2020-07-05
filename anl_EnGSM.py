@@ -17,20 +17,32 @@ class Anl_basem:
   def __init__(self):
     pass
 
-  def main_driver(self, data_path):
+  def main_driver(self, data_path:str):
+    """品質調整
+    Args:
+      data_path(str) : 週間アンサンブルデータのPATH 
+    Note:
+      full_data(np.ndarray) : grib形式をバイナリー形式に自作したデータセット
+      constitution -> [要素, 高度面, ensemble_mem:0=ctrl_run, 緯度, 経度] 
+    """
+
     """Set parm. """
     surf_elem, elem = RG.data_kind()
     lon, lat = RG.set_coordinate()
     elem_num = len(elem)
     
     """Set data. & Making pertubation"""
-
     full_data = RG.read_gpv(data_path, elem_num)
 
+    for imem in range(RG.ensemble_mem):
+      pertb_uwnd = RG.calc_prime(full_data[elem['UGRD'],:,0], full_data[elem['UGRD'],:,imem])
+      pertb_vwnd = RG.calc_prime(full_data[elem['VGRD'],:,0], full_data[elem['VGRD'],:,imem])
+      pertb_tmp  = RG.calc_prime(full_data[elem['TMP'],:,0], full_data[elem['TMP'],:,imem])
+      pertb_slp  = RG.calc_prime(full_data[surf_elem['PRMSL'],:,0], full_data[elem['PRMSL'],:,imem])
+    
+    
 
-
-
-
+    """Description func. """
     fig, ax = plt.subplots()
     mapp = MP.base(projection_mode='lcc')
     x, y = MP.coord_change(mapp, lon, lat)
