@@ -1,57 +1,52 @@
 #!/bin/csh -f
-#--------------------------------------------
-#  sub       :: get_info.sh
-#  purpose   :: ypu can get JMA GSM_data
-#
-#  you decide start date & end date.
-#    >(s_yy, s_mm, s_dd  & e_yy, e_mm, e_dd) 
-#							
-#							coded by Toyooka
-#							 @2018.7.29
-#--------------------------------------------
+set datapath = '/work3/daichi/Data/GSM_EnData/grib/'
 
- set s_yy = 2019
- set e_yy = 2019
- while ( ${s_yy} <= ${e_yy} ) 
+# set date
+set s_yy = 2019; set e_yy = 2019
+set s_mm = 10  ; set e_mm = 10
+set s_dd = 1   ; set e_dd = 30
+set s_hh = 0   ; set e_hh = 18
 
- set s_mm = 10 
- set e_mm = 10
- while ( ${s_mm} <= ${e_mm} )
-	 	
- set m0 = ${s_mm}
- if( ${s_mm} <= 9 ) set m0 = 0${s_mm}
+while ( ${s_yy} <= ${e_yy} ) 
+  while ( ${s_mm} <= ${e_mm} )
+    set m0 = `printf %02d ${s_mm}`
+    while ( ${s_dd} <= ${e_dd} )
+      set d0 = `printf %02d ${s_dd}`
 
- set s_dd = 1 
- set e_dd = 30
- while ( ${s_dd} <= ${e_dd} )
- set d0 = ${s_dd}
- if( ${s_dd} <= 9 ) set d0 = 0${s_dd}
-
- cd data
- mkdir -p ${s_yy}${m0}${d0}
- set i_dir = /work3/daichi/puff_model/tra_analysis/data/${s_yy}${m0}${d0}
+      cd ${datapath}
+      mkdir -p ./${s_yy}${m0}${d0}
+      set i_dir = ${datapath}/${s_yy}${m0}${d0}
  
- sleep 5
+      sleep 5
 
- set o_time = 0000
- 
- set s_hh = 0 
- set e_hh = 18
- while ( ${s_hh} <= ${e_hh} )
- set h0 = ${s_hh}
- if( ${s_hh} <= 9 ) set h0 = 0${s_hh}
+      while ( ${s_hh} <= ${e_hh} )
+        set h0 = `printf %02d ${s_hh}`
+        set accum_day = ${s_yy}${m0}${d0}${h0}
+        
+        if ( ${accum_day} <= 2006030100 ) then
+          wget http://database.rish.kyoto-u.ac.jp/arch/jmadata/data/gpv/original/${s_yy}/${m0}/${d0}/WFM12XSFC -P ${i_dir}
+          wget http://database.rish.kyoto-u.ac.jp/arch/jmadata/data/gpv/original/${s_yy}/${m0}/${d0}/WFM12XPLL -P ${i_dir}
+          wget http://database.rish.kyoto-u.ac.jp/arch/jmadata/data/gpv/original/${s_yy}/${m0}/${d0}/WFM12XPLM -P ${i_dir}
+          wget http://database.rish.kyoto-u.ac.jp/arch/jmadata/data/gpv/original/${s_yy}/${m0}/${d0}/WFM12XPLH -P ${i_dir}
 
- wget http://database.rish.kyoto-u.ac.jp/arch/jmadata/data/gpv/original/${s_yy}/${m0}/${d0}/Z__C_RJTD_${s_yy}${m0}${d0}${h0}0000_GSM_GPV_Rgl_FD${o_time}_grib2.bin -P ${i_dir}
+        else
+          # Leaving the scalability.
+          wget http://database.rish.kyoto-u.ac.jp/arch/jmadata/data/gpv/original/${s_yy}/${m0}/${d0}/Z__C_RJTD_${s_yy}${m0}${d0}${h0}_EPSW_GPV_Rgl_FD00-08_grib2.bin -P ${i_dir}
+          wget http://database.rish.kyoto-u.ac.jp/arch/jmadata/data/gpv/original/${s_yy}/${m0}/${d0}/Z__C_RJTD_${s_yy}${m0}${d0}${h0}_EPSW_GPV_Rjp_FD00-08_grib2.bin -P ${i_dir}
 
+        endif
 
- @ s_hh = ${s_hh} + 6
- end
- @ s_dd = ${s_dd} + 1
- cd /work3/daichi/puff_model/tra_analysis/ 
- end
- @ s_mm = ${s_mm} + 1
- end
- @ s_yy = ${s_yy} + 1
- end
+        @ s_hh = ${s_hh} + 6
+      end
+    
+      @ s_dd = ${s_dd} + 1
+      cd ${datapath}
+    end
+
+  @ s_mm = ${s_mm} + 1
+  end
+
+@ s_yy = ${s_yy} + 1
+end
 
 exit
