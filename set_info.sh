@@ -1,6 +1,5 @@
 #!/bin/csh -f
 alias wgrib1='/usr/bin/wgrib'
- 
 set datapath = '/work3/daichi/Data/GSM_EnData/'
 
 # set date
@@ -41,13 +40,13 @@ while ( ${s_yy} <= ${e_yy} )
         while ( ${il} <= 4 )
         set i_file = ${i_list[${il}]}
 
-        wgrib -v ${i_file} | grep "UGRD" | wgrib ${i_file} -i -no_header -append -ieee ${o_dir}/uwnd_${s_yy}${m0}${d0}${h0}.grd
-        wgrib -v ${i_file} | grep "VGRD" | wgrib ${i_file} -i -no_header -append -ieee ${o_dir}/vwnd_${s_yy}${m0}${d0}${h0}.grd
-        wgrib -v ${i_file} | grep "TMP"  | wgrib ${i_file} -i -no_header -append -ieee ${o_dir}/tmp_${s_yy}${m0}${d0}${h0}.grd
+        wgrib1 -v ${i_file} | grep "UGRD" | wgrib1 ${i_file} -i -no_header -append -ieee ${o_dir}/uwnd_${s_yy}${m0}${d0}${h0}.grd
+        wgrib1 -v ${i_file} | grep "VGRD" | wgrib1 ${i_file} -i -no_header -append -ieee ${o_dir}/vwnd_${s_yy}${m0}${d0}${h0}.grd
+        wgrib1 -v ${i_file} | grep "TMP"  | wgrib1 ${i_file} -i -no_header -append -ieee ${o_dir}/tmp_${s_yy}${m0}${d0}${h0}.grd
 
-        if ( ${il} == 1 ) wgrib -v ${i_file} | grep "sfc" | wgrib ${i_file} -i -no_header -append -ieee ${o_dir}/hgt_${s_yy}${m0}${d0}${h0}.grd
+        if ( ${il} == 1 ) wgrib1 -v ${i_file} | grep "sfc" | wgrib1 ${i_file} -i -no_header -append -ieee ${o_dir}/hgt_${s_yy}${m0}${d0}${h0}.grd
 
-        if ( ${il} != 1 ) wgrib -v ${i_file} | grep "HGT" | wgrib ${i_file} -i -no_header -append -ieee ${o_dir}/hgt_${s_yy}${m0}${d0}${h0}.grd
+        if ( ${il} != 1 ) wgrib1 -v ${i_file} | grep "HGT" | wgrib1 ${i_file} -i -no_header -append -ieee ${o_dir}/hgt_${s_yy}${m0}${d0}${h0}.grd
 
       else
         # Leaving the scalability.
