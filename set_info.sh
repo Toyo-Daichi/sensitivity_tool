@@ -1,5 +1,5 @@
 #!/bin/csh -f
-alias wgrib1='/usr/bin/wgrib'
+alias wgrib1 '/usr/bin/wgrib'
 set datapath = '/work3/daichi/Data/GSM_EnData/'
 
 # set date
@@ -9,7 +9,8 @@ set s_dd = 2   ; set e_dd = 2
 set s_hh = 0   ; set e_hh = 0
 
 # set your target info.
-set ft = 72 
+set ft  = 72
+set mem = 25
 
 while ( ${s_yy} <= ${e_yy} )
 
@@ -22,10 +23,9 @@ while ( ${s_yy} <= ${e_yy} )
       while ( ${s_hh} <= ${e_hh} )
       set h0 = `printf %02d ${s_hh}`
 
-      cd ${datapath}
-      mkdir -p ./${s_yy}${m0}${d0}
       set i_dir = ${datapath}/grib/${s_yy}${m0}${d0}
-      set o_dir = ${datapath}/bin/
+      set o_dir = ${datapath}/bin/${s_yy}${m0}${d0}
+      mkdir -p ${o_dir}
 
       set accum_day = ${s_yy}${m0}${d0}${h0}
       if ( ${accum_day} <= 2006030100 ) then
@@ -34,19 +34,29 @@ while ( ${s_yy} <= ${e_yy} )
         set i_500  = ${i_dir}/WFM12XPLM
         set i_300  = ${i_dir}/WFM12XPLH
 
-        set i_list = ( ${i_surf} ${i_850} ${i_500} ${300} )
-        set il     = 1
+        set i_list = ( ${i_surf} ${i_850} ${i_500} ${i_300} )
+        set il = 1
 
         while ( ${il} <= 4 )
         set i_file = ${i_list[${il}]}
 
-        wgrib1 -v ${i_file} | grep "UGRD" | wgrib1 ${i_file} -i -no_header -append -ieee ${o_dir}/uwnd_${s_yy}${m0}${d0}${h0}.grd
-        wgrib1 -v ${i_file} | grep "VGRD" | wgrib1 ${i_file} -i -no_header -append -ieee ${o_dir}/vwnd_${s_yy}${m0}${d0}${h0}.grd
-        wgrib1 -v ${i_file} | grep "TMP"  | wgrib1 ${i_file} -i -no_header -append -ieee ${o_dir}/tmp_${s_yy}${m0}${d0}${h0}.grd
+        wgrib1 -v ${i_file} | grep "UGRD"  | grep "${ft}hr fcst" | wgrib1 ${i_file} -i -bin -nh -o ${o_dir}/uwnd_${s_yy}${m0}${d0}${h0}_${il}.grd
+        wgrib1 -v ${i_file} | grep "VGRD"  | grep "${ft}hr fcst" | wgrib1 ${i_file} -i -bin -nh -o ${o_dir}/vwnd_${s_yy}${m0}${d0}${h0}_${il}.grd
 
-        if ( ${il} == 1 ) wgrib1 -v ${i_file} | grep "sfc" | wgrib1 ${i_file} -i -no_header -append -ieee ${o_dir}/hgt_${s_yy}${m0}${d0}${h0}.grd
+        if ( ${il} == 1 ) then
+          wgrib1 -v ${i_file} | grep "PRMSL"   | grep "${ft}hr fcst" | wgrib1 ${i_file} -i -bin -nh -o ${o_dir}/hgt_${s_yy}${m0}${d0}${h0}_${il}.grd
+          wgrib1 -v ${i_file} | grep "APCP" | grep "0-${ft}hr acc" | wgrib1 ${i_file} -i -bin -nh -o ${o_dir}/tmp_${s_yy}${m0}${d0}${h0}_${il}.grd
+          sleep 3s
+        else if ( ${il} != 1 ) then
+          wgrib1 -v ${i_file} | grep "HGT"  | grep "${ft}hr fcst" | wgrib1 ${i_file} -i -bin -nh -o ${o_dir}/hgt_${s_yy}${m0}${d0}${h0}_${il}.grd
+          wgrib1 -v ${i_file} | grep "TMP"  | grep "${ft}hr fcst" | wgrib1 ${i_file} -i -bin -nh -o ${o_dir}/tmp_${s_yy}${m0}${d0}${h0}_${il}.grd
+          sleep 3s
+        endif
+        
+        #echo ${il}
+        @ il = ${il} + 1
 
-        if ( ${il} != 1 ) wgrib1 -v ${i_file} | grep "HGT" | wgrib1 ${i_file} -i -no_header -append -ieee ${o_dir}/hgt_${s_yy}${m0}${d0}${h0}.grd
+        end
 
       else
         # Leaving the scalability.
@@ -56,24 +66,30 @@ while ( ${s_yy} <= ${e_yy} )
         set il = 1
 
         while ( ${i} <= 4 )
- 
-          set C = `printf %4d ${I[${i}]}` 
-          set level = `eval echo ${C} mb`
-          wgrib2 -v ${i_file} | grep "UGRD" | grep "${level}" |wgrib2 ${i_file} -i -no_header -append -ieee ${o_file}/uwnd_${s_yy}${m0}${d0}${h0}.grd
-          wgrib2 -v ${i_file} | grep "VGRD" | grep "${level}" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_file}/vwnd_${s_yy}${m0}${d0}${h0}.grd
-          wgrib2 -v ${i_file} | grep "TMP" | grep "${level}" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_file}/tmp_${s_yy}${m0}${d0}${h0}.grd
-          wgrib2 -v ${i_file} | grep "HGT" | grep "${level}" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_file}/hgt_${s_yy}${m0}${d0}${h0}.grd
-          @ i = ${i} + 1
+        set C = `printf %4d ${I[${i}]}` 
+        set level = `eval echo ${C} mb`
+        wgrib2 -v ${i_file} | grep "UGRD" | grep "${level}" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_file}/uwnd_${s_yy}${m0}${d0}${h0}.grd
+        wgrib2 -v ${i_file} | grep "VGRD" | grep "${level}" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_file}/vwnd_${s_yy}${m0}${d0}${h0}.grd
+        wgrib2 -v ${i_file} | grep "TMP"  | grep "${level}" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_file}/tmp_${s_yy}${m0}${d0}${h0}.grd
+        wgrib2 -v ${i_file} | grep "HGT"  | grep "${level}" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_file}/hgt_${s_yy}${m0}${d0}${h0}.grd
+        @ il = ${il} + 1
         
         end
-
       endif
 
-      cat ${o_file}/uwnd_${s_yy}${m0}${d0}${h0}.grd ${o_file}/vwnd_${s_yy}${m0}${d0}${h0}.grd ${o_file}/vvel_${s_yy}${m0}${d0}${h0}.grd ${o_file}/tmp_${s_yy}${m0}${d0}${h0}.grd ${o_file}/hgt_${s_yy}${m0}${d0}${h0}.grd >! ${o_file}/${s_yy}${m0}${d0}${h0}.grd
+      cat ${o_dir}/uwnd_${s_yy}${m0}${d0}${h0}_?.grd >! ${o_dir}/uwnd_${s_yy}${m0}${d0}${h0}_${ft}hr.grd
+      cat ${o_dir}/vwnd_${s_yy}${m0}${d0}${h0}_?.grd >! ${o_dir}/vwnd_${s_yy}${m0}${d0}${h0}_${ft}hr.grd
+      cat ${o_dir}/hgt_${s_yy}${m0}${d0}${h0}_?.grd  >! ${o_dir}/hgt_${s_yy}${m0}${d0}${h0}_${ft}hr.grd
+      cat ${o_dir}/tmp_${s_yy}${m0}${d0}${h0}_?.grd  >! ${o_dir}/tmp_${s_yy}${m0}${d0}${h0}_${ft}hr.grd
 
-      #rm -f ${i_file}
-      #rm -f ${o_file}/*_*
- 
+      cat ${o_dir}/uwnd_${s_yy}${m0}${d0}${h0}_${ft}hr.grd \
+          ${o_dir}/vwnd_${s_yy}${m0}${d0}${h0}_${ft}hr.grd \
+          ${o_dir}/hgt_${s_yy}${m0}${d0}${h0}_${ft}hr.grd  \
+          ${o_dir}/tmp_${s_yy}${m0}${d0}${h0}_${ft}hr.grd  \
+       >! ${o_dir}/${s_yy}${m0}${d0}${h0}_${ft}hr_${mem}mem.grd
+
+       rm -rf  ${o_dir}/uwnd_*.grd ${o_dir}/vwnd_*.grd ${o_dir}/tmp_*.grd ${o_dir}/hgt_*.grd 
+      
       @ s_hh = ${s_hh} + 6
     end
       
