@@ -112,6 +112,8 @@ class Mapping:
   def contour(self, basemap, x, y, data, *, elem='default', colors="black", linestyles='-', linewidths=0.5):
     if elem == 'default':
       clevs = np.arange(995.0, 1020.0, 5.0) 
+    elif elem == 'diff':
+      clevs = np.arange(-10.0, 10.0, 1.0) 
 
     contour = basemap.contour(x, y, data, clevs, colors=colors, linestyles=linestyles, linewidths=linewidths)
     contour.clabel(fmt='%1.1f', fontsize=8)

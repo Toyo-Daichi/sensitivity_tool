@@ -43,6 +43,8 @@ class ReadGPV:
     """
     return ensm_run - ctrl_run
 
+  def weight_latitude(self, lat:np.ndarray) -> np.ndarray:
+    return np.sqrt(np.cos(np.deg2rad(lat)))
 
 class Energy_norm:
   def __init__(self):
@@ -50,7 +52,7 @@ class Energy_norm:
 
   def dry_energy_norm(self,
     u_prime:np.ndarray, v_prime:np.ndarray, tmp_prime:np.ndarray, slp_prime:np.ndarray,
-    Pr:float=1000.d0, Tr:float=270.d0, cp:float=0.24, R:float=8.314 
+    Pr:float=1000.0, Tr:float=270.0, cp:float=0.24, R:float=8.314 
   ):
     """乾燥エネルギーノルムの計算
     Args:
@@ -73,5 +75,15 @@ class Energy_norm:
     + (tmp_prime[i_hgt])**2 + R*Tr*((slp_prime/Pr)**2) ) \
     *(1/(2*Pr))
 
+    return dry_energy_norm
+
   def humid_energy_norm(self):
     pass
+
+  def _multi_prm(self, 
+    tmp_prime:np.ndarray, slp_prime:np.ndarray,
+    Pr:float=1000.0, Tr:float=270.0, cp:float=0.24, R:float=8.314 
+    ):    
+    multi_prm_tmp_prime = np.sqrt(cp/Tr)*tmp_prime  
+    multi_prm_slp_prime = (np.sqrt(R/Tr)/Pr)*slp_prime  
+    return multi_prm_tmp_prime, multi_prm_tmp_prime
