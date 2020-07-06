@@ -72,10 +72,16 @@ class Energy_norm:
       constitution -> [緯度, 経度] 
     """
 
-    dry_energy_norm = \
-    ((u_prime[i_hgt])**2 + (v_prime[i_hgt])**2 
-    + (tmp_prime[i_hgt])**2 + self.R*self.Tr*((slp_prime/self.Pr)**2) ) \
-    *(1/(2*self.Pr))
+    physical_term = (u_prime)**2 + (v_prime)**2
+    potential_term = (self.cp/self.Tr)*((tmp_prime)**2)
+
+    _physical_term = physical_term[0] + physical_term[1] + physical_term[2]
+    _potential_term = potential_term[0] + potential_term[1] + potential_term[2]
+
+    first_term = (_physical_term + _physical_term)/(2*self.Pr)
+
+    sec_term = ((slp_prime/self.Pr)**2)/(2*self.Tr*self.R)   
+    dry_energy_norm = first_term + sec_term
 
     return dry_energy_norm
 

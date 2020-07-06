@@ -109,11 +109,23 @@ class Mapping:
     cbar = basemap.colorbar(cmap, 'right', size='2.5%')
     cbar.set_label(label, size=8)
 
+  def norm_contourf(self, basemap, x, y, data):
+    levels = [0.1, 0.2, 0.5, 1.0, 2.0, 5.0, 10.0]
+    colors = ['#FFFFFF', '#00FFFF', '#000080', '#228B22', '#FFFF00', '#FF8000', '#FF0000', '#FF00FF']
+
+    cmap = plt.contourf(x, y, data, levels, colors=colors, extend='both')
+    cbar = basemap.colorbar(cmap, 'right', size='2.5%')
+    cbar.set_label('[J/kg]', size=6)
+
   def contour(self, basemap, x, y, data, *, elem='default', colors="black", linestyles='-', linewidths=0.5):
     if elem == 'default':
       clevs = np.arange(995.0, 1020.0, 5.0) 
     elif elem == 'diff':
       clevs = np.arange(-10.0, 10.0, 1.0) 
+    elif elem == 'norm':
+      clevs = np.arange(0.0, 5.0, 0.1) 
+    elif elem == '500hPa':
+      clevs = np.arange(500.0, 6000.0, 50) 
 
     contour = basemap.contour(x, y, data, clevs, colors=colors, linestyles=linestyles, linewidths=linewidths)
     contour.clabel(fmt='%1.1f', fontsize=8)

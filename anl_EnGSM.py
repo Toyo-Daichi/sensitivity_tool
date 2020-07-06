@@ -6,6 +6,7 @@ Created from 2020.7.15
 
 import os, sys
 sys.path.append(os.path.join(os.path.dirname(__file__), './module'))
+import numpy as np
 import matplotlib.pyplot as plt
 
 #import my_module
@@ -43,23 +44,32 @@ class Anl_basem:
     pertb_slp = [[] for _ in range(RG.ensemble_size)]
 
     for imem in range(1, RG.ensemble_size):
-      pertb_uwnd[imem-1] = RG.calc_prime(full_data[elem['UGRD'],:,0], full_data[elem['UGRD'],:,imem])
-      pertb_vwnd[imem-1] = RG.calc_prime(full_data[elem['VGRD'],:,0], full_data[elem['VGRD'],:,imem])
+      pertb_uwnd[imem-1] = RG.calc_prime(full_data[elem['UGRD'],1:,0], full_data[elem['UGRD'],1:,imem])
+      pertb_vwnd[imem-1] = RG.calc_prime(full_data[elem['VGRD'],1:,0], full_data[elem['VGRD'],1:,imem])
       pertb_tmp[imem-1] = RG.calc_prime(full_data[elem['TMP'],1:,0], full_data[elem['TMP'],1:,imem])
       pertb_slp[imem-1] = RG.calc_prime(full_data[surf_elem['PRMSL'],0,0]*0.01, full_data[surf_elem['PRMSL'],0,imem]*0.01)
       # latitude weight
       pertb_uwnd[imem-1] = pertb_uwnd[imem-1][:,:]*weight_lat
       pertb_vwnd[imem-1] = pertb_vwnd[imem-1][:,:]*weight_lat
-      pertb_tmp[imem-1]  = pertb_tmp[imem-1][:,:]*weight_lat
-      pertb_slp[imem-1]  = pertb_slp[imem-1][:,:]*weight_lat
+      pertb_tmp[imem-1]  = pertb_tmp[imem-1][:,:]*weight_lat*np.sqrt(EN.cp/EN.Tr)
+      pertb_slp[imem-1]  = pertb_slp[imem-1][:,:]*weight_lat*np.sqrt((EN.R*EN.Tr)/EN.Pr)
 
+    """Calc dry enegy norm"""
+    dry_energy_norm = EN.dry_energy_norm(
+      pertb_uwnd[0], pertb_vwnd[0],
+      pertb_tmp[0], pertb_slp[0],
+    )
+    
+    print(full_data[elem['HGT'], 2, 0])
+    
     """Description func. """
     fig, ax = plt.subplots()
     mapp = MP.base(projection_mode='lcc')
     x, y = MP.coord_change(mapp, lon, lat)
 
-    MP.rain_contourf(mapp, x, y, full_data[surf_elem['APCP'],0,0], hr='default')
-    MP.contour(mapp, x, y, pertb_slp[0], elem='diff')
+    #MP.rain_contourf(mapp, x, y, full_data[surf_elem['APCP'],0,0], hr='default')
+    MP.contour(mapp, x, y, full_data[elem['HGT'], 2, 0], elem='500hPa')
+    MP.norm_contourf(mapp, x, y, dry_energy_norm)
     #MP.contour(mapp, x, y, full_data[surf_elem['PRMSL'],0,1]*0.01)
     #MP.rain_contourf(mapp, x, y, full_data[surf_elem['PRMSL']*0.01,1,24], hr='default')
     #for _ in range(1, RG.ensemble_size):
@@ -78,6 +88,7 @@ if __name__ == "__main__":
 
   """Class set"""
   RG = readgpv.ReadGPV(nx,ny,nz,mem)
+  EN = readgpv.Energy_norm() 
   MP = mapping.Mapping('JPN')
 
   #Main_driver
