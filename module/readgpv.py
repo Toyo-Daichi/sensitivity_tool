@@ -73,7 +73,5 @@ class Energy_norm:
     + (tmp_prime[i_hgt])**2 + R*Tr*((slp_prime/Pr)**2) ) \
     *(1/(2*Pr))
 
-
-
   def humid_energy_norm(self):
     pass

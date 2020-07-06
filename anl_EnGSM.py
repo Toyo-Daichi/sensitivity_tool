@@ -34,21 +34,19 @@ class Anl_basem:
     """Set data. & Making pertubation"""
     full_data = RG.read_gpv(data_path, elem_num)
 
-    for imem in range(RG.ensemble_mem):
+    for imem in range(1, RG.ensemble_mem):
       pertb_uwnd = RG.calc_prime(full_data[elem['UGRD'],:,0], full_data[elem['UGRD'],:,imem])
       pertb_vwnd = RG.calc_prime(full_data[elem['VGRD'],:,0], full_data[elem['VGRD'],:,imem])
       pertb_tmp  = RG.calc_prime(full_data[elem['TMP'],:,0], full_data[elem['TMP'],:,imem])
       pertb_slp  = RG.calc_prime(full_data[surf_elem['PRMSL'],:,0], full_data[elem['PRMSL'],:,imem])
-    
-    
 
     """Description func. """
-    fig, ax = plt.subplots()
-    mapp = MP.base(projection_mode='lcc')
-    x, y = MP.coord_change(mapp, lon, lat)
+    #fig, ax = plt.subplots()
+    #mapp = MP.base(projection_mode='lcc')
+    #x, y = MP.coord_change(mapp, lon, lat)
 
-    MP.rain_contourf(mapp, x, y, full_data[surf_elem['APCP'],0,24], hr='default')
-    MP.contour(mapp, x, y, full_data[surf_elem['PRMSL'],0,24]*0.01)
+    #MP.rain_contourf(mapp, x, y, full_data[surf_elem['APCP'],0,24], hr='default')
+    #MP.contour(mapp, x, y, full_data[surf_elem['PRMSL'],0,24]*0.01)
     #MP.vector(mapp, x, y, surf_data[surf_elem['US']], surf_data[surf_elem['VS']], skip=5)
     #MP.title(self.exp_name + ':: 201807061800, ft:6hr, mem:Mean')		
 
