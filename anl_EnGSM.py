@@ -63,8 +63,14 @@ class Anl_basem:
       )
 
     """Calc. rate of Each ensemble member"""
+    area_lat_min_index, area_lat_max_index, area_lon_min_index, area_lon_max_index = \
+      EN.verification_region(
+        lon, lat,
+        area_lat_min =50, area_lat_max =20,
+        area_lon_min =120, area_lon_max =150
+    )
 
-
+    print(area_lat_min_index, area_lat_max_index, area_lon_min_index, area_lon_max_index)
     
     """Description func. """
     fig, ax = plt.subplots()
@@ -72,15 +78,14 @@ class Anl_basem:
     x, y = MP.coord_change(mapp, lon, lat)
 
     #MP.rain_contourf(mapp, x, y, full_data[surf_elem['APCP'],0,0], hr='default')
-    for imem in range(1, RG.ensemble_size):
-      MP.contour(mapp, x, y, full_data[elem['HGT'], 2, imem-1], elem='500hPa')
-      MP.norm_contourf(mapp, x, y, dry_energy_norm[imem-1])
+    MP.contour(mapp, x, y, full_data[elem['HGT'], 2, 0], elem='500hPa')
+    MP.norm_contourf(mapp, x, y, dry_energy_norm[0])
     #MP.contour(mapp, x, y, full_data[surf_elem['PRMSL'],0,1]*0.01)
     #MP.rain_contourf(mapp, x, y, full_data[surf_elem['PRMSL']*0.01,1,24], hr='default')
     #for _ in range(1, RG.ensemble_size):
     #MP.vector(mapp, x, y, surf_data[surf_elem['US']], surf_data[surf_elem['VS']], skip=5)
-      MP.title('Test run, ft:72hr')
-      plt.show()
+    MP.title('Test run, ft:72hr')
+    plt.show()
 
 if __name__ == "__main__":
   """Set basic info. """

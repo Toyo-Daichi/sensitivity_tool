@@ -88,6 +88,29 @@ class Energy_norm:
   def humid_energy_norm(self):
     pass
 
+  def verification_region(self, 
+    lon, lat, *,
+    area_lat_min:float =50.0, area_lat_max:float =20.0,
+    area_lon_min:float =120.0, area_lon_max:float =150.0
+  ):
+    """検証領域のインデックス番号を返す
+    Args:
+      lon, lat (np.ndarray): 経度, 緯度のnp.ndarray
+      area_lat_min (float, optional): 検証領域の緯度最低値. Defaults to 50.
+      area_lat_max (float, optional): 検証領域の緯度最高値. Defaults to 20.
+      area_lon_min (float, optional): 検証領域の経度最低値. Defaults to 120.
+      area_lon_max (float, optional): 検証領域の経度最高値. Defaults to 150.
+    Retunrs:
+      各値に相当する　listのindex番号.
+    Note:
+      lambert図法の気象研のoutputでは, おそらく使えないだろう...
+    """
+    area_lat_min_index, area_lat_max_index = np.where(lat == area_lat_min), np.where(lat == area_lat_max)
+    area_lon_min_index, area_lon_max_index = np.where(lon == area_lon_min), np.where(lon == area_lon_min)
+
+    return area_lat_min_index, area_lat_max_index, \
+           area_lon_min_index, area_lon_max_index
+
   def _multi_prm(self, tmp_prime:np.ndarray, slp_prime:np.ndarray):    
     multi_prm_tmp_prime = np.sqrt(self.cp/self.Tr)*tmp_prime  
     multi_prm_slp_prime = (np.sqrt(self.R/self.Tr)/self.Pr)*slp_prime  
