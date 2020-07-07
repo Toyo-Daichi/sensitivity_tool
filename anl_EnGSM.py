@@ -47,7 +47,7 @@ class Anl_basem:
       pertb_uwnd[imem-1] = RG.calc_prime(full_data[elem['UGRD'],1:,0], full_data[elem['UGRD'],1:,imem])
       pertb_vwnd[imem-1] = RG.calc_prime(full_data[elem['VGRD'],1:,0], full_data[elem['VGRD'],1:,imem])
       pertb_tmp[imem-1] = RG.calc_prime(full_data[elem['TMP'],1:,0], full_data[elem['TMP'],1:,imem])
-      pertb_slp[imem-1] = RG.calc_prime(full_data[surf_elem['PRMSL'],0,0]*0.01, full_data[surf_elem['PRMSL'],0,imem]*0.01)
+      pertb_slp[imem-1] = RG.calc_prime(np.log(full_data[surf_elem['PRMSL'],0,0]*0.01), np.log(full_data[surf_elem['PRMSL'],0,imem]*0.01))
       # latitude weight
       pertb_uwnd[imem-1] = pertb_uwnd[imem-1][:,:]*weight_lat
       pertb_vwnd[imem-1] = pertb_vwnd[imem-1][:,:]*weight_lat
