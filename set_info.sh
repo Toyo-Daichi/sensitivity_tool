@@ -9,7 +9,7 @@ set s_dd = 2   ; set e_dd = 2
 set s_hh = 0   ; set e_hh = 0
 
 # set your target info.
-set ft  = 72
+set ft  = 'anl' 
 set mem = 25
 
 while ( ${s_yy} <= ${e_yy} )
@@ -40,20 +40,36 @@ while ( ${s_yy} <= ${e_yy} )
         while ( ${il} <= 4 )
         set i_file = ${i_list[${il}]}
 
-        wgrib1 -v ${i_file} | grep "UGRD"  | grep "${ft}hr fcst" | wgrib1 ${i_file} -i -bin -nh -o ${o_dir}/uwnd_${s_yy}${m0}${d0}${h0}_${il}.grd
-        wgrib1 -v ${i_file} | grep "VGRD"  | grep "${ft}hr fcst" | wgrib1 ${i_file} -i -bin -nh -o ${o_dir}/vwnd_${s_yy}${m0}${d0}${h0}_${il}.grd
+        if ( ${ft} == 'anl' ) then
+          wgrib1 -v ${i_file} | grep "UGRD"  | grep "${ft}" | wgrib1 ${i_file} -i -bin -nh -o ${o_dir}/uwnd_${s_yy}${m0}${d0}${h0}_${il}.grd
+          wgrib1 -v ${i_file} | grep "VGRD"  | grep "${ft}" | wgrib1 ${i_file} -i -bin -nh -o ${o_dir}/vwnd_${s_yy}${m0}${d0}${h0}_${il}.grd
 
-        if ( ${il} == 1 ) then
-          wgrib1 -v ${i_file} | grep "PRMSL"   | grep "${ft}hr fcst" | wgrib1 ${i_file} -i -bin -nh -o ${o_dir}/hgt_${s_yy}${m0}${d0}${h0}_${il}.grd
-          wgrib1 -v ${i_file} | grep "APCP" | grep "0-${ft}hr acc" | wgrib1 ${i_file} -i -bin -nh -o ${o_dir}/tmp_${s_yy}${m0}${d0}${h0}_${il}.grd
-          sleep 3s
-        else if ( ${il} != 1 ) then
-          wgrib1 -v ${i_file} | grep "HGT"  | grep "${ft}hr fcst" | wgrib1 ${i_file} -i -bin -nh -o ${o_dir}/hgt_${s_yy}${m0}${d0}${h0}_${il}.grd
-          wgrib1 -v ${i_file} | grep "TMP"  | grep "${ft}hr fcst" | wgrib1 ${i_file} -i -bin -nh -o ${o_dir}/tmp_${s_yy}${m0}${d0}${h0}_${il}.grd
-          sleep 3s
+          if ( ${il} == 1 ) then
+            wgrib1 -v ${i_file} | grep "PRMSL"   | grep "${ft}" | wgrib1 ${i_file} -i -bin -nh -o ${o_dir}/hgt_${s_yy}${m0}${d0}${h0}_${il}.grd
+            wgrib1 -v ${i_file} | grep "APCP" | grep "0-72hr acc" | wgrib1 ${i_file} -i -bin -nh -o ${o_dir}/tmp_${s_yy}${m0}${d0}${h0}_${il}.grd
+            sleep 3s
+          else if ( ${il} != 1 ) then
+            wgrib1 -v ${i_file} | grep "HGT"  | grep "${ft}" | wgrib1 ${i_file} -i -bin -nh -o ${o_dir}/hgt_${s_yy}${m0}${d0}${h0}_${il}.grd
+            wgrib1 -v ${i_file} | grep "TMP"  | grep "${ft}" | wgrib1 ${i_file} -i -bin -nh -o ${o_dir}/tmp_${s_yy}${m0}${d0}${h0}_${il}.grd
+            sleep 3s
+          endif
+
+        else if ( ${ft} != 'anl' ) then
+          wgrib1 -v ${i_file} | grep "UGRD"  | grep "${ft}hr fcst" | wgrib1 ${i_file} -i -bin -nh -o ${o_dir}/uwnd_${s_yy}${m0}${d0}${h0}_${il}.grd
+          wgrib1 -v ${i_file} | grep "VGRD"  | grep "${ft}hr fcst" | wgrib1 ${i_file} -i -bin -nh -o ${o_dir}/vwnd_${s_yy}${m0}${d0}${h0}_${il}.grd
+
+          if ( ${il} == 1 ) then
+            wgrib1 -v ${i_file} | grep "PRMSL"   | grep "${ft}hr fcst" | wgrib1 ${i_file} -i -bin -nh -o ${o_dir}/hgt_${s_yy}${m0}${d0}${h0}_${il}.grd
+            wgrib1 -v ${i_file} | grep "APCP" | grep "0-${ft}hr acc" | wgrib1 ${i_file} -i -bin -nh -o ${o_dir}/tmp_${s_yy}${m0}${d0}${h0}_${il}.grd
+            sleep 3s
+          else if ( ${il} != 1 ) then
+            wgrib1 -v ${i_file} | grep "HGT"  | grep "${ft}hr fcst" | wgrib1 ${i_file} -i -bin -nh -o ${o_dir}/hgt_${s_yy}${m0}${d0}${h0}_${il}.grd
+            wgrib1 -v ${i_file} | grep "TMP"  | grep "${ft}hr fcst" | wgrib1 ${i_file} -i -bin -nh -o ${o_dir}/tmp_${s_yy}${m0}${d0}${h0}_${il}.grd
+            sleep 3s
+          endif
+
         endif
         
-        #echo ${il}
         @ il = ${il} + 1
 
         end

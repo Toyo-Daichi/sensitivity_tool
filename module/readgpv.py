@@ -105,8 +105,8 @@ class Energy_norm:
     Note:
       lambert図法の気象研のoutputでは, おそらく使えないだろう...
     """
-    area_lat_min_index, area_lat_max_index = np.where(lat == area_lat_min), np.where(lat == area_lat_max)
-    area_lon_min_index, area_lon_max_index = np.where(lon == area_lon_min), np.where(lon == area_lon_min)
+    area_lat_min_index, area_lat_max_index = np.where(lat == area_lat_min)[0][0], np.where(lat == area_lat_max)[0][0]
+    area_lon_min_index, area_lon_max_index = np.where(lon == area_lon_min)[1][0], np.where(lon == area_lon_max)[1][0]
 
     return area_lat_min_index, area_lat_max_index, \
            area_lon_min_index, area_lon_max_index

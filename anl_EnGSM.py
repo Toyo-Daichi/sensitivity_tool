@@ -63,15 +63,23 @@ class Anl_basem:
       )
 
     """Calc. rate of Each ensemble member"""
-    area_lat_min_index, area_lat_max_index, area_lon_min_index, area_lon_max_index = \
+    lat_min_index, lat_max_index, lon_min_index, lon_max_index = \
       EN.verification_region(
         lon, lat,
         area_lat_min =50, area_lat_max =20,
         area_lon_min =120, area_lon_max =150
     )
 
-    print(area_lat_min_index, area_lat_max_index, area_lon_min_index, area_lon_max_index)
-    
+
+    sum_region_dry_energy_norm = [[] for _ in range(RG.ensemble_size)]
+    for imem in range(1, RG.ensemble_size):
+      sum_region_dry_energy_norm[imem-1] =\
+        np.sum(dry_energy_norm[imem-1][lat_min_index:lat_max_index,lon_min_index:lon_max_index])
+
+    for _ in range(1, RG.ensemble_size):
+      print(dry_energy_norm[_-1][lat_min_index:lat_max_index, lon_min_index:lon_max_index])
+      print(sum_region_dry_energy_norm[_-1])
+
     """Description func. """
     fig, ax = plt.subplots()
     mapp = MP.base(projection_mode='lcc')
@@ -92,9 +100,13 @@ if __name__ == "__main__":
   yyyy, mm, dd, hh = 2005, 9, 2, 0
   nx, ny, nz = 144, 37, 4
   ft, mem = 72, 25
-
-  indir = '/work3/daichi/Data/GSM_EnData'
-  indata = indir + '/bin/{}{:02}{:02}/'.format(yyyy,mm,dd) + '{}{:02}{:02}{:02}_{:02}hr_{:02}mem.grd'.format(yyyy,mm,dd,hh,ft,mem)
+  
+  if ft == 'anl':
+    indir = '/work3/daichi/Data/GSM_EnData'
+    indata = indir + '/bin/{}{:02}{:02}/'.format(yyyy,mm,dd) + '{}{:02}{:02}{:02}_anlhr_{:02}mem.grd'.format(yyyy,mm,dd,hh,mem)
+  elif ft != 'anl':
+    indir = '/work3/daichi/Data/GSM_EnData'
+    indata = indir + '/bin/{}{:02}{:02}/'.format(yyyy,mm,dd) + '{}{:02}{:02}{:02}_{:02}hr_{:02}mem.grd'.format(yyyy,mm,dd,hh,ft,mem)
 
   """Class set"""
   RG = readgpv.ReadGPV(nx,ny,nz,mem)
