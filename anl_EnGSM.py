@@ -38,10 +38,10 @@ class Anl_basem:
     
     """Set data. & Making pertubation"""
     full_data = RG.read_gpv(data_path, elem_num)
-    pertb_uwnd = [[] for _ in range(RG.ensemble_size)]
-    pertb_vwnd = [[] for _ in range(RG.ensemble_size)]
-    pertb_tmp = [[] for _ in range(RG.ensemble_size)]
-    pertb_slp = [[] for _ in range(RG.ensemble_size)]
+    pertb_uwnd = [[] for _ in range(RG.ensemble_size-1)]
+    pertb_vwnd = [[] for _ in range(RG.ensemble_size-1)]
+    pertb_tmp = [[] for _ in range(RG.ensemble_size-1)]
+    pertb_slp = [[] for _ in range(RG.ensemble_size-1)]
 
     for imem in range(1, RG.ensemble_size):
       pertb_uwnd[imem-1] = RG.calc_prime(full_data[elem['UGRD'],1:,0], full_data[elem['UGRD'],1:,imem])
@@ -54,13 +54,17 @@ class Anl_basem:
       pertb_tmp[imem-1]  = pertb_tmp[imem-1][:,:]*weight_lat*np.sqrt(EN.cp/EN.Tr)
       pertb_slp[imem-1]  = pertb_slp[imem-1][:,:]*weight_lat*np.sqrt((EN.R*EN.Tr)/EN.Pr)
 
-    """Calc dry enegy norm"""
-    dry_energy_norm = EN.dry_energy_norm(
-      pertb_uwnd[0], pertb_vwnd[0],
-      pertb_tmp[0], pertb_slp[0],
-    )
-    
-    print(full_data[elem['HGT'], 2, 0])
+    """Calc. dry enegy norm"""
+    dry_energy_norm = [[] for _ in range(RG.ensemble_size)]
+    for imem in range(1, RG.ensemble_size):
+      dry_energy_norm[imem-1] = EN.dry_energy_norm(
+        pertb_uwnd[imem-1], pertb_vwnd[imem-1],
+        pertb_tmp[imem-1], pertb_slp[imem-1],
+      )
+
+    """Calc. rate of Each ensemble member"""
+
+
     
     """Description func. """
     fig, ax = plt.subplots()
@@ -68,14 +72,15 @@ class Anl_basem:
     x, y = MP.coord_change(mapp, lon, lat)
 
     #MP.rain_contourf(mapp, x, y, full_data[surf_elem['APCP'],0,0], hr='default')
-    MP.contour(mapp, x, y, full_data[elem['HGT'], 2, 0], elem='500hPa')
-    MP.norm_contourf(mapp, x, y, dry_energy_norm)
+    for imem in range(1, RG.ensemble_size):
+      MP.contour(mapp, x, y, full_data[elem['HGT'], 2, imem-1], elem='500hPa')
+      MP.norm_contourf(mapp, x, y, dry_energy_norm[imem-1])
     #MP.contour(mapp, x, y, full_data[surf_elem['PRMSL'],0,1]*0.01)
     #MP.rain_contourf(mapp, x, y, full_data[surf_elem['PRMSL']*0.01,1,24], hr='default')
     #for _ in range(1, RG.ensemble_size):
     #MP.vector(mapp, x, y, surf_data[surf_elem['US']], surf_data[surf_elem['VS']], skip=5)
-    MP.title('Test run, ft:72hr')		
-    plt.show()
+      MP.title('Test run, ft:72hr')
+      plt.show()
 
 if __name__ == "__main__":
   """Set basic info. """
