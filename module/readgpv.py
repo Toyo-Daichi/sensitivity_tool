@@ -50,8 +50,8 @@ class Energy_norm:
   def __init__(self):
     self.Pr:float=1000.0
     self.Tr:float=270.0
-    self.cp:float=0.24
-    self.R:float=8.314 
+    self.cp:float=1004.0
+    self.R:float=287.0 
 
   def dry_energy_norm(self,
     u_prime:np.ndarray, v_prime:np.ndarray, tmp_prime:np.ndarray, slp_prime:np.ndarray,
@@ -65,8 +65,8 @@ class Energy_norm:
     Parameters:
       self.Pr (float, optional)  : 経験的に求めた参照気圧. Defaults to 1000 hPa.
       self.Tr (float, optional)  : 経験的に求めた参照気温. Defaults to 270 K.
-      self.cp (float, optional)  : 定圧比熱. Defaults to 0.24.
-      self.R  (float, optional)  : 気体の状態定数. Defaults to 8.314.
+      self.cp (float, optional)  : 定圧比熱. Defaults to 1004 J/K*kg.
+      self.R  (float, optional)  : 気体の状態定数. Defaults to 287.0 J/K*kg.
     Returns:
       dry_energy_norm (np.ndarray): トータル乾燥エネルギーノルムのリスト
       constitution -> [緯度, 経度] 
@@ -115,3 +115,4 @@ class Energy_norm:
     multi_prm_tmp_prime = np.sqrt(self.cp/self.Tr)*tmp_prime  
     multi_prm_slp_prime = (np.sqrt(self.R/self.Tr)/self.Pr)*slp_prime  
     return multi_prm_tmp_prime, multi_prm_slp_prime
+
