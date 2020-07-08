@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from Users.toyo.Terminal.sensitivity_tool.anl_EnGSM import press_levels
 import numpy as np
 from scipy import integrate
 
@@ -55,7 +56,7 @@ class Energy_norm:
     self.R:float=287.0 
 
   def dry_energy_norm(self,
-    u_prime:np.ndarray, v_prime:np.ndarray, tmp_prime:np.ndarray, slp_prime:np.ndarray,
+    u_prime:np.ndarray, v_prime:np.ndarray, tmp_prime:np.ndarray, slp_prime:np.ndarray, press_levels:np.ndarray
   ):
     """乾燥エネルギーノルムの計算
     Args:
@@ -63,27 +64,24 @@ class Energy_norm:
       v_prime   (np.ndarray): 南北風のコントロールランからの予測時間における摂動
       tmp_prime (np.ndarray): 気温のコントロールランからの予測時間における摂動
       slp_prime (np.ndarray): 海面更生気圧のコントロールランからの予測時間における摂動
+      press_levels (np.ndarray) : 鉛直積分で用いる気圧面のリスト
     Parameters:
       self.Pr (float) : 経験的に求めた参照気圧. Defaults to 1000 hPa.
       self.Tr (float) : 経験的に求めた参照気温. Defaults to 270 K.
       self.cp (float) : 定圧比熱. Defaults to 1004 J/K*kg.
       self.R  (float) : 気体の状態定数. Defaults to 287.0 J/K*kg.
     Returns:
-      dry_energy_norm (np.ndarray): トータル乾燥エネルギーノルムのリスト
+      dry_energy_norm (np.ndarray): トータル乾燥エネルギーノルム(J/kg)
       constitution -> [緯度, 経度] 
     """
 
     physical_term = (u_prime)**2 + (v_prime)**2
     potential_term = (self.cp/self.Tr)*((tmp_prime)**2)
 
-    _physical_term = physical_term[0] + physical_term[1] + physical_term[2]
-    _potential_term = potential_term[0] + potential_term[1] + potential_term[2]
-
-    first_term = (_physical_term + _physical_term)/(2*self.Pr)
-
+    first_term = self._vint(physical_term+potential_term, press_levels)
     sec_term = ((slp_prime/self.Pr)**2)/(2*self.Tr*self.R)   
-    dry_energy_norm = first_term + sec_term
 
+    dry_energy_norm = first_term + sec_term
     return dry_energy_norm
 
   def humid_energy_norm(self):
