@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import numpy as np
+from scipy import integrate
 
 class ReadGPV:
   def __init__(self, nx, ny, nz, mem):
@@ -63,10 +64,10 @@ class Energy_norm:
       tmp_prime (np.ndarray): 気温のコントロールランからの予測時間における摂動
       slp_prime (np.ndarray): 海面更生気圧のコントロールランからの予測時間における摂動
     Parameters:
-      self.Pr (float, optional)  : 経験的に求めた参照気圧. Defaults to 1000 hPa.
-      self.Tr (float, optional)  : 経験的に求めた参照気温. Defaults to 270 K.
-      self.cp (float, optional)  : 定圧比熱. Defaults to 1004 J/K*kg.
-      self.R  (float, optional)  : 気体の状態定数. Defaults to 287.0 J/K*kg.
+      self.Pr (float) : 経験的に求めた参照気圧. Defaults to 1000 hPa.
+      self.Tr (float) : 経験的に求めた参照気温. Defaults to 270 K.
+      self.cp (float) : 定圧比熱. Defaults to 1004 J/K*kg.
+      self.R  (float) : 気体の状態定数. Defaults to 287.0 J/K*kg.
     Returns:
       dry_energy_norm (np.ndarray): トータル乾燥エネルギーノルムのリスト
       constitution -> [緯度, 経度] 
@@ -116,3 +117,15 @@ class Energy_norm:
     multi_prm_slp_prime = (np.sqrt(self.R/self.Tr)/self.Pr)*slp_prime  
     return multi_prm_tmp_prime, multi_prm_slp_prime
 
+  def _vint(self, x_array:np.ndarray, press_array:np.ndarray) -> np.ndarray:
+    """気圧面鉛直積分
+    Args:
+      x_array (np.ndarray)     : 持っている要素の離散値の値
+      press_array (np.ndarray) : 今回使用するp面座標の差の値
+    Returns:
+      y_array (np.ndarray)     : 鉛直積分した値
+    Note:
+      今回使用した積分方法はシンプソン則
+    """
+    y_array = integrate.simps(x_array, press_array)
+    return y_array

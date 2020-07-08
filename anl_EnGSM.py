@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 #import my_module
 import mapping
 import readgpv
+import setup
 
 class Anl_basem:
 
@@ -97,10 +98,17 @@ class Anl_basem:
 
 if __name__ == "__main__":
   """Set basic info. """
-  yyyy, mm, dd, hh = 2005, 9, 2, 0
-  nx, ny, nz = 144, 37, 4
-  ft, mem = 72, 25
+  yyyy, mm, dd, hh, ft = 2005, 9, 2, 0, 72
+  dataset = 'WFM'
+
+  """Class & parm set """
+  ST = setup.Setup(dataset)
+  nx, ny, nz, mem, press_levels = ST.set_prm()
   
+  RG = readgpv.ReadGPV(nx,ny,nz,mem)
+  EN = readgpv.Energy_norm() 
+  MP = mapping.Mapping('JPN')
+
   if ft == 'anl':
     indir = '/work3/daichi/Data/GSM_EnData'
     indata = indir + '/bin/{}{:02}{:02}/'.format(yyyy,mm,dd) + '{}{:02}{:02}{:02}_anlhr_{:02}mem.grd'.format(yyyy,mm,dd,hh,mem)
@@ -108,12 +116,6 @@ if __name__ == "__main__":
     indir = '/work3/daichi/Data/GSM_EnData'
     indata = indir + '/bin/{}{:02}{:02}/'.format(yyyy,mm,dd) + '{}{:02}{:02}{:02}_{:02}hr_{:02}mem.grd'.format(yyyy,mm,dd,hh,ft,mem)
 
-  """Class set"""
-  RG = readgpv.ReadGPV(nx,ny,nz,mem)
-  EN = readgpv.Energy_norm() 
-  MP = mapping.Mapping('JPN')
-
-  #Main_driver
   DR = Anl_basem()
   DR.main_driver(indata)
   print('Normal END')
