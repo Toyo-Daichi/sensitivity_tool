@@ -8,6 +8,7 @@ import os, sys
 sys.path.append(os.path.join(os.path.dirname(__file__), './module'))
 import numpy as np
 import matplotlib.pyplot as plt
+from tqdm import tqdm
 
 #import my_module
 import mapping
@@ -35,6 +36,7 @@ class Anl_basem:
     surf_elem, elem = RG.data_kind()
     lon, lat = RG.set_coordinate()
     weight_lat = RG.weight_latitude(lat)
+    press_levels = ST.set_pressure_levels()
     elem_num = len(elem)
     
     """Set data. & Making pertubation"""
@@ -61,6 +63,7 @@ class Anl_basem:
       dry_energy_norm[imem-1] = EN.dry_energy_norm(
         pertb_uwnd[imem-1], pertb_vwnd[imem-1],
         pertb_tmp[imem-1], pertb_slp[imem-1],
+        press_levels 
       )
 
     """Calc. rate of Each ensemble member"""
@@ -71,15 +74,14 @@ class Anl_basem:
         area_lon_min =120, area_lon_max =150
     )
 
+    #sum_region_dry_energy_norm = [[] for _ in range(RG.ensemble_size)]
+    #for imem in range(1, RG.ensemble_size):
+    #  sum_region_dry_energy_norm[imem-1] =\
+    #    np.sum(dry_energy_norm[imem-1][lat_min_index:lat_max_index,lon_min_index:lon_max_index])
 
-    sum_region_dry_energy_norm = [[] for _ in range(RG.ensemble_size)]
-    for imem in range(1, RG.ensemble_size):
-      sum_region_dry_energy_norm[imem-1] =\
-        np.sum(dry_energy_norm[imem-1][lat_min_index:lat_max_index,lon_min_index:lon_max_index])
-
-    for _ in range(1, RG.ensemble_size):
-      print(dry_energy_norm[_-1][lat_min_index:lat_max_index, lon_min_index:lon_max_index])
-      print(sum_region_dry_energy_norm[_-1])
+    #for _ in range(1, RG.ensemble_size):
+    #  print(dry_energy_norm[_-1][lat_min_index:lat_max_index, lon_min_index:lon_max_index])
+    #  print(sum_region_dry_energy_norm[_-1])
 
     """Description func. """
     fig, ax = plt.subplots()
@@ -103,10 +105,9 @@ if __name__ == "__main__":
 
   """Class & parm set """
   ST = setup.Setup(dataset)
-  nx, ny, nz, mem, press_levels = ST.set_prm()
-  
+  nx, ny, nz, mem = ST.set_prm()
   RG = readgpv.ReadGPV(nx,ny,nz,mem)
-  EN = readgpv.Energy_norm() 
+  EN = readgpv.Energy_norm(nx,ny) 
   MP = mapping.Mapping('JPN')
 
   if ft == 'anl':

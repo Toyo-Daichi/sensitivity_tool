@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from Users.toyo.Terminal.sensitivity_tool.anl_EnGSM import press_levels
 import numpy as np
 from scipy import integrate
 
@@ -49,7 +48,9 @@ class ReadGPV:
     return np.sqrt(np.cos(np.deg2rad(lat)))
 
 class Energy_norm:
-  def __init__(self):
+  def __init__(self, nx, ny):
+    self.nx = nx
+    self.ny = ny
     self.Pr:float=1000.0
     self.Tr:float=270.0
     self.cp:float=1004.0
@@ -78,10 +79,12 @@ class Energy_norm:
     physical_term = (u_prime)**2 + (v_prime)**2
     potential_term = (self.cp/self.Tr)*((tmp_prime)**2)
 
-    first_term = self._vint(physical_term+potential_term, press_levels)
-    sec_term = ((slp_prime/self.Pr)**2)/(2*self.Tr*self.R)   
+    print(physical_term+potential_term)
 
-    dry_energy_norm = first_term + sec_term
+    first_term = self._vint(physical_term+potential_term, press_levels)
+    sec_term = ((self.Tr*self.R)*(slp_prime/self.Pr)**2)/2
+
+    dry_energy_norm = (first_term+sec_term)/(2*self.Tr*self.R) 
     return dry_energy_norm
 
   def humid_energy_norm(self):
@@ -110,11 +113,6 @@ class Energy_norm:
     return area_lat_min_index, area_lat_max_index, \
            area_lon_min_index, area_lon_max_index
 
-  def _multi_prm(self, tmp_prime:np.ndarray, slp_prime:np.ndarray):    
-    multi_prm_tmp_prime = np.sqrt(self.cp/self.Tr)*tmp_prime  
-    multi_prm_slp_prime = (np.sqrt(self.R/self.Tr)/self.Pr)*slp_prime  
-    return multi_prm_tmp_prime, multi_prm_slp_prime
-
   def _vint(self, x_array:np.ndarray, press_array:np.ndarray) -> np.ndarray:
     """気圧面鉛直積分
     Args:
@@ -125,5 +123,10 @@ class Energy_norm:
     Note:
       今回使用した積分方法はシンプソン則
     """
-    y_array = integrate.simps(x_array, press_array)
+    y_array = np.empty_like(x_array[0], dtype=np.float32)
+
+    for iy in range(self.ny):
+      for ix in range(self.nx):
+        y_array[iy,ix] = integrate.simps(x_array[:,iy,ix], press_array[::-1])
+
     return y_array
