@@ -79,8 +79,6 @@ class Energy_norm:
     physical_term = (u_prime)**2 + (v_prime)**2
     potential_term = (self.cp/self.Tr)*((tmp_prime)**2)
 
-    print(physical_term+potential_term)
-
     first_term = self._vint(physical_term+potential_term, press_levels)
     sec_term = ((self.Tr*self.R)*(slp_prime/self.Pr)**2)/2
 

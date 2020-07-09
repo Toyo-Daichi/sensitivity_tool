@@ -29,7 +29,7 @@ class Anl_basem:
       constitution -> [要素, 高度面, ensemble_mem:0=ctrl_run, 緯度, 経度] 
       *** 気温/高度は, 地表面では積算降水量/海面更生気圧となっているので注意
       pertb_elem(np.ndarray) : コントロールランから各メンバーを引いた摂動データセット
-      constitution -> [ensemble_mem -1(cntl分), nd.array[高度, 緯度, 経度]]
+      constitution -> [ensemble_mem -1(cntl分), 高度, 緯度, 経度]
     """
 
     """Set parm. """
@@ -57,14 +57,21 @@ class Anl_basem:
       pertb_tmp[imem-1]  = pertb_tmp[imem-1][:,:]*weight_lat*np.sqrt(EN.cp/EN.Tr)
       pertb_slp[imem-1]  = pertb_slp[imem-1][:,:]*weight_lat*np.sqrt((EN.R*EN.Tr)/EN.Pr)
 
+    """Pertubation np.array Update"""
+    pertb_pertb_uwnd = np.array(pertb_uwnd)
+    pertb_pertb_vwnd = np.array(pertb_uwnd)
+    pertb_pertb_tmp = np.array(pertb_tmp)
+    pertb_pertb_slp = np.array(pertb_slp)
+
     """Calc. dry enegy norm"""
     dry_energy_norm = [[] for _ in range(RG.ensemble_size)]
-    for imem in range(1, RG.ensemble_size):
-      dry_energy_norm[imem-1] = EN.dry_energy_norm(
-        pertb_uwnd[imem-1], pertb_vwnd[imem-1],
-        pertb_tmp[imem-1], pertb_slp[imem-1],
+    for imem in range(RG.ensemble_size-1):
+      dry_energy_norm[imem] = EN.dry_energy_norm(
+        pertb_uwnd[imem], pertb_vwnd[imem],
+        pertb_tmp[imem],  pertb_slp[imem],
         press_levels 
       )
+    
 
     """Calc. rate of Each ensemble member"""
     lat_min_index, lat_max_index, lon_min_index, lon_max_index = \
@@ -74,29 +81,28 @@ class Anl_basem:
         area_lon_min =120, area_lon_max =150
     )
 
-    #sum_region_dry_energy_norm = [[] for _ in range(RG.ensemble_size)]
-    #for imem in range(1, RG.ensemble_size):
-    #  sum_region_dry_energy_norm[imem-1] =\
-    #    np.sum(dry_energy_norm[imem-1][lat_min_index:lat_max_index,lon_min_index:lon_max_index])
+    vertification_region_norm_list = []
+    for imem in range(RG.ensemble_size-1):
+      vertification_region_norm_list.append(np.sum(dry_energy_norm[imem][lat_min_index:lat_max_index,lon_min_index:lon_max_index]))
 
-    #for _ in range(1, RG.ensemble_size):
-    #  print(dry_energy_norm[_-1][lat_min_index:lat_max_index, lon_min_index:lon_max_index])
-    #  print(sum_region_dry_energy_norm[_-1])
+    ensemble_rate_list = []
+    for imem in range(RG.ensemble_size-1):
+      ensemble_rate_list.append((vertification_region_norm_list[imem]/sum(vertification_region_norm_list))*100)
 
-    """Description func. """
-    fig, ax = plt.subplots()
-    mapp = MP.base(projection_mode='lcc')
-    x, y = MP.coord_change(mapp, lon, lat)
+    #"""Description func. """
+    #fig, ax = plt.subplots()
+    #mapp = MP.base(projection_mode='lcc')
+    #x, y = MP.coord_change(mapp, lon, lat)
 
     #MP.rain_contourf(mapp, x, y, full_data[surf_elem['APCP'],0,0], hr='default')
-    MP.contour(mapp, x, y, full_data[elem['HGT'], 2, 0], elem='500hPa')
-    MP.norm_contourf(mapp, x, y, dry_energy_norm[0])
+    #MP.contour(mapp, x, y, full_data[elem['HGT'], 2, 0], elem='500hPa')
+    #MP.norm_contourf(mapp, x, y, dry_energy_norm[0])
     #MP.contour(mapp, x, y, full_data[surf_elem['PRMSL'],0,1]*0.01)
     #MP.rain_contourf(mapp, x, y, full_data[surf_elem['PRMSL']*0.01,1,24], hr='default')
     #for _ in range(1, RG.ensemble_size):
     #MP.vector(mapp, x, y, surf_data[surf_elem['US']], surf_data[surf_elem['VS']], skip=5)
-    MP.title('Test run, ft:72hr')
-    plt.show()
+    #MP.title('Test run, ft:72hr')
+    #plt.show()
 
 if __name__ == "__main__":
   """Set basic info. """
