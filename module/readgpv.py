@@ -93,7 +93,7 @@ class Energy_norm:
     first_term = self._vint(physical_term+potential_term, press_levels)
     first_term = first_term/(2*self.Pr)
 
-    sec_term = ((self.Tr*self.R)*(slp_prime/self.Pr)**2)/(2*self.Pr)
+    sec_term = (self.Tr*self.R/self.Pr**2)*(slp_prime**2)*0.5
 
     dry_energy_norm = first_term+sec_term 
 

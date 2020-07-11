@@ -88,7 +88,7 @@ class Anl_EnASA:
 
 if __name__ == "__main__":
   """Set basic info. """
-  yyyy, mm, dd, hh, ft = 2003, 1, 21, 12, 72
+  yyyy, mm, dd, hh, ft = 2005, 9, 2, 00, 72
   dataset = 'WFM'
 
   """Class & parm set """

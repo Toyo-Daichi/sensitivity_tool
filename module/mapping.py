@@ -17,23 +17,27 @@ class Mapping:
 
   def __init__(self, area):
     if area == 'JPN':
+      self.area = area
       self.lon_min, self.lon_max = 120, 155
       self.lat_min, self.lat_max = 17, 50
       self.lat_0, self.lon_0 = 35, 140
     
     elif area == 'EJPN':
+      self.area = area
       self.lon_min, self.lon_max = 120, 155
       self.lat_min, self.lat_max = 17, 50
       self.lat_0, self.lon_0 = 35, 140
 
     elif area == 'WJPN':
+      self.area = area
       self.lon_min, self.lon_max = 129, 141
       self.lat_min, self.lat_max = 29, 38
       self.lat_0, self.lon_0 = 35, 140
 
     elif area == 'NH':
-      self.lon_min, self.lon_max = 120, 55
-      self.lat_min, self.lat_max = 25, 40
+      self.area = area
+      self.lon_min, self.lon_max = 90, 165
+      self.lat_min, self.lat_max = 0, 60 
       self.lat_0, self.lon_0 = 35, 140
 
   def base(self, *, projection_mode='lcc'):
@@ -47,8 +51,13 @@ class Mapping:
     )
     
     mapping.drawcoastlines(color='black', linewidth=0.5)
-    mapping.drawmeridians(np.arange(0, 360, 5),  labels=[False, True, False, True], fontsize='small', color='gray', linewidth=0.5)
-    mapping.drawparallels(np.arange(-90, 90, 5), labels=[True, False, False, True], fontsize='small', color='gray', linewidth=0.5)
+    
+    if self.area is not 'NH':
+      mapping.drawmeridians(np.arange(0, 360, 5),  labels=[False, True, False, True], fontsize='small', color='gray', linewidth=0.5)
+      mapping.drawparallels(np.arange(-90, 90, 5), labels=[True, False, False, True], fontsize='small', color='gray', linewidth=0.5)
+    elif self.area is 'NH':
+      mapping.drawmeridians(np.arange(0, 360, 15),  labels=[False, True, False, True], fontsize='small', color='gray', linewidth=0.5)
+      mapping.drawparallels(np.arange(-90, 90, 15), labels=[True, False, False, True], fontsize='small', color='gray', linewidth=0.5)
         
     return mapping
 

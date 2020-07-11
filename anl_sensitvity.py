@@ -49,6 +49,7 @@ class Anl_basem:
     
     """Set data. & Making pertubation"""
     init_full_data = RG.read_gpv(init_data_path, elem_num)
+    #vertifi_full_data = RG.read_gpv(init_data_path, elem_num)
     vertifi_full_data = RG.read_gpv(vertifi_data_path, elem_num)
     pertb_uwnd = np.zeros((RG.ensemble_size-1, RG.nz-RG.surf, RG.ny, RG.nx))
     pertb_vwnd = np.zeros((RG.ensemble_size-1, RG.nz-RG.surf, RG.ny, RG.nx))
@@ -64,29 +65,29 @@ class Anl_basem:
       pertb_uwnd[imem-1] = pertb_uwnd[imem-1]*weight_lat
       pertb_vwnd[imem-1] = pertb_vwnd[imem-1]*weight_lat
       pertb_tmp[imem-1]  = pertb_tmp[imem-1]*weight_lat*np.sqrt(EN.cp/EN.Tr)
-      pertb_slp[imem-1]  = pertb_slp[imem-1]*weight_lat*np.sqrt((EN.R*EN.Tr)/EN.Pr)
+      pertb_slp[imem-1]  = pertb_slp[imem-1]*weight_lat*np.sqrt((EN.R*EN.Tr))/EN.Pr
 
-    #"""Multiply Ensemble mem rate"""
-    #ens_rate_list = np.load(list_path)
-    #sensitivity_pertb_uwnd = RG.weight_average(pertb_uwnd,ens_rate_list)
-    #sensitivity_pertb_vwnd = RG.weight_average(pertb_vwnd,ens_rate_list)
-    #sensitivity_pertb_tmp  = RG.weight_average(pertb_tmp,ens_rate_list)
-    #sensitivity_pertb_slp  = RG.weight_average(pertb_slp,ens_rate_list)
+    """Multiply Ensemble mem rate"""
+    ens_rate_list = np.load(list_path)
+    sensitivity_pertb_uwnd = RG.weight_average(pertb_uwnd,ens_rate_list)
+    sensitivity_pertb_vwnd = RG.weight_average(pertb_vwnd,ens_rate_list)
+    sensitivity_pertb_tmp  = RG.weight_average(pertb_tmp,ens_rate_list)
+    sensitivity_pertb_slp  = RG.weight_average(pertb_slp,ens_rate_list)
 
-    #"""Calc. dry enegy norm"""
-    #dry_energy_norm = EN.dry_energy_norm(
-    #  sensitivity_pertb_uwnd, sensitivity_pertb_vwnd,
-    #  sensitivity_pertb_tmp, sensitivity_pertb_slp,
-    #  press_levels 
-    #  )
-
-    # check each norm
-    imem = 1
+    """Calc. dry enegy norm"""
     dry_energy_norm = EN.dry_energy_norm(
-      pertb_uwnd[imem], pertb_vwnd[imem],
-      pertb_tmp[imem], pertb_slp[imem],
+      sensitivity_pertb_uwnd, sensitivity_pertb_vwnd,
+      sensitivity_pertb_tmp, sensitivity_pertb_slp,
       press_levels 
       )
+
+    # check each norm
+    #imem = 1 
+    #dry_energy_norm = EN.dry_energy_norm(
+    #  pertb_uwnd[imem], pertb_vwnd[imem],
+    #  pertb_tmp[imem], pertb_slp[imem],
+    #  press_levels 
+    #  )
 
     lat_min_index, lat_max_index, lon_min_index, lon_max_index = \
       EN.verification_region(
@@ -112,7 +113,7 @@ class Anl_basem:
 
 if __name__ == "__main__":
   """Set basic info. """
-  yyyy, mm, dd, hh = 2003, 1, 21, 12 
+  yyyy, mm, dd, hh = 2005, 9, 2, 00 
   init, ft = 'anl', 72 
   dataset = 'WFM'
 
@@ -121,7 +122,7 @@ if __name__ == "__main__":
   nx, ny, nz, mem = ST.set_prm()
   RG = readgpv.ReadGPV(nx,ny,nz,mem)
   EN = readgpv.Energy_norm(nx,ny) 
-  MP = mapping.Mapping('JPN')
+  MP = mapping.Mapping('NH')
   DR = Anl_basem()
 
   indir = '/work3/daichi/Data/GSM_EnData'
