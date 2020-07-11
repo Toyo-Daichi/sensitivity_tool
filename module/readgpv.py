@@ -7,6 +7,7 @@ class ReadGPV:
     self.nx = nx
     self.ny = ny
     self.nz = nz
+    self.surf = 1
     self.ensemble_size = mem
 
   def data_kind(self, mode='default'):

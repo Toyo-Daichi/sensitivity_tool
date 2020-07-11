@@ -43,10 +43,10 @@ class Anl_basem:
     
     """Set data. & Making pertubation"""
     full_data = RG.read_gpv(data_path, elem_num)
-    pertb_uwnd = np.zeros((RG.emsemble_size-1, RG.nz, RG.ny, RG.nx))
-    pertb_vwnd = np.zeros((RG.emsemble_size-1, RG.nz, RG.ny, RG.nx))
-    pertb_tmp  = np.zeros((RG.emsemble_size-1, RG.nz, RG.ny, RG.nx))
-    pertb_slp  = np.zeros((RG.emsemble_size-1, RG.ny, RG.nx))
+    pertb_uwnd = np.zeros((RG.ensemble_size-1, RG.nz-RG.surf, RG.ny, RG.nx))
+    pertb_vwnd = np.zeros((RG.ensemble_size-1, RG.nz-RG.surf, RG.ny, RG.nx))
+    pertb_tmp  = np.zeros((RG.ensemble_size-1, RG.nz-RG.surf, RG.ny, RG.nx))
+    pertb_slp  = np.zeros((RG.ensemble_size-1, RG.ny, RG.nx))
 
     for imem in range(1, RG.ensemble_size):
       pertb_uwnd[imem-1, :, :, :] = RG.calc_prime(full_data[elem['UGRD'],1:,0], full_data[elem['UGRD'],1:,imem])
@@ -102,7 +102,7 @@ if __name__ == "__main__":
   indir = '/work3/daichi/Data/GSM_EnData'
   indata = indir + '/bin/{}{:02}{:02}/'.format(yyyy,mm,dd) + '{}{:02}{:02}{:02}_{:02}hr_{:02}mem.grd'.format(yyyy,mm,dd,hh,ft,mem)
 
-  ensemble_rate_list =  DR.En_ajoint_sensitivity_driver(indata)
-  DR.En_ajoint_sensitivity_driver_v1(indata, ensemble_rate_list)
+  ensemble_rate_list = DR.En_ajoint_sensitivity_driver(indata)
 
+  print(sum(ensemble_rate_list))
   print('Normal END')
