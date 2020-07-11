@@ -20,16 +20,20 @@ class Anl_basem:
   def __init__(self):
     pass
 
-  def main_driver(self, data_path:str):
+  def En_ajoint_sensitivity_driver(self, data_path:str):
     """
     Args:
-      data_path(str) : 週間アンサンブルデータのPATH 
+      data_path(str) : 週間アンサンブルデータのPATH
+    Returns:
+      ensemble_rate_list(list) : アンサンブルメンバーに割り振る割合
     Note:
       full_data(np.ndarray)  : grib形式をバイナリー形式に自作したデータセット
       constitution -> [要素, 高度面, ensemble_mem:0=ctrl_run, 緯度, 経度] 
       *** 気温/高度は, 地表面では積算降水量/海面更生気圧となっているので注意
       pertb_elem(np.ndarray) : コントロールランから各メンバーを引いた摂動データセット
       constitution -> [ensemble_mem -1(cntl分), 高度, 緯度, 経度]
+      dry_energy_norm(list, np.ndarray) : 各メンバーから求めた乾燥エネルギーノルム
+      constitution -> [ensemble_mem -1(cntl分), np.ndarray[緯度, 経度]]
     """
 
     """Set parm. """
@@ -72,7 +76,6 @@ class Anl_basem:
         press_levels 
       )
     
-
     """Calc. rate of Each ensemble member"""
     lat_min_index, lat_max_index, lon_min_index, lon_max_index = \
       EN.verification_region(
@@ -89,20 +92,7 @@ class Anl_basem:
     for imem in range(RG.ensemble_size-1):
       ensemble_rate_list.append((vertification_region_norm_list[imem]/sum(vertification_region_norm_list))*100)
 
-    #"""Description func. """
-    #fig, ax = plt.subplots()
-    #mapp = MP.base(projection_mode='lcc')
-    #x, y = MP.coord_change(mapp, lon, lat)
-
-    #MP.rain_contourf(mapp, x, y, full_data[surf_elem['APCP'],0,0], hr='default')
-    #MP.contour(mapp, x, y, full_data[elem['HGT'], 2, 0], elem='500hPa')
-    #MP.norm_contourf(mapp, x, y, dry_energy_norm[0])
-    #MP.contour(mapp, x, y, full_data[surf_elem['PRMSL'],0,1]*0.01)
-    #MP.rain_contourf(mapp, x, y, full_data[surf_elem['PRMSL']*0.01,1,24], hr='default')
-    #for _ in range(1, RG.ensemble_size):
-    #MP.vector(mapp, x, y, surf_data[surf_elem['US']], surf_data[surf_elem['VS']], skip=5)
-    #MP.title('Test run, ft:72hr')
-    #plt.show()
+    return ensemble_rate_list
 
 if __name__ == "__main__":
   """Set basic info. """
@@ -115,14 +105,12 @@ if __name__ == "__main__":
   RG = readgpv.ReadGPV(nx,ny,nz,mem)
   EN = readgpv.Energy_norm(nx,ny) 
   MP = mapping.Mapping('JPN')
-
-  if ft == 'anl':
-    indir = '/work3/daichi/Data/GSM_EnData'
-    indata = indir + '/bin/{}{:02}{:02}/'.format(yyyy,mm,dd) + '{}{:02}{:02}{:02}_anlhr_{:02}mem.grd'.format(yyyy,mm,dd,hh,mem)
-  elif ft != 'anl':
-    indir = '/work3/daichi/Data/GSM_EnData'
-    indata = indir + '/bin/{}{:02}{:02}/'.format(yyyy,mm,dd) + '{}{:02}{:02}{:02}_{:02}hr_{:02}mem.grd'.format(yyyy,mm,dd,hh,ft,mem)
-
   DR = Anl_basem()
-  DR.main_driver(indata)
+
+  indir = '/work3/daichi/Data/GSM_EnData'
+  indata = indir + '/bin/{}{:02}{:02}/'.format(yyyy,mm,dd) + '{}{:02}{:02}{:02}_{:02}hr_{:02}mem.grd'.format(yyyy,mm,dd,hh,ft,mem)
+
+  ensemble_rate_list =  DR.En_ajoint_sensitivity_driver(indata)
+  DR.En_ajoint_sensitivity_driver_v1(indata_v1, ensemble_rate_list)
+
   print('Normal END')
