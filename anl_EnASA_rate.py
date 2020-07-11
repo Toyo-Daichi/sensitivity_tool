@@ -52,12 +52,12 @@ class Anl_EnASA:
       pertb_uwnd[imem-1, :, :, :] = RG.calc_prime(full_data[elem['UGRD'],1:,0], full_data[elem['UGRD'],1:,imem])
       pertb_vwnd[imem-1, :, :, :] = RG.calc_prime(full_data[elem['VGRD'],1:,0], full_data[elem['VGRD'],1:,imem])
       pertb_tmp[imem-1, :, :, :] = RG.calc_prime(full_data[elem['TMP'],1:,0], full_data[elem['TMP'],1:,imem])
-      pertb_slp[imem-1, :, :] = RG.calc_prime(np.log(full_data[surf_elem['PRMSL'],0,0]*0.01), np.log(full_data[surf_elem['PRMSL'],0,imem]*0.01))
+      pertb_slp[imem-1, :, :] = RG.calc_prime(full_data[surf_elem['PRMSL'],0,0]*0.01, full_data[surf_elem['PRMSL'],0,imem]*0.01)
       # latitude weight
       pertb_uwnd[imem-1] = pertb_uwnd[imem-1]*weight_lat
       pertb_vwnd[imem-1] = pertb_vwnd[imem-1]*weight_lat
-      pertb_tmp[imem-1]  = pertb_tmp[imem-1]*weight_lat*np.sqrt(EN.cp/EN.Tr)
-      pertb_slp[imem-1]  = pertb_slp[imem-1]*weight_lat*np.sqrt((EN.R*EN.Tr)/EN.Pr)
+      pertb_tmp[imem-1]  = pertb_tmp[imem-1]*weight_lat
+      pertb_slp[imem-1]  = pertb_slp[imem-1]*weight_lat
    
     """Calc. dry enegy norm"""
     dry_energy_norm = [[] for _ in range(RG.ensemble_size)]
@@ -88,7 +88,7 @@ class Anl_EnASA:
 
 if __name__ == "__main__":
   """Set basic info. """
-  yyyy, mm, dd, hh, ft = 2005, 9, 2, 0, 72
+  yyyy, mm, dd, hh, ft = 2003, 1, 21, 12, 72
   dataset = 'WFM'
 
   """Class & parm set """
@@ -103,6 +103,6 @@ if __name__ == "__main__":
   indata = indir + '/bin/{}{:02}{:02}/'.format(yyyy,mm,dd) + '{}{:02}{:02}{:02}_{:02}hr_{:02}mem.grd'.format(yyyy,mm,dd,hh,ft,mem)
 
   ensemble_rate_list = DR.En_ajoint_sensitivity_driver(indata)
-  setup.save_list_ndarray(ensemble_rate_list, indir+'/rate/{}{:02}{:02}{:02}_{:02}hr_{:02}mem'.format(yyyy,mm,dd,hh,ft,mem))
-  print('...... Output data on ' + '/rate/{}{:02}{:02}{:02}_{:02}hr_{:02}mem'.format(yyyy,mm,dd,hh,ft,mem))
+  setup.save_list_ndarray(ensemble_rate_list, indir+'/rate/', '{}{:02}{:02}{:02}_{:02}hr_{:02}mem'.format(yyyy,mm,dd,hh,ft,mem))
+  print('...... Output data on ' + indir + '/rate/{}{:02}{:02}{:02}_{:02}hr_{:02}mem.npy'.format(yyyy,mm,dd,hh,ft,mem))
   print('Normal END')

@@ -55,7 +55,7 @@ class ReadGPV:
       weights = weight_list,
       returned = True
     )
-    print('..... CALCULATE WEIGHT AVE. SUM OF WEIGHT ', sum_of_weight)
+    #print('..... CALCULATE WEIGHT AVE. SUM OF WEIGHT ', sum_of_weight)
     return weight_average
 
 class Energy_norm:
@@ -89,11 +89,14 @@ class Energy_norm:
 
     physical_term = (u_prime)**2 + (v_prime)**2
     potential_term = (self.cp/self.Tr)*((tmp_prime)**2)
-
+    
     first_term = self._vint(physical_term+potential_term, press_levels)
-    sec_term = ((self.Tr*self.R)*(slp_prime/self.Pr)**2)/2
+    first_term = first_term/(2*self.Pr)
 
-    dry_energy_norm = (first_term+sec_term)/(2*self.Tr*self.R) 
+    sec_term = ((self.Tr*self.R)*(slp_prime/self.Pr)**2)/(2*self.Pr)
+
+    dry_energy_norm = first_term+sec_term 
+
     return dry_energy_norm
 
   def humid_energy_norm(self):

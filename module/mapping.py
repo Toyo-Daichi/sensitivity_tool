@@ -125,7 +125,7 @@ class Mapping:
     elif elem == 'norm':
       clevs = np.arange(0.0, 5.0, 0.1) 
     elif elem == '500hPa':
-      clevs = np.arange(500.0, 6000.0, 50) 
+      clevs = np.arange(500.0, 6000.0, 100) 
 
     contour = basemap.contour(x, y, data, clevs, colors=colors, linestyles=linestyles, linewidths=linewidths)
     contour.clabel(fmt='%1.1f', fontsize=8)

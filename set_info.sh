@@ -3,13 +3,13 @@ alias wgrib1 '/usr/bin/wgrib'
 set datapath = '/work3/daichi/Data/GSM_EnData/'
 
 # set date
-set s_yy = 2005; set e_yy = 2005
-set s_mm = 9   ; set e_mm = 9
-set s_dd = 2   ; set e_dd = 2
-set s_hh = 0   ; set e_hh = 0
+set s_yy = 2003; set e_yy = 2003
+set s_mm = 1   ; set e_mm = 1
+set s_dd = 21  ; set e_dd = 21
+set s_hh = 12  ; set e_hh = 12
 
 # set your target info.
-set ft  = 'anl' 
+set ft  = 'anl' # 'anl' or 24, 48, 72
 set mem = 25
 
 while ( ${s_yy} <= ${e_yy} )
