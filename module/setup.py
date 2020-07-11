@@ -18,3 +18,9 @@ class Setup:
     elif self.dataset is 'EPSW':
       press_levels = np.array([850.0, 500.0, 300.0])
     return press_levels
+
+""" simple package"""
+
+def save_list_ndarray(data:list, indir:str, name:str):
+  data = np.array(data, dtype='float32')
+  np.save(indir+name,data)

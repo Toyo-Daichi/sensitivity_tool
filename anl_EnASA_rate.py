@@ -103,6 +103,6 @@ if __name__ == "__main__":
   indata = indir + '/bin/{}{:02}{:02}/'.format(yyyy,mm,dd) + '{}{:02}{:02}{:02}_{:02}hr_{:02}mem.grd'.format(yyyy,mm,dd,hh,ft,mem)
 
   ensemble_rate_list = DR.En_ajoint_sensitivity_driver(indata)
-
-  print(sum(ensemble_rate_list))
+  setup.save_list_ndarray(ensemble_rate_list, indir+'/rate/', 'EnASA_rate')
+  print('...... Output data on ' + indir +'/rate/EnASA_rate.npy')
   print('Normal END')
