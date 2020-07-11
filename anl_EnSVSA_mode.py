@@ -41,28 +41,32 @@ class Anl_EnSVSA:
     
     """Set data. & Making pertubation"""
     full_data = RG.read_gpv(data_path, elem_num)
-    pertb_uwnd = np.zeros((RG.ensemble_size-1, RG.nz-RG.surf, RG.ny, RG.nx))
-    pertb_vwnd = np.zeros((RG.ensemble_size-1, RG.nz-RG.surf, RG.ny, RG.nx))
-    pertb_tmp  = np.zeros((RG.ensemble_size-1, RG.nz-RG.surf, RG.ny, RG.nx))
-    pertb_slp  = np.zeros((RG.ensemble_size-1, RG.ny, RG.nx))
+    pertb_uwnd = np.zeros((RG.ensemble_size-1, (RG.nz-RG.surf)*RG.ny*RG.nx))
+    pertb_vwnd = np.zeros((RG.ensemble_size-1, (RG.nz-RG.surf)*RG.ny*RG.nx))
+    pertb_tmp  = np.zeros((RG.ensemble_size-1, (RG.nz-RG.surf)*RG.ny*RG.nx))
+    pertb_slp  = np.zeros((RG.ensemble_size-1, RG.ny*RG.nx))
 
     for imem in range(1, RG.ensemble_size):
-      pertb_uwnd[imem-1, :, :, :] = RG.calc_prime(full_data[elem['UGRD'],1:,0], full_data[elem['UGRD'],1:,imem])
-      pertb_vwnd[imem-1, :, :, :] = RG.calc_prime(full_data[elem['VGRD'],1:,0], full_data[elem['VGRD'],1:,imem])
-      pertb_tmp[imem-1, :, :, :] = RG.calc_prime(full_data[elem['TMP'],1:,0], full_data[elem['TMP'],1:,imem])
-      pertb_slp[imem-1, :, :] = RG.calc_prime(full_data[surf_elem['PRMSL'],0,0]*0.01, full_data[surf_elem['PRMSL'],0,imem]*0.01)
+      pertb_uwnd[imem-1, :] = RG.calc_prime(full_data[elem['UGRD'],1:,0].reshape(-1), full_data[elem['UGRD'],1:,imem].reshape(-1))
+      pertb_vwnd[imem-1, :] = RG.calc_prime(full_data[elem['VGRD'],1:,0].reshape(-1), full_data[elem['VGRD'],1:,imem].reshape(-1))
+      pertb_tmp[imem-1, :] = RG.calc_prime(full_data[elem['TMP'],1:,0].reshape(-1), full_data[elem['TMP'],1:,imem].reshape(-1))
+      pertb_slp[imem-1, :] = RG.calc_prime(full_data[surf_elem['PRMSL'],0,0].reshape(-1)*0.01, full_data[surf_elem['PRMSL'],0,imem].reshape(-1)*0.01)
       # latitude weight
-      pertb_uwnd[imem-1] = pertb_uwnd[imem-1]*weight_lat
-      pertb_vwnd[imem-1] = pertb_vwnd[imem-1]*weight_lat
-      pertb_tmp[imem-1]  = pertb_tmp[imem-1]*weight_lat*np.sqrt(EN.cp/EN.Tr)
-      pertb_slp[imem-1]  = pertb_slp[imem-1]*weight_lat*np.sqrt((EN.R*EN.Tr)/EN.Pr)
+      #pertb_uwnd[imem-1] = pertb_uwnd[imem-1]*weight_lat.reshape(-1)
+      #pertb_vwnd[imem-1] = pertb_vwnd[imem-1]*weight_lat.reshape(-1)
+      #pertb_tmp[imem-1]  = pertb_tmp[imem-1]*weight_lat*np.sqrt(EN.cp/EN.Tr).reshape(-1)
+      #pertb_slp[imem-1]  = pertb_slp[imem-1]*weight_lat*np.sqrt((EN.R*EN.Tr)/EN.Pr).reshape(-1)
    
     """Making singular value of decomposition of Z"""
-    eigen_mtx = np.zeros(((RG.elem-1)*(RG.nz-1)*RG.nx*RG.ny+RG.nx*RG.ny, RG.ensemble_size)
-    eigen_mtx[:(RG.nz-1)*RG.nx*RG.ny, :] = pertb_uwnd[:]
-    eigen_mtx[(RG.nz-1)*RG.nx*RG.ny:2*(RG.nz-1)*RG.nx*RG.ny, :] = pertb_vwnd[:]
-    eigen_mtx[2*(RG.nz-1)*RG.nx*RG.ny:3*(RG.nz-1)*RG.nx*RG.ny, :] = pertb_tmp[:]
-    eigen_mtx[3*(RG.nz-1)*RG.nx*RG.ny:, :] = pertb_slp[:]
+    eigen_mtx = np.zeros(((elem_num-1)*(RG.nz-1)*RG.nx*RG.ny+RG.nx*RG.ny, RG.ensemble_size-1))
+    
+    for imem in range(RG.ensemble_size):
+      eigen_mtx[ :(RG.nz-1)*RG.nx*RG.ny, imem] = pertb_uwnd[imem, :]
+      eigen_mtx[  (RG.nz-1)*RG.nx*RG.ny:2*(RG.nz-1)*RG.nx*RG.ny, imem] = pertb_vwnd[imem,:]
+      eigen_mtx[2*(RG.nz-1)*RG.nx*RG.ny:3*(RG.nz-1)*RG.nx*RG.ny, imem] = pertb_tmp[imem,:]
+      #eigen_mtx[3*(RG.nz-1)*RG.nx*RG.ny:4*RG.nx*RG.ny, imem] = pertb_slp[imem,:]
+
+    print(eigen_mtx)
 
 if __name__ == "__main__":
   """Set basic info. """
@@ -75,7 +79,7 @@ if __name__ == "__main__":
   RG = readgpv.ReadGPV(nx,ny,nz,mem)
   EN = readgpv.Energy_norm(nx,ny) 
   MP = mapping.Mapping('JPN')
-  DR = Anl_EnASA()
+  DR = Anl_EnSVSA()
 
   indir = '/work3/daichi/Data/GSM_EnData'
   indata = indir + '/bin/{}{:02}{:02}/'.format(yyyy,mm,dd) + '{}{:02}{:02}{:02}_{:02}hr_{:02}mem.grd'.format(yyyy,mm,dd,hh,ft,mem)
