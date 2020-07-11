@@ -63,8 +63,8 @@ class Anl_basem:
       # latitude weight
       pertb_uwnd[imem-1] = pertb_uwnd[imem-1]*weight_lat
       pertb_vwnd[imem-1] = pertb_vwnd[imem-1]*weight_lat
-      pertb_tmp[imem-1]  = pertb_tmp[imem-1]*weight_lat
-      pertb_slp[imem-1]  = pertb_slp[imem-1]*weight_lat
+      pertb_tmp[imem-1]  = pertb_tmp[imem-1]*weight_lat*np.sqrt(EN.cp/EN.Tr)
+      pertb_slp[imem-1]  = pertb_slp[imem-1]*weight_lat*np.sqrt((EN.R*EN.Tr)/EN.Pr)
 
     #"""Multiply Ensemble mem rate"""
     #ens_rate_list = np.load(list_path)

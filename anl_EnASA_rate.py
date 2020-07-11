@@ -56,8 +56,8 @@ class Anl_EnASA:
       # latitude weight
       pertb_uwnd[imem-1] = pertb_uwnd[imem-1]*weight_lat
       pertb_vwnd[imem-1] = pertb_vwnd[imem-1]*weight_lat
-      pertb_tmp[imem-1]  = pertb_tmp[imem-1]*weight_lat
-      pertb_slp[imem-1]  = pertb_slp[imem-1]*weight_lat
+      pertb_tmp[imem-1]  = pertb_tmp[imem-1]*weight_lat*np.sqrt(EN.cp/EN.Tr)
+      pertb_slp[imem-1]  = pertb_slp[imem-1]*weight_lat*np.sqrt((EN.R*EN.Tr)/EN.Pr)
    
     """Calc. dry enegy norm"""
     dry_energy_norm = [[] for _ in range(RG.ensemble_size)]
