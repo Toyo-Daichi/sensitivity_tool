@@ -4,6 +4,7 @@ Created from 2020.7.15
 @author: Toyo_Daichi
 """
 
+from Users.toyo.Terminal.sensitivity_tool.anl_EnASA_rate import ensemble_rate_list
 import os, sys
 sys.path.append(os.path.join(os.path.dirname(__file__), './module'))
 import numpy as np
@@ -13,23 +14,23 @@ import mapping
 import readgpv
 import setup
 
-class Anl_EnASA:
+class Anl_basem:
 
   def __init__(self):
     pass
 
-  def En_ajoint_sensitivity_driver(self, data_path:str):
+  def sensitivity_driver(self, data_path:str, list_path:np.ndarray):
     """
     Args:
-      data_path(str) : 週間アンサンブルデータのPATH
-    Returns:
-      ensemble_rate_list(list) : アンサンブルメンバーに割り振る割合.このメンバー数にctrlは入っていないことに注意.
+      data_path(str): 週間アンサンブルデータのPATH
+      list_path(str): アンサンブルメンバーに割り振る割合リストのPATH.このメンバー数にctrlは入っていないことに注意.
     Note:
       full_data(np.ndarray)  : grib形式をバイナリー形式に自作したデータセット
       constitution -> [要素, 高度面, ensemble_mem:0=ctrl_run, 緯度, 経度] 
       *** 気温/高度は, 地表面では積算降水量/海面更生気圧となっているので注意
       pertb_elem(np.ndarray) : コントロールランから各メンバーを引いた摂動データセット
       constitution -> [ensemble_mem -1(cntl分), 高度, 緯度, 経度]
+      ens_rate_list(np.ndarray) : アンサンブルメンバーに割り振る割合リスト
       dry_energy_norm(list, np.ndarray) : 各メンバーから求めた乾燥エネルギーノルム
       constitution -> [ensemble_mem -1(cntl分), np.ndarray[緯度, 経度]]
     """
@@ -58,37 +59,36 @@ class Anl_EnASA:
       pertb_vwnd[imem-1] = pertb_vwnd[imem-1]*weight_lat
       pertb_tmp[imem-1]  = pertb_tmp[imem-1]*weight_lat*np.sqrt(EN.cp/EN.Tr)
       pertb_slp[imem-1]  = pertb_slp[imem-1]*weight_lat*np.sqrt((EN.R*EN.Tr)/EN.Pr)
+
+    """Multiply Ensemble mem rate"""
+    ens_rate_list = np.load(inlist)
+    sensitivity_pertb_uwnd = RG.weight_average(pertb_uwnd,ens_rate_list)
+    sensitivity_pertb_vwnd = RG.weight_average(pertb_uwnd,ens_rate_list)
+    sensitivity_pertb_tmp  = RG.weight_average(pertb_uwnd,ens_rate_list)
+    sensitivity_pertb_slp  = RG.weight_average(pertb_uwnd,ens_rate_list)
    
     """Calc. dry enegy norm"""
-    dry_energy_norm = [[] for _ in range(RG.ensemble_size)]
-    for imem in range(RG.ensemble_size-1):
-      dry_energy_norm[imem] = EN.dry_energy_norm(
-        pertb_uwnd[imem], pertb_vwnd[imem],
-        pertb_tmp[imem],  pertb_slp[imem],
-        press_levels 
+    dry_energy_norm = EN.dry_energy_norm(
+      sensitivity_pertb_uwnd, sensitivity_pertb_vwnd,
+      sensitivity_pertb_tmp, sensitivity_pertb_slp,
+      press_levels 
       )
     
-    """Calc. rate of Each ensemble member"""
-    lat_min_index, lat_max_index, lon_min_index, lon_max_index = \
-      EN.verification_region(
-        lon, lat,
-        area_lat_min =50, area_lat_max =20,
-        area_lon_min =120, area_lon_max =150
-    )
+    """Draw sensitivity area @dry enegy norm"""
+    fig, ax = plt.subplots()
+    mapp = MP.base(projection_mode='lcc')
+    x, y = MP.coord_change(mapp, lon, lat)
+    
+    MP.contour(mapp, x, y, full_data[elem['HGT'], 2, 0], elem='500hPa')
+    MP.norm_contourf(mapp, x, y, dry_energy_norm)
+    MP.title('Test run, ft:72hr')
+    plt.show()
 
-    vertification_region_norm_list = []
-    for imem in range(RG.ensemble_size-1):
-      vertification_region_norm_list.append(np.sum(dry_energy_norm[imem][lat_min_index:lat_max_index,lon_min_index:lon_max_index]))
-
-    ensemble_rate_list = []
-    for imem in range(RG.ensemble_size-1):
-      ensemble_rate_list.append((vertification_region_norm_list[imem]/sum(vertification_region_norm_list))*100)
-
-    return ensemble_rate_list
 
 if __name__ == "__main__":
   """Set basic info. """
   yyyy, mm, dd, hh, ft = 2005, 9, 2, 0, 72
+  initial = 'anl'
   dataset = 'WFM'
 
   """Class & parm set """
@@ -97,12 +97,11 @@ if __name__ == "__main__":
   RG = readgpv.ReadGPV(nx,ny,nz,mem)
   EN = readgpv.Energy_norm(nx,ny) 
   MP = mapping.Mapping('JPN')
-  DR = Anl_EnASA()
+  DR = Anl_basem()
 
   indir = '/work3/daichi/Data/GSM_EnData'
-  indata = indir + '/bin/{}{:02}{:02}/'.format(yyyy,mm,dd) + '{}{:02}{:02}{:02}_{:02}hr_{:02}mem.grd'.format(yyyy,mm,dd,hh,ft,mem)
+  indata = indir + '/bin/{}{:02}{:02}/'.format(yyyy,mm,dd) + '{}{:02}{:02}{:02}_{}hr_{:02}mem.grd'.format(yyyy,mm,dd,hh,initial,mem)
+  inlist = indir + '/rate/{}{:02}{:02}/'.format(yyyy,mm,dd) + '{}{:02}{:02}{:02}_{:02}hr_{:02}mem.npy'.format(yyyy,mm,dd,hh,ft,mem)
 
-  ensemble_rate_list = DR.En_ajoint_sensitivity_driver(indata)
-  setup.save_list_ndarray(ensemble_rate_list, indir+'/rate/{}{:02}{:02}{:02}_{:02}hr_{:02}mem'.format(yyyy,mm,dd,hh,ft,mem))
-  print('...... Output data on ' + '/rate/{}{:02}{:02}{:02}_{:02}hr_{:02}mem'.format(yyyy,mm,dd,hh,ft,mem))
+  DR.sensitivity_driver(indata, inlist)
   print('Normal END')

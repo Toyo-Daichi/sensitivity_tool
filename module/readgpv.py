@@ -48,6 +48,16 @@ class ReadGPV:
   def weight_latitude(self, lat:np.ndarray) -> np.ndarray:
     return np.sqrt(np.cos(np.deg2rad(lat)))
 
+  def weight_average(self, data:np.ndarray, weight_list:np.ndarray):
+    weight_average, sum_of_weight = np.average( 
+      a = data,
+      axis = 0,
+      weights = weight_list,
+      returned = True
+    )
+    print('..... CALCULATE WEIGHT AVE. SUM OF WEIGHT ', sum_of_weight)
+    return weight_average
+
 class Energy_norm:
   def __init__(self, nx, ny):
     self.nx = nx
