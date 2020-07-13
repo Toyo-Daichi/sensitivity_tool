@@ -77,36 +77,55 @@ while ( ${s_yy} <= ${e_yy} )
         @ il = ${il} + 1
         end
 
-      else
-        # Leaving the scalability.
-        set i_full = ${i_dir}/grib/Z__C_RJTD_${s_yy}${m0}${d0}${h0}0000_EPSW_GPV_Rgl_FD00-08_grib2.bin 
-        set i_list = ( sfc 850 500 300 )
+      else if ( ${accum_day} <= 2020032300 ) then
+        set i_file = ${i_dir}/grib/Z__C_RJTD_${s_yy}${m0}${d0}${h0}0000_EPSW_GPV_Rgl_FD00-08_grib2.bin 
+        set i_list = ( ground 850 500 300 )
         set il = 1
 
-        while ( ${i} <= 4 )
-        set C = `printf %4d ${I[${i}]}` 
-        set level = `eval echo ${C} mb`
-        wgrib2 -v ${i_file} | grep "UGRD" | grep "${level}" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_file}/uwnd_${s_yy}${m0}${d0}${h0}.grd
-        wgrib2 -v ${i_file} | grep "VGRD" | grep "${level}" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_file}/vwnd_${s_yy}${m0}${d0}${h0}.grd
-        wgrib2 -v ${i_file} | grep "TMP"  | grep "${level}" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_file}/tmp_${s_yy}${m0}${d0}${h0}.grd
-        wgrib2 -v ${i_file} | grep "HGT"  | grep "${level}" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_file}/hgt_${s_yy}${m0}${d0}${h0}.grd
-        @ il = ${il} + 1
-        
+        while ( ${il} <= 4 )
+          set level = ${i_list[${il}]}
+
+          if ( ${ft} == 'anl' ) then
+            wgrib2 -v ${i_file} | grep "UGRD" | grep "${level}" | grep "${ft}" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/uwnd_${s_yy}${m0}${d0}${h0}_${il}.grd
+            wgrib2 -v ${i_file} | grep "VGRD" | grep "${level}" | grep "${ft}" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/vwnd_${s_yy}${m0}${d0}${h0}_${il}.grd
+            if ( ${il} == 1 ) then
+              wgrib2 -v ${i_file} | grep "PRMSL"   | grep "${ft}" | grep "${ft}" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/hgt_${s_yy}${m0}${d0}${h0}_${il}.grd
+              wgrib2 -v ${i_file} | grep "APCP"    | grep "0-8 day"| wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/tmp_${s_yy}${m0}${d0}${h0}_${il}.grd
+              sleep 3s
+            else if ( ${il} != 1 ) then
+              wgrib2 -v ${i_file} | grep "HGT"  | grep "${ft}" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/hgt_${s_yy}${m0}${d0}${h0}_${il}.grd
+              wgrib2 -v ${i_file} | grep "TMP"  | grep "${ft}" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/tmp_${s_yy}${m0}${d0}${h0}_${il}.grd
+              sleep 3s
+            endif
+          else if ( ${ft} != 'anl' ) then
+            wgrib2 -v ${i_file} | grep "UGRD" | grep "${level}" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/uwnd_${s_yy}${m0}${d0}${h0}_${il}.grd
+            wgrib2 -v ${i_file} | grep "VGRD" | grep "${level}" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/vwnd_${s_yy}${m0}${d0}${h0}_${il}.grd
+            wgrib2 -v ${i_file} | grep "TMP"  | grep "${level}" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_file}/tmp_${s_yy}${m0}${d0}${h0}_${il}.grd
+            wgrib2 -v ${i_file} | grep "HGT"  | grep "${level}" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_file}/hgt_${s_yy}${m0}${d0}${h0}_${il}.grd
+          
+          endif
+
+          @ il = ${il} + 1
         end
+
+      else
+        echo "CHECK your DATE or wget (on get_info.sh) Z__C_RJTD_yyyyMMddhhmmss_EPSG_GPV_Rgl_Gll1p25deg_FD0000-0100_grib2.bin"
+        exit
+
       endif
 
       cat ${o_dir}/uwnd_${s_yy}${m0}${d0}${h0}_?.grd >! ${o_dir}/uwnd_${s_yy}${m0}${d0}${h0}_${ft}hr.grd
       cat ${o_dir}/vwnd_${s_yy}${m0}${d0}${h0}_?.grd >! ${o_dir}/vwnd_${s_yy}${m0}${d0}${h0}_${ft}hr.grd
       cat ${o_dir}/hgt_${s_yy}${m0}${d0}${h0}_?.grd  >! ${o_dir}/hgt_${s_yy}${m0}${d0}${h0}_${ft}hr.grd
       cat ${o_dir}/tmp_${s_yy}${m0}${d0}${h0}_?.grd  >! ${o_dir}/tmp_${s_yy}${m0}${d0}${h0}_${ft}hr.grd
-
+      
       cat ${o_dir}/uwnd_${s_yy}${m0}${d0}${h0}_${ft}hr.grd \
           ${o_dir}/vwnd_${s_yy}${m0}${d0}${h0}_${ft}hr.grd \
           ${o_dir}/hgt_${s_yy}${m0}${d0}${h0}_${ft}hr.grd  \
           ${o_dir}/tmp_${s_yy}${m0}${d0}${h0}_${ft}hr.grd  \
-       >! ${o_dir}/${s_yy}${m0}${d0}${h0}_${ft}hr_${mem}mem.grd
+      >!  ${o_dir}/${s_yy}${m0}${d0}${h0}_${ft}hr_${mem}mem.grd
 
-       rm -rf  ${o_dir}/uwnd_*.grd ${o_dir}/vwnd_*.grd ${o_dir}/tmp_*.grd ${o_dir}/hgt_*.grd 
+      rm -rf  ${o_dir}/uwnd_*.grd ${o_dir}/vwnd_*.grd ${o_dir}/tmp_*.grd ${o_dir}/hgt_*.grd 
       
       @ s_hh = ${s_hh} + 6
     end
