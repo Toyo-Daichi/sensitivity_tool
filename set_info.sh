@@ -14,7 +14,7 @@ set s_hh = 12  ; set e_hh = 12
 
 # set your target info.
 set ft  = 'anl' # 'anl' or 24, 48, 72
-set mem = 25
+set mem = 27
 
 while ( ${s_yy} <= ${e_yy} )
 
@@ -89,19 +89,19 @@ while ( ${s_yy} <= ${e_yy} )
             wgrib2 -v ${i_file} | grep "UGRD" | grep "${level}" | grep "${ft}" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/uwnd_${s_yy}${m0}${d0}${h0}_${il}.grd
             wgrib2 -v ${i_file} | grep "VGRD" | grep "${level}" | grep "${ft}" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/vwnd_${s_yy}${m0}${d0}${h0}_${il}.grd
             if ( ${il} == 1 ) then
-              wgrib2 -v ${i_file} | grep "PRMSL"   | grep "${ft}" | grep "${ft}" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/hgt_${s_yy}${m0}${d0}${h0}_${il}.grd
-              wgrib2 -v ${i_file} | grep "APCP"    | grep "0-8 day"| wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/tmp_${s_yy}${m0}${d0}${h0}_${il}.grd
+              wgrib2 -v ${i_file} | grep "PRMSL"   | grep "${level}" | grep "${ft}" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/hgt_${s_yy}${m0}${d0}${h0}_${il}.grd
+              wgrib2 -v ${i_file} | grep "APCP"    | grep "0-8 day"  | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/tmp_${s_yy}${m0}${d0}${h0}_${il}.grd
               sleep 3s
             else if ( ${il} != 1 ) then
-              wgrib2 -v ${i_file} | grep "HGT"  | grep "${ft}" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/hgt_${s_yy}${m0}${d0}${h0}_${il}.grd
-              wgrib2 -v ${i_file} | grep "TMP"  | grep "${ft}" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/tmp_${s_yy}${m0}${d0}${h0}_${il}.grd
+              wgrib2 -v ${i_file} | grep "HGT"  | grep "${level}" | grep "${ft}" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/hgt_${s_yy}${m0}${d0}${h0}_${il}.grd
+              wgrib2 -v ${i_file} | grep "TMP"  | grep "${level}" | grep "${ft}" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/tmp_${s_yy}${m0}${d0}${h0}_${il}.grd
               sleep 3s
             endif
           else if ( ${ft} != 'anl' ) then
-            wgrib2 -v ${i_file} | grep "UGRD" | grep "${level}" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/uwnd_${s_yy}${m0}${d0}${h0}_${il}.grd
-            wgrib2 -v ${i_file} | grep "VGRD" | grep "${level}" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/vwnd_${s_yy}${m0}${d0}${h0}_${il}.grd
-            wgrib2 -v ${i_file} | grep "TMP"  | grep "${level}" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_file}/tmp_${s_yy}${m0}${d0}${h0}_${il}.grd
-            wgrib2 -v ${i_file} | grep "HGT"  | grep "${level}" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_file}/hgt_${s_yy}${m0}${d0}${h0}_${il}.grd
+            wgrib2 -v ${i_file} | grep "UGRD" | grep "${level}" | grep "${ft}" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/uwnd_${s_yy}${m0}${d0}${h0}_${il}.grd
+            wgrib2 -v ${i_file} | grep "VGRD" | grep "${level}" | grep "${ft}" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/vwnd_${s_yy}${m0}${d0}${h0}_${il}.grd
+            wgrib2 -v ${i_file} | grep "TMP"  | grep "${level}" | grep "${ft}" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_file}/tmp_${s_yy}${m0}${d0}${h0}_${il}.grd
+            wgrib2 -v ${i_file} | grep "HGT"  | grep "${level}" | grep "${ft}" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_file}/hgt_${s_yy}${m0}${d0}${h0}_${il}.grd
           
           endif
 
