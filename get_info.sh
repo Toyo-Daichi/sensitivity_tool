@@ -2,9 +2,9 @@
 set datapath = '/work3/daichi/Data/GSM_EnData/grib/'
 
 # set date
-set s_yy = 2003; set e_yy = 2003
-set s_mm = 1   ; set e_mm = 1
-set s_dd = 21  ; set e_dd = 21
+set s_yy = 2018; set e_yy = 2018
+set s_mm = 7   ; set e_mm = 7
+set s_dd = 4   ; set e_dd = 4
 set s_hh = 12  ; set e_hh = 12 
 
 while ( ${s_yy} <= ${e_yy} ) 
@@ -29,10 +29,11 @@ while ( ${s_yy} <= ${e_yy} )
           wget http://database.rish.kyoto-u.ac.jp/arch/jmadata/data/gpv/original/${s_yy}/${m0}/${d0}/WFM12XPLM -P ${i_dir}
           wget http://database.rish.kyoto-u.ac.jp/arch/jmadata/data/gpv/original/${s_yy}/${m0}/${d0}/WFM12XPLH -P ${i_dir}
 
-        else
-          # Leaving the scalability.
-          wget http://database.rish.kyoto-u.ac.jp/arch/jmadata/data/gpv/original/${s_yy}/${m0}/${d0}/Z__C_RJTD_${s_yy}${m0}${d0}${h0}_EPSW_GPV_Rgl_FD00-08_grib2.bin -P ${i_dir}
-          wget http://database.rish.kyoto-u.ac.jp/arch/jmadata/data/gpv/original/${s_yy}/${m0}/${d0}/Z__C_RJTD_${s_yy}${m0}${d0}${h0}_EPSW_GPV_Rjp_FD00-08_grib2.bin -P ${i_dir}
+        else if ( ${accum_day} <= 2020032300 ) then
+          wget http://database.rish.kyoto-u.ac.jp/arch/jmadata/data/gpv/original/${s_yy}/${m0}/${d0}/Z__C_RJTD_${s_yy}${m0}${d0}${h0}0000_EPSW_GPV_Rgl_FD00-08_grib2.bin -P ${i_dir}
+
+        else 
+          echo "CHECK your DATE or wget Z__C_RJTD_yyyyMMddhhmmss_EPSG_GPV_Rgl_Gll1p25deg_FD0000-0100_grib2.bin"
 
         endif
 

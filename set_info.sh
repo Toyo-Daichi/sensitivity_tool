@@ -1,5 +1,9 @@
 #!/bin/csh -f
+
+# set command
 alias wgrib1 '/usr/bin/wgrib'
+alias wgrib2 '/usr/bin/wgrib2'
+
 set datapath = '/work3/daichi/Data/GSM_EnData/'
 
 # set date
@@ -71,13 +75,11 @@ while ( ${s_yy} <= ${e_yy} )
         endif
         
         @ il = ${il} + 1
-
         end
 
       else
         # Leaving the scalability.
-        set i_full = ${i_dir}/grib/Z__C_RJTD_${s_yy}${m0}${d0}${h0}_EPSW_GPV_Rgl_FD00-08_grib2.bin 
-
+        set i_full = ${i_dir}/grib/Z__C_RJTD_${s_yy}${m0}${d0}${h0}0000_EPSW_GPV_Rgl_FD00-08_grib2.bin 
         set i_list = ( sfc 850 500 300 )
         set il = 1
 

@@ -49,8 +49,8 @@ class Anl_basem:
     
     """Set data. & Making pertubation"""
     init_full_data = RG.read_gpv(init_data_path, elem_num)
-    #vertifi_full_data = RG.read_gpv(init_data_path, elem_num)
-    vertifi_full_data = RG.read_gpv(vertifi_data_path, elem_num)
+    vertifi_full_data = RG.read_gpv(init_data_path, elem_num)
+    #vertifi_full_data = RG.read_gpv(vertifi_data_path, elem_num)
     pertb_uwnd = np.zeros((RG.ensemble_size-1, RG.nz-RG.surf, RG.ny, RG.nx))
     pertb_vwnd = np.zeros((RG.ensemble_size-1, RG.nz-RG.surf, RG.ny, RG.nx))
     pertb_tmp  = np.zeros((RG.ensemble_size-1, RG.nz-RG.surf, RG.ny, RG.nx))
@@ -74,7 +74,7 @@ class Anl_basem:
     sensitivity_pertb_tmp  = RG.weight_average(pertb_tmp,ens_rate_list)
     sensitivity_pertb_slp  = RG.weight_average(pertb_slp,ens_rate_list)
 
-    """Calc. dry enegy norm"""
+    #"""Calc. dry enegy norm"""
     dry_energy_norm = EN.dry_energy_norm(
       sensitivity_pertb_uwnd, sensitivity_pertb_vwnd,
       sensitivity_pertb_tmp, sensitivity_pertb_slp,
@@ -82,7 +82,7 @@ class Anl_basem:
       )
 
     # check each norm
-    #imem = 1 
+    #imem = 17 
     #dry_energy_norm = EN.dry_energy_norm(
     #  pertb_uwnd[imem], pertb_vwnd[imem],
     #  pertb_tmp[imem], pertb_slp[imem],
@@ -105,7 +105,7 @@ class Anl_basem:
     mapp = MP.base(projection_mode='lcc')
     x, y = MP.coord_change(mapp, lon, lat)
     
-    MP.norm_contourf(mapp, x, y, dry_energy_norm)
+    MP.norm_contourf(mapp, x, y, dry_energy_norm*10)
     MP.contour(mapp, x, y, init_full_data[elem['HGT'], 2, 0], elem='500hPa')
     MP.title('Test run, ft:72hr')
     plt.show()
