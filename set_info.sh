@@ -7,14 +7,17 @@ alias wgrib2 '/usr/bin/wgrib2'
 set datapath = '/work3/daichi/Data/GSM_EnData/'
 
 # set date
-set s_yy = 2003; set e_yy = 2003
-set s_mm = 1   ; set e_mm = 1
-set s_dd = 21  ; set e_dd = 21
+set s_yy = 2018; set e_yy = 2018
+set s_mm = 7   ; set e_mm = 7
+set s_dd = 4   ; set e_dd = 4
 set s_hh = 12  ; set e_hh = 12
 
 # set your target info.
 set ft  = 'anl' # 'anl' or 24, 48, 72
 set mem = 27
+
+# set output on ctrl file
+set ctrl_on = 1
 
 while ( ${s_yy} <= ${e_yy} )
 
@@ -33,6 +36,8 @@ while ( ${s_yy} <= ${e_yy} )
 
       set accum_day = ${s_yy}${m0}${d0}${h0}
       if ( ${accum_day} <= 2006030100 ) then
+        set nx = 144; set ny = 37; set nz = 4; set mem = 25 
+
         set i_surf = ${i_dir}/WFM12XSFC
         set i_850  = ${i_dir}/WFM12XPLL
         set i_500  = ${i_dir}/WFM12XPLM
@@ -78,7 +83,9 @@ while ( ${s_yy} <= ${e_yy} )
         end
 
       else if ( ${accum_day} <= 2020032300 ) then
-        set i_file = ${i_dir}/grib/Z__C_RJTD_${s_yy}${m0}${d0}${h0}0000_EPSW_GPV_Rgl_FD00-08_grib2.bin 
+        set nx = 144; set ny = 73; set nz = 4; set mem = 27 
+
+        set i_file = ${i_dir}/Z__C_RJTD_${s_yy}${m0}${d0}${h0}0000_EPSW_GPV_Rgl_FD00-08_grib2.bin 
         set i_list = ( ground 850 500 300 )
         set il = 1
 
@@ -89,7 +96,7 @@ while ( ${s_yy} <= ${e_yy} )
             wgrib2 -v ${i_file} | grep "UGRD" | grep "${level}" | grep "${ft}" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/uwnd_${s_yy}${m0}${d0}${h0}_${il}.grd
             wgrib2 -v ${i_file} | grep "VGRD" | grep "${level}" | grep "${ft}" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/vwnd_${s_yy}${m0}${d0}${h0}_${il}.grd
             if ( ${il} == 1 ) then
-              wgrib2 -v ${i_file} | grep "PRMSL"   | grep "${level}" | grep "${ft}" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/hgt_${s_yy}${m0}${d0}${h0}_${il}.grd
+              wgrib2 -v ${i_file} | grep "PRMSL"   | grep "${ft}" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/hgt_${s_yy}${m0}${d0}${h0}_${il}.grd
               wgrib2 -v ${i_file} | grep "APCP"    | grep "0-8 day"  | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/tmp_${s_yy}${m0}${d0}${h0}_${il}.grd
               sleep 3s
             else if ( ${il} != 1 ) then
@@ -97,18 +104,31 @@ while ( ${s_yy} <= ${e_yy} )
               wgrib2 -v ${i_file} | grep "TMP"  | grep "${level}" | grep "${ft}" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/tmp_${s_yy}${m0}${d0}${h0}_${il}.grd
               sleep 3s
             endif
+
           else if ( ${ft} != 'anl' ) then
+            ft_day = ${ft}/24
             wgrib2 -v ${i_file} | grep "UGRD" | grep "${level}" | grep "${ft}" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/uwnd_${s_yy}${m0}${d0}${h0}_${il}.grd
             wgrib2 -v ${i_file} | grep "VGRD" | grep "${level}" | grep "${ft}" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/vwnd_${s_yy}${m0}${d0}${h0}_${il}.grd
-            wgrib2 -v ${i_file} | grep "TMP"  | grep "${level}" | grep "${ft}" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_file}/tmp_${s_yy}${m0}${d0}${h0}_${il}.grd
-            wgrib2 -v ${i_file} | grep "HGT"  | grep "${level}" | grep "${ft}" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_file}/hgt_${s_yy}${m0}${d0}${h0}_${il}.grd
-          
+            if ( ${il} == 1 ) then
+              wgrib2 -v ${i_file} | grep "PRMSL"   | grep "${ft}" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/hgt_${s_yy}${m0}${d0}${h0}_${il}.grd
+              if ( ${ft_day} <= 2 ) then
+                wgrib2 -v ${i_file} | grep "APCP"  | grep "0-${ft} hour"  | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/tmp_${s_yy}${m0}${d0}${h0}_${il}.grd
+              else if ( ${ft_day} > 2 ) then
+                wgrib2 -v ${i_file} | grep "APCP"  | grep "0-${ft_day} day"  | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/tmp_${s_yy}${m0}${d0}${h0}_${il}.grd
+              endif
+              sleep 3s
+            else if ( ${il} != 1 ) then
+              wgrib2 -v ${i_file} | grep "HGT"  | grep "${level}" | grep "${ft}" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/hgt_${s_yy}${m0}${d0}${h0}_${il}.grd
+              wgrib2 -v ${i_file} | grep "TMP"  | grep "${level}" | grep "${ft}" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/tmp_${s_yy}${m0}${d0}${h0}_${il}.grd
+              sleep 3s
+            endif
           endif
 
           @ il = ${il} + 1
+          echo ${il}
         end
 
-      else
+      else if ( ${accum_day} > 2020032300 ) then
         echo "CHECK your DATE or wget (on get_info.sh) Z__C_RJTD_yyyyMMddhhmmss_EPSG_GPV_Rgl_Gll1p25deg_FD0000-0100_grib2.bin"
         exit
 
@@ -137,7 +157,29 @@ while ( ${s_yy} <= ${e_yy} )
   @ s_mm = ${s_mm} + 1
   end
 
- @ s_yy = ${s_yy} + 1
- end
+@ s_yy = ${s_yy} + 1
+end
 
- exit
+if ( ${ctrl_on} == 1 ) then
+cat > ${o_dir}/${e_yy}${m0}${d0}${h0}_${ft}hr_${mem}mem.ctl << EOF
+    dset ${e_yy}${m0}${d0}${h0}_${ft}hr_${mem}mem.grd 
+    option big_endian template
+    undef 1.e30
+    title ${e_yy}${m0}${d0}${h0}_${ft}hr_${mem}mem.grd
+    xdef ${nx} linear 0.0 2.5
+    ydef ${ny} linear -90 2.5
+    zdef ${nz} levels 1000 850 500 300
+    edef ${mem} names
+    001 002 003 004 005 006 007 008 009 010 
+    011 012 013 014 015 016 017 018 019 020 
+    021 022 023 024 025 026 027 028 029 030
+    endedef
+    VARS 4
+     U  50   0  X-wind component (m s-1) # x-stagger
+     V  50   0  Y-wind component (m s-1) # y-stagger
+     H  50   0  Pressure (Pa)
+     T  50   0  Temperature (K)
+    ENDVARS
+EOF
+
+exit
