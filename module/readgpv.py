@@ -62,7 +62,7 @@ class Energy_norm:
   def __init__(self, nx, ny):
     self.nx = nx
     self.ny = ny
-    self.Pr:float=1000.0
+    self.Pr:float=750.0
     self.Tr:float=270.0
     self.cp:float=1004.0
     self.R:float=287.0 
@@ -91,7 +91,7 @@ class Energy_norm:
     potential_term = (self.cp/self.Tr)*((tmp_prime)**2)
     
     first_term = self._vint(physical_term+potential_term, press_levels)
-    #first_term = first_term/(2*self.Pr)
+    first_term = first_term/(2*self.Pr)
 
     sec_term = (self.Tr*self.R*self.Pr)*(slp_prime**2/self.Pr)/(2*self.Pr)
 

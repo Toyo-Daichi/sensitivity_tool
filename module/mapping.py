@@ -37,8 +37,8 @@ class Mapping:
 
     elif area == 'NH':
       self.area = area
-      self.lon_min, self.lon_max = 90, 165
-      self.lat_min, self.lat_max = 0, 60 
+      self.lon_min, self.lon_max = 80, 175
+      self.lat_min, self.lat_max = 0, 65 
       self.lat_0, self.lon_0 = 35, 140
 
   def base(self, *, projection_mode='lcc'):
@@ -57,7 +57,7 @@ class Mapping:
       mapping.drawmeridians(np.arange(0, 360, 5),  labels=[False, True, False, True], fontsize='small', color='gray', linewidth=0.5)
       mapping.drawparallels(np.arange(-90, 90, 5), labels=[True, False, False, True], fontsize='small', color='gray', linewidth=0.5)
     elif self.area is 'NH':
-      mapping.drawmeridians(np.arange(0, 360, 15),  labels=[False, True, False, True], fontsize='small', color='gray', linewidth=0.5)
+      mapping.drawmeridians(np.arange(0, 360, 15),  labels=[False, False, False, True], fontsize='small', color='gray', linewidth=0.5)
       mapping.drawparallels(np.arange(-90, 90, 15), labels=[True, False, False, True], fontsize='small', color='gray', linewidth=0.5)
         
     return mapping
@@ -125,8 +125,13 @@ class Mapping:
   def norm_contourf(self, basemap, x, y, data, *, label='default'):
     if label == 'default':
       levels = [0.1, 0.2, 0.5, 1.0, 2.0, 5.0, 10.0]
-    elif label == 'each':
-      levels = [0.5, 1.0, 2.0, 5.0, 10.0, 15.0, 30.0]
+    
+    elif label == 'spread_initial':
+      levels = [2.5, 5.0, 10.0, 12.0, 15.0, 20.0, 30.0]
+    
+    elif label == 'spread_72hr':
+      levels = [10.0, 12.0, 15.0, 20.0, 25.0, 30.0, 50.0]
+    
     colors = ['#FFFFFF', '#00FFFF', '#000080', '#228B22', '#FFFF00', '#FF8000', '#FF0000', '#FF00FF']
     cmap = plt.contourf(x, y, data, levels, colors=colors, extend='both')
     cbar = basemap.colorbar(cmap, 'right', size='2.5%')

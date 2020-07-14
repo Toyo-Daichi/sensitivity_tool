@@ -62,7 +62,7 @@ class Energy_norm:
   def __init__(self, nx, ny):
     self.nx = nx
     self.ny = ny
-    self.Pr:float=1000.0
+    self.Pr:float=750.0
     self.Tr:float=270.0
     self.cp:float=1004.0
     self.R:float=287.0 

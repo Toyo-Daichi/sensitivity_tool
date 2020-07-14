@@ -66,6 +66,10 @@ class Anl_basem:
         area_lat_min =50, area_lat_max =20,
         area_lon_min =120, area_lon_max =150
       )
+    
+    lat_grd = lat_max_index-lat_min_index +1
+    lon_grd = lon_max_index-lon_min_index +1
+    dims = lat_grd*lon_grd
 
     # check each norm
     #imem = 0 
@@ -88,15 +92,16 @@ class Anl_basem:
         )
 
 
-      #print('..... Check Vertification area Norm SUM {:02} {}'.format(
-      #  imem, np.sum(dry_energy_norm[imem, lat_min_index:lat_max_index,lon_min_index:lon_max_index]))
-      #)
-      #print('..... Check Vertification area first_term {:02} {}'.format(
-      #  imem, np.sum(first_term[imem, lat_min_index:lat_max_index,lon_min_index:lon_max_index]))
-      #)
-      #print('..... Check Vertification area sec_term {:02} {}'.format(
-      #  imem, np.sum(sec_term[imem, lat_min_index:lat_max_index,lon_min_index:lon_max_index]))
-      #)
+      print('')
+      print('..... Check Vertification area Norm SUM   {:02} {}'.format(
+        imem, np.sum(dry_energy_norm[imem, lat_min_index:lat_max_index,lon_min_index:lon_max_index])/dims)
+      )
+      print('..... Check Vertification area first_term {:02} {}'.format(
+        imem, np.sum(first_term[imem, lat_min_index:lat_max_index,lon_min_index:lon_max_index])/dims)
+      )
+      print('..... Check Vertification area sec_term   {:02} {}'.format(
+        imem, np.sum(sec_term[imem, lat_min_index:lat_max_index,lon_min_index:lon_max_index])/dims)
+      )
 
       #print('..... Check Vertification area Norm SUM {:02} {}'.format(
       #  imem, dry_energy_norm[imem, lat_min_index:lat_max_index,lon_min_index:lon_max_index])
@@ -109,29 +114,39 @@ class Anl_basem:
       #)
 
     """Draw sensitivity area @dry enegy norm"""
-    for _ in range(RG.ensemble_size): 
-      fig, ax = plt.subplots()
-      mapp = MP.base(projection_mode='lcc')
-      x, y = MP.coord_change(mapp, lon, lat)
+    fig, ax = plt.subplots()
+    mapp = MP.base(projection_mode='lcc')
+    x, y = MP.coord_change(mapp, lon, lat)
+    
+    MP.norm_contourf(mapp, x, y, np.average(dry_energy_norm, axis=0), label='spread_initial')
+    MP.contour(mapp, x, y, np.average(vertifi_full_data[elem['HGT'], 2, :], axis=0), elem='500hPa')
+    MP.title('TE spread [ J/kg ] FT=72hr INIT = 20030121 ')
+    plt.show()
 
-      # basic set
-      MP.norm_contourf(mapp, x, y, dry_energy_norm[_], label='each')
-      MP.contour(mapp, x, y, vertifi_full_data[elem['HGT'], 2, imem], elem='500hPa')
-      #
-      ## test
-      ##MP.norm_contourf(mapp, x, y, first_term)
-      ##MP.norm_contourf(mapp, x, y, sec_term)
-      ##MP.diff_contourf(mapp, x, y, pertb_tmp[17, 2])
+    
+    # for _ in range(RG.ensemble_size): 
+    #   fig, ax = plt.subplots()
+    #   mapp = MP.base(projection_mode='lcc')
+    #   x, y = MP.coord_change(mapp, lon, lat)
 
-      MP.title('Test run')
-      plt.show()
-      plt.close('all')
+    #   # basic set
+    #   MP.norm_contourf(mapp, x, y, dry_energy_norm[_], label='each')
+    #   MP.contour(mapp, x, y, vertifi_full_data[elem['HGT'], 2, imem], elem='500hPa')
+    #   #
+    #   ## test
+    #   ##MP.norm_contourf(mapp, x, y, first_term)
+    #   ##MP.norm_contourf(mapp, x, y, sec_term)
+    #   ##MP.diff_contourf(mapp, x, y, pertb_tmp[17, 2])
+  
+    #   MP.title('Test run')
+    #   plt.show()
+    #   plt.close('all')
 
 
 if __name__ == "__main__":
   """Set basic info. """
-  yyyy, mm, dd, hh, ft = 2018, 7, 4, 12, 'anl'
-  dataset = 'EPSW' # 'WFM' or 'EPSW'
+  yyyy, mm, dd, hh, ft = 2003, 1, 21, 12, 'anl'
+  dataset = 'WFM' # 'WFM' or 'EPSW'
 
   """Class & parm set """
   ST = setup.Setup(dataset)
@@ -143,9 +158,6 @@ if __name__ == "__main__":
 
   indir = '/work3/daichi/Data/GSM_EnData'
   vertifi_data = indir + '/bin/{}{:02}{:02}/'.format(yyyy,mm,dd) + '{}{:02}{:02}{:02}_{}hr_{:02}mem.grd'.format(yyyy,mm,dd,hh,ft,mem)
-  #vertifi_data = indir + '/bin/{}{:02}{:02}/'.format(yyyy,mm,dd) + '{}{:02}{:02}{:02}_{:02}hr_{:02}mem.grd'.format(yyyy,mm,dd,hh,ft,mem)
-  ensm_rate_list = indir + '/rate/' + '{}{:02}{:02}{:02}_{}hr_{:02}mem.npy'.format(yyyy,mm,dd,hh,ft,mem)
-  #ensm_rate_list = indir + '/rate/' + '{}{:02}{:02}{:02}_{:02}hr_{:02}mem.npy'.format(yyyy,mm,dd,hh,ft,mem)
 
   DR.sensitivity_driver(vertifi_data)
   print('Normal END')
