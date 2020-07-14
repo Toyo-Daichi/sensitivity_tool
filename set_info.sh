@@ -17,7 +17,7 @@ set ft  = 'anl' # 'anl' or 24, 48, 72
 set mem = 27
 
 # set output on ctrl file
-set ctrl_on = 1
+set ctrl_on = 0
 
 while ( ${s_yy} <= ${e_yy} )
 
@@ -161,6 +161,7 @@ while ( ${s_yy} <= ${e_yy} )
 end
 
 if ( ${ctrl_on} == 1 ) then
+# Confirm bug. 2020.7.14
 cat > ${o_dir}/${e_yy}${m0}${d0}${h0}_${ft}hr_${mem}mem.ctl << EOF
     dset ${e_yy}${m0}${d0}${h0}_${ft}hr_${mem}mem.grd 
     option big_endian template
