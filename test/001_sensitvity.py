@@ -62,19 +62,13 @@ class Anl_basem:
       pertb_slp[imem-1]  = pertb_slp[imem-1]*weight_lat*np.sqrt((EN.R*EN.Tr))/EN.Pr
 
     """Calc. dry enegy norm"""
+    # check each norm
+    imem = 17 s
     dry_energy_norm = EN.dry_energy_norm(
-      sensitivity_pertb_uwnd, sensitivity_pertb_vwnd,
-      sensitivity_pertb_tmp, sensitivity_pertb_slp,
+      pertb_uwnd[imem], pertb_vwnd[imem],
+      pertb_tmp[imem], pertb_slp[imem],
       press_levels 
       )
-
-    # check each norm
-    #imem = 17 s
-    #dry_energy_norm = EN.dry_energy_norm(
-    #  pertb_uwnd[imem], pertb_vwnd[imem],
-    #  pertb_tmp[imem], pertb_slp[imem],
-    #  press_levels 
-    #  )
 
     lat_min_index, lat_max_index, lon_min_index, lon_max_index = \
       EN.verification_region(
