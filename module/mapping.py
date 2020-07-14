@@ -12,6 +12,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from mpl_toolkits.basemap import Basemap
+import seaborn as sns
 
 class Mapping:
 
@@ -85,12 +86,14 @@ class Mapping:
 
   def corr_contourf(self, basemap, x, y, data):
     levels = np.arange(-1.0, 1.1, 0.1) 
-    cmap = plt.contourf(x, y, data, levels, cmap=cm.coolwarm)
+    _cmap = sns.diverging_palette(220, 10, as_cmap=True) 
+    cmap = plt.contourf(x, y, data, levels, cmap=_cmap, extend='both')
     cbar = basemap.colorbar(cmap, 'right', size='2.5%')
     
   def curl_contourf(self, basemap, x, y, data):
     levels = np.arange(-7.0, 7.0, 0.5) 
-    cmap = plt.contourf(x, y, data, levels, cmap=cm.coolwarm)
+    cmap = sns.diverging_palette(220, 10, as_cmap=True)
+    cmap = plt.contourf(x, y, data, levels, cmap=cm.coolwarm, extend='both')
     cbar = basemap.colorbar(cmap, 'right', size='2.5%')
 
   def qflux_contourf(self, basemap, x, y, data):
@@ -114,14 +117,17 @@ class Mapping:
       levels = np.arange(-5.0, 6.0, 0.5)
       label = '[ kg/kg x m/s x $ 10^{2} $ ]'
 
-    cmap = plt.contourf(x, y, data, levels, cmap=cm.coolwarm, extend='both')
+    _cmap = sns.diverging_palette(220, 10, as_cmap=True) 
+    cmap = plt.contourf(x, y, data, levels, cmap=_cmap, extend='both')
     cbar = basemap.colorbar(cmap, 'right', size='2.5%')
     cbar.set_label(label, size=8)
 
-  def norm_contourf(self, basemap, x, y, data):
-    levels = [0.1, 0.2, 0.5, 1.0, 2.0, 5.0, 10.0]
+  def norm_contourf(self, basemap, x, y, data, *, label='default'):
+    if label == 'default':
+      levels = [0.1, 0.2, 0.5, 1.0, 2.0, 5.0, 10.0]
+    elif label == 'each':
+      levels = [0.5, 1.0, 2.0, 5.0, 10.0, 15.0, 30.0]
     colors = ['#FFFFFF', '#00FFFF', '#000080', '#228B22', '#FFFF00', '#FF8000', '#FF0000', '#FF00FF']
-
     cmap = plt.contourf(x, y, data, levels, colors=colors, extend='both')
     cbar = basemap.colorbar(cmap, 'right', size='2.5%')
     cbar.set_label('[J/kg]', size=6)

@@ -88,12 +88,12 @@ class Energy_norm:
     """
 
     physical_term = (u_prime)**2 + (v_prime)**2
-    potential_term = (self.cp/self.Tr)*((tmp_prime)**2)
+    potential_term = (tmp_prime)**2
     
     first_term = self._vint(physical_term+potential_term, press_levels)
-    #first_term = first_term/(2*self.Pr)
+    first_term = first_term/(2*self.Pr)
 
-    sec_term = (self.Tr*self.R*self.Pr)*(slp_prime**2/self.Pr)/(2*self.Pr)
+    sec_term = (slp_prime**2)/2
 
     dry_energy_norm = first_term+sec_term 
 
@@ -139,6 +139,6 @@ class Energy_norm:
 
     for iy in range(self.ny):
       for ix in range(self.nx):
-        y_array[iy,ix] = integrate.simps(x_array[:,iy,ix], press_array[::-1])
+        y_array[iy,ix] = integrate.simps(x_array[:,iy,ix], press_array[:])*-1
 
     return y_array
