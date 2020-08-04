@@ -16,9 +16,6 @@ set s_hh = 12  ; set e_hh = 12
 set ft  = 'anl' # 'anl' or 24, 48, 72
 set mem = 27
 
-# set output on ctrl file
-set ctrl_on = 0
-
 while ( ${s_yy} <= ${e_yy} )
 
   while ( ${s_mm} <= ${e_mm} )
@@ -159,28 +156,5 @@ while ( ${s_yy} <= ${e_yy} )
 
 @ s_yy = ${s_yy} + 1
 end
-
-if ( ${ctrl_on} == 1 ) then
-# Confirm bug. 2020.7.14
-cat > ${o_dir}/${e_yy}${m0}${d0}${h0}_${ft}hr_${mem}mem.ctl << EOF
-    dset ${e_yy}${m0}${d0}${h0}_${ft}hr_${mem}mem.grd 
-    option big_endian template
-    undef 1.e30
-    title ${e_yy}${m0}${d0}${h0}_${ft}hr_${mem}mem.grd
-    xdef ${nx} linear 0.0 2.5
-    ydef ${ny} linear -90 2.5
-    zdef ${nz} levels 1000 850 500 300
-    edef ${mem} names
-    001 002 003 004 005 006 007 008 009 010 
-    011 012 013 014 015 016 017 018 019 020 
-    021 022 023 024 025 026 027 028 029 030
-    endedef
-    VARS 4
-     U  50   0  X-wind component (m s-1) # x-stagger
-     V  50   0  Y-wind component (m s-1) # y-stagger
-     H  50   0  Pressure (Pa)
-     T  50   0  Temperature (K)
-    ENDVARS
-EOF
 
 exit
