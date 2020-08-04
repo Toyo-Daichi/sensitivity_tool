@@ -20,7 +20,6 @@ class Setup:
     return press_levels
 
 """ simple package"""
-
 def save_list_ndarray(data:list, indir:str, name:str):
   data = np.array(data, dtype='float32')
   np.save(indir+name,data)
