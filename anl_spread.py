@@ -23,23 +23,33 @@ class Anl_SPREAD:
   def __init__(self):
     pass
      
-  def main_driver(self, dry_energy_norm, hgt_data):
+  def main_driver(self, dry_energy_norm, hgt_data, target_region):
     """Draw sensitivity area @dry enegy norm"""
     fig, ax = plt.subplots()
     mapp = MP.base(projection_mode='lcc')
     lon, lat = RG.set_coordinate() 
     x, y = MP.coord_change(mapp, lon, lat)
+
+    lat_min_index, lat_max_index, lon_min_index, lon_max_index = \
+      EN.verification_region(lon,lat,
+          area_lat_min=target_region[1], area_lat_max=target_region[0],
+          area_lon_min=target_region[2], area_lon_max=target_region[3]
+      )
+
+    #vertifcation region
+    MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
     
     MP.norm_contourf(mapp, x, y, np.average(dry_energy_norm, axis=0), label='spread_72hr')
     MP.contour(mapp, x, y, hgt_data[1], elem='500hPa')
-    MP.title('TE spread [ J/kg ] FT=72hr INIT = 20050902')
+    MP.title('TE spread [ J/kg ] FT=00hr INIT = 20050902')
     plt.show()
 
 if __name__ == "__main__":
   """Set basic info. """
-  yyyy, mm, dd, hh, ft = '2005', '09', '02', '12', '72'
+  yyyy, mm, dd, hh, ft = '2003', '01', '21', '12', '72'
   date = yyyy+mm+dd+hh
   dataset = 'WFM' # 'WFM' or 'EPSW'
+  target_region = ( 20, 50, 120, 150 ) # lat_min/max, lon_min/max
 
   """Class & parm set """
   DR = Anl_SPREAD()
@@ -98,6 +108,6 @@ if __name__ == "__main__":
       imem, np.sum(potential_term[imem, lat_min_index:lat_max_index,lon_min_index:lon_max_index])/dims)
     )
 
-  DR.main_driver(dry_energy_norm,np.average(hgt_data,axis=0))
+  DR.main_driver(dry_energy_norm,np.average(hgt_data,axis=0),target_region)
 
   print('Normal END')

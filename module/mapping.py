@@ -124,9 +124,9 @@ class Mapping:
 
   def norm_contourf(self, basemap, x, y, data, *, label='default'):
     if label == 'adjoint':
-      levels = [0.01, 0.05, 0.1, 0.15, 0.2, 0.5, 1.0]
+      levels = [0.5, 1.0, 2.0, 3.0, 4.0, 5.0, 10.0]
     
-    elif label == 'spread_initial':
+    elif label == 'spread_init':
       levels = [2.5, 5.0, 10.0, 12.0, 15.0, 20.0, 30.0]
     
     elif label == 'spread_72hr':
@@ -157,8 +157,16 @@ class Mapping:
   def barb(self, basemap, x, y, u, v):
     pass
 
-  def point(self, basemap, x, y, *, marker="o", markersize=10):
-    map.plot(x, y, marker=marker, markersize=markersize)
+  def point_linear(self, basemap, lon, lat, x_min, x_max, y_min, y_max, *, color='red', ls='-', lw=2.0):
+    basemap.plot(lon[y_min:y_max,x_max], lat[y_min:y_max,x_max], color=color, ls=ls, lw=lw)
+    basemap.plot(lon[y_min:y_max,x_min], lat[y_min:y_max,x_min], color=color, ls=ls, lw=lw)
+    basemap.plot(lon[y_min,x_min:x_max+1], lat[y_min,x_min:x_max+1], color=color, ls=ls, lw=lw)
+    basemap.plot(lon[y_max-1,x_min:x_max+1], lat[y_max-1,x_min:x_max+1], color=color, ls=ls, lw=lw)
+
+  def point(self, basemap, lon, lat, x, y, *, marker="*", markersize=30):
+    basemap.plot(
+       lon[y,x], lat[y,x], marker=marker, markersize=markersize
+    )
 
   def text(self, basemap, x, y, string, *, size=20, color="black"):
     plt.text(x, y, string, size=size, color=color)
