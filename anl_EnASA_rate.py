@@ -23,7 +23,7 @@ class Anl_ENASA:
 
   def __init__(self):
     pass
-     
+
   def adjoint_sensitivity_driver(self, pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_slp, target_region):
     """Adjoint sensitivity anaysis(theta を求める)
     Args:
@@ -47,7 +47,7 @@ class Anl_ENASA:
     for imem in range(EN.mem-EN.ctrl):
       dry_energy_norm[imem], physical_term[imem], potential_term[imem] =\
         EN.calc_dry_EN_NORM(pertb_uwnd[imem],pertb_vwnd[imem],pertb_tmp[imem],pertb_slp[imem])
-      region_TE[imem] = np.sum(dry_energy_norm[imem, lat_min_index:lat_max_index,lon_min_index:lon_max_index])/dims)
+      region_TE[imem] = np.sum(dry_energy_norm[imem, lat_min_index:lat_max_index,lon_min_index:lon_max_index])/dims
 
     theta = self._calc_part(region_TE)
     return theta
@@ -58,6 +58,24 @@ class Anl_ENASA:
       i_theta = region_TE[imem]/np.sum(region_TE[:])
       theta.append(i_theta)
     return theta
+
+  def sensitivity_driver(self, pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_slp, theta):
+    """Adjoint sensitivity anaysis(theta を求める)
+    Args:
+      target_region(tuple) : 検証領域の設定
+    """
+    dry_energy_norm = np.zeros((EN.ny,EN.nx))
+    physical_term   = np.zeros((EN.ny,EN.nx))
+    potential_term  = np.zeros((EN.ny,EN.nx))
+
+    dry_energy_norm, physical_term, potential_term = EN.calc_dry_EN_NORM(
+        np.average(pertb_uwnd[imem],weights=theta),
+        np.average(pertb_vwnd[imem],weights=theta),
+        np.average(pertb_tmp[imem], weights=theta),
+        np.average(pertb_slp[imem], weights=theta)
+      )
+
+    return dry_energy_norm, physical_term, potential_term
 
   def draw_driver(self, dry_energy_norm, hgt_data):
     """Draw sensitivity area @dry enegy norm"""
@@ -89,14 +107,11 @@ if __name__ == "__main__":
 
   """Making pretubation data Vertificate TIME"""
   indir = '/work3/daichi/Data/GSM_EnData/bin/'
-  uwnd_data, vwnd_data, hgt_data, tmp_data, slp_data, rain_data = RG.data_read_driver(indir+date[0:8])
+  uwnd_data, vwnd_data, hgt_data, tmp_data, slp_data, rain_data = RG.data_read_ft_driver(indir+date[0:8])
   pertb_uwnd,pertb_vwnd,pertb_tmp,pertb_slp = EN.data_pertb_driver(uwnd_data,vwnd_data,tmp_data,slp_data)   
  
-  weight_pertb_uwnd = np.zeros((EN.mem-EN.ctrl,EN.nz,EN.ny,EN.nx))
-  weight_pertb_vwnd = np.zeros((EN.mem-EN.ctrl,EN.nz,EN.ny,EN.nx))
-  weight_pertb_tmp  = np.zeros((EN.mem-EN.ctrl,EN.nz-EN.surf,EN.ny,EN.nx))
-  weight_pertb_slp  = np.zeros((EN.mem-EN.ctrl,EN.ny,EN.nx))
-
+  #weight on latitude
+  weight_pertb_uwnd, weight_pertb_vwnd, weight_pertb_tmp, weight_pertb_slp = EN.init_array()
   for imem in range(EN.mem-EN.ctrl):
     for i_level in range(EN.nz):
       weight_pertb_uwnd[imem,i_level,:,:] = pertb_uwnd[imem,i_level,:,:]*weight_lat
@@ -105,37 +120,23 @@ if __name__ == "__main__":
       weight_pertb_tmp[imem,i_level,:,:] = pertb_tmp[imem,i_level,:,:]*weight_lat
     weight_pertb_slp[imem,:,:] = pertb_slp[imem,:,:]*weight_lat
 
-  theta =  
+  theta = DR.adjoint_sensitivity_driver(weight_pertb_uwnd,weight_pertb_vwnd,weight_pertb_tmp,weight_pertb_slp,target_region)
   
-  """Calc. dry Energy NORM"""
-  dry_energy_norm = np.zeros((EN.mem-EN.ctrl,EN.ny,EN.nx))
-  physical_term   = np.zeros((EN.mem-EN.ctrl,EN.ny,EN.nx))
-  potential_term  = np.zeros((EN.mem-EN.ctrl,EN.ny,EN.nx))
-
-  lat_min_index, lat_max_index, lon_min_index, lon_max_index = \
-    EN.verification_region(lon,lat,
-        area_lat_min =50, area_lat_max =20,
-        area_lon_min =120, area_lon_max =150
-    )
-    
-  lon_grd = lon_max_index-lon_min_index +1
-  dims = lat_grd*lon_grd
-
+  """Calc. Sensitivity Region"""
+  uwnd_data, vwnd_data, hgt_data, tmp_data, slp_data, rain_data = RG.data_read_init_driver(indir+date[0:8])
+  pertb_uwnd,pertb_vwnd,pertb_tmp,pertb_slp = EN.data_pertb_driver(uwnd_data,vwnd_data,tmp_data,slp_data)
+  
+  #weight on latitude
+  weight_pertb_uwnd, weight_pertb_vwnd, weight_pertb_tmp, weight_pertb_slp = EN.init_array()
   for imem in range(EN.mem-EN.ctrl):
-    dry_energy_norm[imem], physical_term[imem], potential_term[imem] =\
-    EN.calc_dry_EN_NORM(weight_pertb_uwnd[imem],weight_pertb_vwnd[imem],weight_pertb_tmp[imem],weight_pertb_slp[imem])
+    for i_level in range(EN.nz):
+      weight_pertb_uwnd[imem,i_level,:,:] = pertb_uwnd[imem,i_level,:,:]*weight_lat
+      weight_pertb_vwnd[imem,i_level,:,:] = pertb_vwnd[imem,i_level,:,:]*weight_lat
+    for i_level in range(EN.nz-EN.surf):
+      weight_pertb_tmp[imem,i_level,:,:] = pertb_tmp[imem,i_level,:,:]*weight_lat
+    weight_pertb_slp[imem,:,:] = pertb_slp[imem,:,:]*weight_lat
 
-    print('')
-    print('..... Check Vertification area Norm SUM {:02} {}'.format(
-      imem, np.sum(dry_energy_norm[imem, lat_min_index:lat_max_index,lon_min_index:lon_max_index])/dims)
-    )
-    print('..... Check Vertification area physical_term {:02} {}'.format(
-      imem, np.sum(physical_term[imem, lat_min_index:lat_max_index,lon_min_index:lon_max_index])/dims)
-    )
-    print('..... Check Vertification area potential_term {:02} {}'.format(
-      imem, np.sum(potential_term[imem, lat_min_index:lat_max_index,lon_min_index:lon_max_index])/dims)
-    )
+  energy_norm = DR.sensitivity_driver(weight_pertb_uwnd,weight_pertb_vwnd,weight_pertb_tmp,weight_pertb_slp,theta)
 
-  DR.main_driver(dry_energy_norm,np.average(hgt_data,axis=0))
-
+  DR.main_driver(energy_norm,np.average(hgt_data,axis=0))
   print('Normal END')

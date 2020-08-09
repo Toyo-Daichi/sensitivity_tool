@@ -19,6 +19,15 @@ class ReadGPV:
     elem      = ( 'UGRD', 'VGRD', 'HGT', 'TMP') 
     return surf_elem, elem
 
+  def init_array(self):
+    uwnd_data = np.zeros((self.mem, self.nz, self.ny, self.nx))
+    vwnd_data = np.zeros((self.mem, self.nz, self.ny, self.nx))
+    hgt_data  = np.zeros((self.mem, self.nz-self.surf, self.ny, self.nx))
+    tmp_data  = np.zeros((self.mem, self.nz-self.surf, self.ny, self.nx))
+    slp_data  = np.zeros((self.mem, self.surf, self.ny, self.nx))
+    rain_data = np.zeros((self.mem, self.surf, self.ny, self.nx))
+    return uwnd_data, vwnd_data, hgt_data, tmp_data, slp_data, rain_data
+
   def data_read_init_driver(self, data_path:str):
     """
     Args:
@@ -27,13 +36,8 @@ class ReadGPV:
       data structure: (アンサンブル数, 鉛直層, 緯度, 経度)
       dara (np.ndarray): 各種要素のデータ
     """
-    uwnd_data = np.zeros((self.mem, self.nz, self.ny, self.nx))
-    vwnd_data = np.zeros((self.mem, self.nz, self.ny, self.nx))
-    hgt_data  = np.zeros((self.mem, self.nz-self.surf, self.ny, self.nx))
-    tmp_data  = np.zeros((self.mem, self.nz-self.surf, self.ny, self.nx))
-    slp_data  = np.zeros((self.mem, self.surf, self.ny, self.nx))
-    rain_data = np.zeros((self.mem, self.surf, self.ny, self.nx))
-    
+    uwnd_data, vwnd_data, hgt_data, tmp_data, slp_data, rain_data = self.init_array
+
     for imem in range(self.mem):
       full_mem_data = self.read_gpv(data_path+'/{:03}/{}_{}hr.grd'.format(imem+1,self.date,self.init),self.elem_num)
       uwnd_data[imem,:,:,:] = full_mem_data[0,:,:,:]
@@ -53,12 +57,7 @@ class ReadGPV:
       data structure: (アンサンブル数, 鉛直層, 緯度, 経度)
       dara (np.ndarray): 各種要素のデータ
     """
-    uwnd_data = np.zeros((self.mem, self.nz, self.ny, self.nx))
-    vwnd_data = np.zeros((self.mem, self.nz, self.ny, self.nx))
-    hgt_data  = np.zeros((self.mem, self.nz-self.surf, self.ny, self.nx))
-    tmp_data  = np.zeros((self.mem, self.nz-self.surf, self.ny, self.nx))
-    slp_data  = np.zeros((self.mem, self.surf, self.ny, self.nx))
-    rain_data = np.zeros((self.mem, self.surf, self.ny, self.nx))
+    uwnd_data, vwnd_data, hgt_data, tmp_data, slp_data, rain_data = self.init_array
     
     for imem in range(self.mem):
       full_mem_data = self.read_gpv(data_path+'/{:03}/{}_{}hr.grd'.format(imem+1,self.date,self.ft),self.elem_num)
@@ -107,6 +106,13 @@ class Energy_NORM:
     self.cp:float=1004.0
     self.R:float=287.0
 
+  def init_array(self):
+    pertb_uwnd_data = np.zeros((self.mem-self.ctrl, self.nz, self.ny, self.nx))
+    pertb_vwnd_data = np.zeros((self.mem-self.ctrl, self.nz, self.ny, self.nx))
+    pertb_tmp_data  = np.zeros((self.mem-self.ctrl, self.nz-self.surf, self.ny, self.nx))
+    pertb_slp_data  = np.zeros((self.mem-self.ctrl, self.surf, self.ny, self.nx))
+    return pertb_uwnd_data, pertb_vwnd_data, pertb_tmp_data, pertb_slp_data
+
   def data_pertb_driver(self,uwnd,vwnd,tmp,slp):
     """コントロールランからの摂動の作成
     Args:
@@ -115,11 +121,7 @@ class Energy_NORM:
     Returns:
       pretb_elem_data(np.ndarray): アンサンブルランのデータからコントロールランデータを引いた擾乱のデータ
     """
-    pertb_uwnd_data = np.zeros((self.mem-self.ctrl, self.nz, self.ny, self.nx))
-    pertb_vwnd_data = np.zeros((self.mem-self.ctrl, self.nz, self.ny, self.nx))
-    pertb_tmp_data  = np.zeros((self.mem-self.ctrl, self.nz-self.surf, self.ny, self.nx))
-    pertb_slp_data  = np.zeros((self.mem-self.ctrl, self.surf, self.ny, self.nx))
-
+    pertb_uwnd_data, pertb_vwnd_data, pertb_tmp_data, pertb_slp_data = self.init_array
     for imem in range(self.mem-self.ctrl):
       pertb_uwnd_data[imem,:,:,:] = uwnd[imem+1,:,:,:] - uwnd[self.ctrl-1,:,:,:]
       pertb_vwnd_data[imem,:,:,:] = vwnd[imem+1,:,:,:] - vwnd[self.ctrl-1,:,:,:]
@@ -169,7 +171,7 @@ class Energy_NORM:
 
     return dry_energy_norm, vint_physical_term, vint_potential_term 
 
-  def humid_energy_norm(self):
+  def calc_humid_EN_NORM(self):
     pass
 
   def verification_region(self, 

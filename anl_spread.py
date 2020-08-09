@@ -52,7 +52,7 @@ if __name__ == "__main__":
 
   """Making pretubation data"""
   indir = '/work3/daichi/Data/GSM_EnData/bin/'
-  uwnd_data, vwnd_data, hgt_data, tmp_data, slp_data, rain_data = RG.data_read_driver(indir+date[0:8])
+  uwnd_data, vwnd_data, hgt_data, tmp_data, slp_data, rain_data = RG.data_read_ft_driver(indir+date[0:8])
   pertb_uwnd,pertb_vwnd,pertb_tmp,pertb_slp = EN.data_pertb_driver(uwnd_data,vwnd_data,tmp_data,slp_data)   
  
   weight_pertb_uwnd = np.zeros((EN.mem-EN.ctrl,EN.nz,EN.ny,EN.nx))
