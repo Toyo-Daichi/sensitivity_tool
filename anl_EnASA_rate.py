@@ -151,7 +151,7 @@ if __name__ == "__main__":
   yyyy, mm, dd, hh, init, ft = '2003', '01', '21', '12', '00', '72'
   date = yyyy+mm+dd+hh
   dataset = 'WFM' # 'WFM' or 'EPSW'
-  target_region = ( 20, 50, 120, 150 ) # lat_min/max, lon_min/max
+  target_region = ( 25, 50, 125, 150 ) # lat_min/max, lon_min/max
 
   """Class & parm set """
   DR = Anl_ENASA()
