@@ -124,10 +124,10 @@ class Mapping:
 
   def norm_contourf(self, basemap, x, y, data, *, label='default'):
     if label == 'adjoint':
-      levels = [0.5, 1.0, 2.0, 3.0, 4.0, 5.0, 10.0]
+      levels = [0.01, 0.025, 0.05, 0.1, 0.2, 0.5, 1.0]
     
     elif label == 'spread_init':
-      levels = [2.5, 5.0, 10.0, 12.0, 15.0, 20.0, 30.0]
+      levels = [1.5, 3.0, 5.0, 7.5, 10.0, 15.0, 30.0]
     
     elif label == 'spread_72hr':
       levels = [10.0, 15.0, 20.0, 25.0, 30.0, 50.0, 100.0]
