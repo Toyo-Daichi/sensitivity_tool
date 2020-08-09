@@ -45,6 +45,9 @@ class ReadGPV:
 
     return uwnd_data, vwnd_data, hgt_data, tmp_data, slp_data, rain_data
 
+  def set_gpv(self, gpv_file, elem):
+    return self._open_gpv(gpv_file).reshape(elem, self.nz, self.mem, self.ny, self.nx)
+
   def read_gpv(self, gpv_file, elem):
     return self._open_gpv(gpv_file).reshape(elem, self.nz, self.ny, self.nx)
 
