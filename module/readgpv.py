@@ -36,7 +36,7 @@ class ReadGPV:
       data structure: (アンサンブル数, 鉛直層, 緯度, 経度)
       dara (np.ndarray): 各種要素のデータ
     """
-    uwnd_data, vwnd_data, hgt_data, tmp_data, slp_data, rain_data = self.init_array
+    uwnd_data, vwnd_data, hgt_data, tmp_data, slp_data, rain_data = self.init_array()
 
     for imem in range(self.mem):
       full_mem_data = self.read_gpv(data_path+'/{:03}/{}_{}hr.grd'.format(imem+1,self.date,self.init),self.elem_num)
@@ -57,7 +57,7 @@ class ReadGPV:
       data structure: (アンサンブル数, 鉛直層, 緯度, 経度)
       dara (np.ndarray): 各種要素のデータ
     """
-    uwnd_data, vwnd_data, hgt_data, tmp_data, slp_data, rain_data = self.init_array
+    uwnd_data, vwnd_data, hgt_data, tmp_data, slp_data, rain_data = self.init_array()
     
     for imem in range(self.mem):
       full_mem_data = self.read_gpv(data_path+'/{:03}/{}_{}hr.grd'.format(imem+1,self.date,self.ft),self.elem_num)
@@ -121,7 +121,7 @@ class Energy_NORM:
     Returns:
       pretb_elem_data(np.ndarray): アンサンブルランのデータからコントロールランデータを引いた擾乱のデータ
     """
-    pertb_uwnd_data, pertb_vwnd_data, pertb_tmp_data, pertb_slp_data = self.init_array
+    pertb_uwnd_data, pertb_vwnd_data, pertb_tmp_data, pertb_slp_data = self.init_array()
     for imem in range(self.mem-self.ctrl):
       pertb_uwnd_data[imem,:,:,:] = uwnd[imem+1,:,:,:] - uwnd[self.ctrl-1,:,:,:]
       pertb_vwnd_data[imem,:,:,:] = vwnd[imem+1,:,:,:] - vwnd[self.ctrl-1,:,:,:]

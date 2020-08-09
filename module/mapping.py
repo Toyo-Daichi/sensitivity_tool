@@ -123,14 +123,14 @@ class Mapping:
     cbar.set_label(label, size=8)
 
   def norm_contourf(self, basemap, x, y, data, *, label='default'):
-    if label == 'default':
-      levels = [0.1, 0.2, 0.5, 1.0, 2.0, 5.0, 10.0]
+    if label == 'adjoint':
+      levels = [0.01, 0.05, 0.1, 0.15, 0.2, 0.5, 1.0]
     
     elif label == 'spread_initial':
       levels = [2.5, 5.0, 10.0, 12.0, 15.0, 20.0, 30.0]
     
     elif label == 'spread_72hr':
-      levels = [10.0, 12.0, 15.0, 20.0, 25.0, 30.0, 50.0]
+      levels = [10.0, 15.0, 20.0, 25.0, 30.0, 50.0, 100.0]
     
     colors = ['#FFFFFF', '#00FFFF', '#000080', '#228B22', '#FFFF00', '#FF8000', '#FF0000', '#FF00FF']
     cmap = plt.contourf(x, y, data, levels, colors=colors, extend='both')
