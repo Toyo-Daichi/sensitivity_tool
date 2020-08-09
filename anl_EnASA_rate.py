@@ -76,10 +76,22 @@ class Anl_ENASA:
     Args:
       target_region(tuple) : 検証領域の設定
     """
-    dry_energy_norm = np.zeros((EN.mem-EN.ctrl,EN.ny,EN.nx))
-    physical_term   = np.zeros((EN.mem-EN.ctrl,EN.ny,EN.nx))
-    potential_term  = np.zeros((EN.mem-EN.ctrl,EN.ny,EN.nx))
-    region_TE       = np.zeros((EN.mem-EN.ctrl))
+
+    dry_energy_norm = np.zeros((EN.ny,EN.nx))
+    physical_term   = np.zeros((EN.ny,EN.nx))
+    potential_term  = np.zeros((EN.ny,EN.nx))
+
+    ave_pertb_uwnd = np.zeros((EN.nz,EN.ny,EN.nx))
+    ave_pertb_vwnd = np.zeros((EN.nz,EN.ny,EN.nx))
+    ave_pertb_tmp  = np.zeros((EN.nz-EN.surf,EN.ny,EN.nx))
+    ave_pertb_slp  = np.zeros((EN.ny,EN.nx))
+
+    for i_level in range(EN.nz):
+      ave_pertb_uwnd[i_level,:,:] = EN.weight_average(pertb_uwnd[:,i_level,:,:],theta)
+      ave_pertb_vwnd[i_level,:,:] = EN.weight_average(pertb_vwnd[:,i_level,:,:],theta)
+    for i_level in range(EN.nz-EN.surf):
+      ave_pertb_tmp[i_level,:,:] = EN.weight_average(pertb_tmp[:,i_level,:,:],theta)
+    ave_pertb_slp[:,:] = EN.weight_average(pertb_slp,theta)
 
     lat_min_index, lat_max_index, lon_min_index, lon_max_index = \
       EN.verification_region(lon,lat,
@@ -91,29 +103,25 @@ class Anl_ENASA:
     lon_grd = lon_max_index-lon_min_index +1
     dims = lat_grd*lon_grd
 
-    for imem in range(EN.mem-EN.ctrl):
-      dry_energy_norm[imem], physical_term[imem], potential_term[imem] =\
-        EN.calc_dry_EN_NORM(pertb_uwnd[imem],pertb_vwnd[imem],pertb_tmp[imem],pertb_slp[imem])
-
-    ave_dry_energy_norm = EN.weight_average(dry_energy_norm,theta)
-    ave_physical_term = EN.weight_average(physical_term,theta)
-    ave_potential_term = EN.weight_average(potential_term,theta)
+    dry_energy_norm, physical_term, potential_term = EN.calc_dry_EN_NORM(
+      ave_pertb_uwnd, ave_pertb_vwnd, ave_pertb_tmp, ave_pertb_slp
+      )
 
     print('')
     print('..... Check Vertification area Norm SUM {} {}'.format(
-      'Adjoint', np.sum(ave_dry_energy_norm[lat_min_index:lat_max_index,lon_min_index:lon_max_index])/dims
+      'Adjoint', np.sum(dry_energy_norm[lat_min_index:lat_max_index,lon_min_index:lon_max_index])/dims
     ))
     print('..... Check Vertification area physical_term {} {}'.format(
-      'Adjoint', np.sum(ave_physical_term[lat_min_index:lat_max_index,lon_min_index:lon_max_index])/dims
+      'Adjoint', np.sum(physical_term[lat_min_index:lat_max_index,lon_min_index:lon_max_index])/dims
     ))
     print('..... Check Vertification area potential_term {} {}'.format(
-      'Adjoint', np.sum(ave_potential_term[lat_min_index:lat_max_index,lon_min_index:lon_max_index])/dims
+      'Adjoint', np.sum(potential_term[lat_min_index:lat_max_index,lon_min_index:lon_max_index])/dims
     ))
 
     print('')
-    print(ave_dry_energy_norm[lat_min_index:lat_max_index,lon_min_index:lon_max_index])
+    print(dry_energy_norm[lat_min_index:lat_max_index,lon_min_index:lon_max_index])
 
-    return ave_dry_energy_norm, ave_physical_term, ave_potential_term
+    return dry_energy_norm, physical_term, potential_term
 
   def draw_driver(self, energy_norm, hgt_data):
     """Draw sensitivity area @dry enegy norm"""
