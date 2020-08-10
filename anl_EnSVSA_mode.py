@@ -4,6 +4,7 @@ Created from 2020.8.10
 @author: Toyo_Daichi
 """
 
+import gc
 import os, sys
 sys.path.append(os.path.join(os.path.dirname(__file__), './module'))
 import numpy as np
@@ -12,6 +13,7 @@ import matplotlib.pyplot as plt
 #my_module
 import mapping
 import readgpv
+import setup
 import statics_tool
 
 class Anl_ENSVSA:
@@ -25,7 +27,7 @@ class Anl_ENSVSA:
   def init_Z_array(self):
     dims_xy = EN.ny*EN.nx
     dims = 2*EN.nz*dims_xy+(EN.nz-EN.surf)*dims_xy+dims_xy # wind+tmp+slp
-    Z_array = np.zeros((dims,EN.mem))
+    Z_array = np.zeros((dims,EN.mem-EN.ctrl))
     return Z_array, dims_xy, dims
 
   def singular_vector_sensitivity_driver(self, pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_slp):
@@ -34,12 +36,14 @@ class Anl_ENSVSA:
     mode_pertb_uwnd, mode_pertb_vwnd, mode_pertb_tmp, mode_pertb_slp = EN.init_array()
 
     for imem in range(EN.mem-EN.ctrl):
-      Z_array[(0*dims_xy):(EN.nz*dims_xy),imem] = np.ravel(pertb_uwnd)
-      Z_array[(EN.nz*dims_xy):(2*(EN.nz*dims_xy)),imem] = np.ravel(pertb_vwnd)
-      Z_array[(2*(EN.nz*dims_xy)):(2*(EN.nz*dims_xy)+((EN.nz-EN.surf)*dims_xy)),imem] = np.ravel(pertb_vwnd)
-      Z_array[(2*(EN.nz*dims_xy)+((EN.nz-EN.surf)*dims_xy)):dims,imem] = np.ravel(pertb_vwnd)
+      Z_array[(0*dims_xy):(EN.nz*dims_xy),imem] = pertb_uwnd[imem].reshape(-1)
+      Z_array[(EN.nz*dims_xy):(2*(EN.nz*dims_xy)),imem] = pertb_vwnd[imem].reshape(-1)
+      Z_array[(2*(EN.nz*dims_xy)):(2*(EN.nz*dims_xy)+((EN.nz-EN.surf)*dims_xy)),imem] = pertb_tmp[imem].reshape(-1)
+      Z_array[(2*(EN.nz*dims_xy)+((EN.nz-EN.surf)*dims_xy)):dims,imem] = pertb_slp[imem].reshape(-1)
 
+    setup.save_list_ndarray(Z_array,'./','Z')
     U_array, sigma_array, V_array = EN.singular_decomposion(Z_array)
+    sys.exit()
 
     return 
 
@@ -121,21 +125,25 @@ if __name__ == "__main__":
   indir = '/work3/daichi/Data/GSM_EnData/bin/'
   uwnd_data, vwnd_data, hgt_data, tmp_data, slp_data, rain_data = RG.data_read_ft_driver(indir+date[0:8])
   pertb_uwnd,pertb_vwnd,pertb_tmp,pertb_slp = EN.data_pertb_driver(uwnd_data,vwnd_data,tmp_data,slp_data)   
+
+  #deallocate normal_data
+  del uwnd_data, vwnd_data, hgt_data, tmp_data, slp_data, rain_data
+  gc.collect()
  
   #weight on latitude
-  weight_pertb_uwnd, weight_pertb_vwnd, weight_pertb_tmp, weight_pertb_slp = EN.init_array()
   for imem in range(EN.mem-EN.ctrl):
     for i_level in range(EN.nz):
-      weight_pertb_uwnd[imem,i_level,:,:] = pertb_uwnd[imem,i_level,:,:]*weight_lat
-      weight_pertb_vwnd[imem,i_level,:,:] = pertb_vwnd[imem,i_level,:,:]*weight_lat
+      pertb_uwnd[imem,i_level,:,:] = pertb_uwnd[imem,i_level,:,:]*weight_lat
+      pertb_vwnd[imem,i_level,:,:] = pertb_vwnd[imem,i_level,:,:]*weight_lat
     for i_level in range(EN.nz-EN.surf):
-      weight_pertb_tmp[imem,i_level,:,:] = pertb_tmp[imem,i_level,:,:]*weight_lat
-    weight_pertb_slp[imem,:,:] = pertb_slp[imem,:,:]*weight_lat
+      pertb_tmp[imem,i_level,:,:] = pertb_tmp[imem,i_level,:,:]*weight_lat
+    pertb_slp[imem,:,:] = pertb_slp[imem,:,:]*weight_lat
+
 
   print('')
   print('..... @ MAKE SINGULAR VECTOR @')
   mode_pertb_uwnd,mode_pertb_vwnd,mode_pertb_tmp,mode_pertb_slp =\
-     DR.singular_vector_sensitivity_driver(weight_pertb_uwnd,weight_pertb_vwnd,weight_pertb_tmp,weight_pertb_slp)
+     DR.singular_vector_sensitivity_driver(pertb_uwnd,pertb_vwnd,pertb_tmp,pertb_slp)
   print('')
 
   """Calc. Sensitivity Region"""

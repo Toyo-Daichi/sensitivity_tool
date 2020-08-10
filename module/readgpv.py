@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 import numpy as np
-from numpy.linalg import svd, matrix_rank
 import setup
+import scipy.linalg
 from scipy import integrate
+import sys
 
 class ReadGPV:
   def __init__(self,dataset,date,ft):
@@ -225,6 +226,26 @@ class Energy_NORM:
       sigma_array (np.ndarray) : 特異値の対角成分(r,r) -> sigma_array*sigma_array/m で(array, array.T)の固有値
       V_array (np.ndarray)     : アジョイント行列(n,m)
     """
-    U_array, sigma_array, V_array = svd(array)
+    
+    try:
+      #U_array, sigma_array, V_array = numpy.linalg.svd(array,full_matrices=True)
+      U_array, sigma_array, V_array = scipy.linalg.svd(array,full_matrices=True)
+      print('..... SUCCESS SINGULAR VECTOR CALCULATION ')
+      return U_array, sigma_array, V_array
 
-    return U_array, sigma_array, V_array
+    except:
+      import psutil
+      print('..... NOT SUCCESS SINGULAR VECTOR CALCULATION ')
+      mem = psutil.virtual_memory() 
+      total, used, available = mem.total, mem.used, mem.available
+      percent_total, percent_used, percent_available = (total/total)*100, (used/total)*100, (available/total)*100
+
+      print(
+        '..... CHECK MEMORY PERCENT MAX:{:.2f}, USED:{:.2f}, EMPTY:{:.2f}'.format(percent_total,percent_used,percent_available)
+        )
+      print('')
+
+      sys.exit()
+
+
+
