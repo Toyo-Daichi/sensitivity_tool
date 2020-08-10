@@ -144,7 +144,7 @@ class Anl_ENASA:
     #norm draw
     MP.norm_contourf(mapp, x, y, energy_norm, label='scope')
     MP.contour(mapp, x, y, hgt_data[1], elem='500hPa')
-    MP.title('TE [ J/kg ] Adjoint sensitivity, FT= {}hr, INIT = {}'.format(ft,date))
+    MP.title('NORMALIZE TE [ J/kg ] Adjoint sensitivity, FT= {}hr, INIT = {}'.format(ft,date))
     plt.show()
 
 if __name__ == "__main__":
