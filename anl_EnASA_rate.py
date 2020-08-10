@@ -13,6 +13,7 @@ from tqdm import tqdm
 #my_module
 import mapping
 import readgpv
+import statics_tool
 
 class Anl_ENASA:
   """Adjoint sensitivity anaysis(theta を求める)
@@ -119,11 +120,11 @@ class Anl_ENASA:
     ))
 
     print('')
-    print(dry_energy_norm[lat_min_index:lat_max_index,lon_min_index:lon_max_index])
+    #print(dry_energy_norm[lat_min_index:lat_max_index,lon_min_index:lon_max_index])
 
     return dry_energy_norm, physical_term, potential_term
 
-  def draw_driver(self, energy_norm, hgt_data):
+  def draw_driver(self, energy_norm, hgt_data, ft, date):
     """Draw sensitivity area @dry enegy norm"""
     fig, ax = plt.subplots()
     mapp = MP.base(projection_mode='lcc')
@@ -141,14 +142,14 @@ class Anl_ENASA:
     MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
 
     #norm draw
-    MP.norm_contourf(mapp, x, y, energy_norm, label='adjoint')
+    MP.norm_contourf(mapp, x, y, energy_norm, label='scope')
     MP.contour(mapp, x, y, hgt_data[1], elem='500hPa')
-    MP.title('TE [ J/kg ] Adjoint sensitivity FT=72hr INIT = 20050902')
+    MP.title('TE [ J/kg ] Adjoint sensitivity, FT= {}hr, INIT = {}'.format(ft,date))
     plt.show()
 
 if __name__ == "__main__":
   """Set basic info. """
-  yyyy, mm, dd, hh, init, ft = '2003', '01', '21', '12', '00', '72'
+  yyyy, mm, dd, hh, init, ft = '2003', '08', '05', '12', '00', '72'
   date = yyyy+mm+dd+hh
   dataset = 'WFM' # 'WFM' or 'EPSW'
   target_region = ( 25, 50, 125, 150 ) # lat_min/max, lon_min/max
@@ -200,7 +201,11 @@ if __name__ == "__main__":
   print('..... @ MAKE SENSITIVITY REGION @')
   energy_norm, _, _ = DR.sensitivity_driver(weight_pertb_uwnd,weight_pertb_vwnd,weight_pertb_tmp,weight_pertb_slp,theta)
 
+  #normalize
+  print('..... @ MAKE NORMALIZE ENERGY NORM @')
   print('')
-  DR.draw_driver(energy_norm,np.average(hgt_data,axis=0))
+  normal_energy_norm = statics_tool.normalize(energy_norm)
+
+  DR.draw_driver(normal_energy_norm,np.average(hgt_data,axis=0),ft,date)
 
   print('Normal END')

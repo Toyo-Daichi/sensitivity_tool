@@ -39,14 +39,14 @@ class Anl_SPREAD:
     #vertifcation region
     MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
     
-    MP.norm_contourf(mapp, x, y, np.average(dry_energy_norm, axis=0), label='spread_init')
+    MP.norm_contourf(mapp, x, y, np.average(dry_energy_norm, axis=0), label='spread_72hr')
     MP.contour(mapp, x, y, hgt_data[1], elem='500hPa')
     MP.title('TE spread [ J/kg ] FT=00hr INIT = 20050902')
     plt.show()
 
 if __name__ == "__main__":
   """Set basic info. """
-  yyyy, mm, dd, hh, ft = '2003', '01', '21', '12', '00'
+  yyyy, mm, dd, hh, ft = '2003', '08', '05', '12', '72'
   date = yyyy+mm+dd+hh
   dataset = 'WFM' # 'WFM' or 'EPSW'
   target_region = ( 25, 50, 125, 150 ) # lat_min/max, lon_min/max

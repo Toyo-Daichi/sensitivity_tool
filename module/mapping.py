@@ -122,15 +122,23 @@ class Mapping:
     cbar = basemap.colorbar(cmap, 'right', size='2.5%')
     cbar.set_label(label, size=8)
 
-  def norm_contourf(self, basemap, x, y, data, *, label='default'):
-    if label == 'adjoint':
+  def norm_contourf(self, basemap, x, y, data, *, label='normal'):
+    if label == 'normal':
+      levels = [0.025, 0.05, 0.1, 0.2, 0.5, 0.75, 1.0]
+
+    elif label == 'scope':
+      #levels = [0.025, 0.050, 0.075, 0.100, 0.125, 0.150, 0.200]
+      levels = [0.025, 0.05, 0.10, 0.15, 0.20, 0.25, 0.30]
+      #levels = [0.075, 0.100, 0.125, 0.150, 0.175, 0.200, 0.250]
+
+    elif label == 'adjoint':
       levels = [0.01, 0.025, 0.05, 0.1, 0.2, 0.5, 1.0]
     
     elif label == 'spread_init':
-      levels = [1.5, 3.0, 5.0, 7.5, 10.0, 15.0, 30.0]
+      levels = [5.0, 7.5, 10.0, 12.5, 15.0, 20.0, 30.0]
     
     elif label == 'spread_72hr':
-      levels = [10.0, 15.0, 20.0, 25.0, 30.0, 50.0, 100.0]
+      levels = [7.5, 10.0, 15.0, 30.0, 50.0, 70.0, 100.0]
     
     colors = ['#FFFFFF', '#00FFFF', '#000080', '#228B22', '#FFFF00', '#FF8000', '#FF0000', '#FF00FF']
     cmap = plt.contourf(x, y, data, levels, colors=colors, extend='both')

@@ -35,3 +35,9 @@ def gaussian_func(x, *, amp:float=1.0, ave:float=0, std:float=1.0):
     gaussian_function(float)
   """
   return amp*np.exp(-1*((x - ave)/2*std)**2)
+
+def normalize(v, axis=-1, order=2):
+  """url: https://deepage.net/features/numpy-normalize.html"""
+  l2 = np.linalg.norm(v, ord = order, axis=axis, keepdims=True)
+  l2[l2==0] = 1
+  return v/l2

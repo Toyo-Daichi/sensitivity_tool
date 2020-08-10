@@ -14,11 +14,11 @@ import subprocess
 
 if __name__ == "__main__":
   """Set basic info. """
-  yyyy, mm, dd, hh, ft = 2005, 9, 2, 12, 72 
+  yyyy, mm, dd, hh, ft = 2003, 8, 5, 12, 72 
   date = '{:04}{:02}{:02}{:02}'.format(yyyy,mm,dd,hh)
   dataset = 'WFM'
   var_list = ('UGRD', 'VGRD', 'HGT', 'TMP') #level=surf, HGT, TMP -> PRMSL, APCP
-  make_var = 0 # 0(make each var output) or 1(only full data)
+  make_var = 1 # 0(make each var output) or 1(only full data)
   
   """Class & data set """
   ST = setup.Setup(dataset)
