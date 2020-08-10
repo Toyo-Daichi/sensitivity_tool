@@ -8,7 +8,6 @@ import os, sys
 sys.path.append(os.path.join(os.path.dirname(__file__), './module'))
 import numpy as np
 import matplotlib.pyplot as plt
-from tqdm import tqdm
 
 #my_module
 import mapping
@@ -73,10 +72,7 @@ class Anl_ENASA:
     return theta
 
   def sensitivity_driver(self, pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_slp, theta):
-    """Adjoint sensitivity anaysis(theta を求める)
-    Args:
-      target_region(tuple) : 検証領域の設定
-    """
+    """Total Energy NORM を計算する """
 
     dry_energy_norm = np.zeros((EN.ny,EN.nx))
     physical_term   = np.zeros((EN.ny,EN.nx))

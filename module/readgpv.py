@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import numpy as np
+from numpy.linalg import svd, matrix_rank
 import setup
 from scipy import integrate
 
@@ -214,3 +215,16 @@ class Energy_NORM:
         y_array[iy,ix] = integrate.simps(x_array[:,iy,ix], press_array[::-1])
 
     return y_array
+
+  def singular_decomposion(self, array):
+    """特異値分解
+    Args:
+      array (np.ndarray)   : 特異値分解したい行列(n,m) 
+    Return:
+      U_array (np.ndarray)     : ユニタリ行列(n,n)
+      sigma_array (np.ndarray) : 特異値の対角成分(r,r) -> sigma_array*sigma_array/m で(array, array.T)の固有値
+      V_array (np.ndarray)     : アジョイント行列(n,m)
+    """
+    U_array, sigma_array, V_array = svd(array)
+
+    return U_array, sigma_array, V_array
