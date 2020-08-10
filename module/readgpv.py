@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 import numpy as np
+import psutil
 import setup
 import scipy.linalg
 from scipy import integrate
 import sys
+import subprocess
 
 class ReadGPV:
   def __init__(self,dataset,date,ft):
@@ -217,7 +219,7 @@ class Energy_NORM:
 
     return y_array
 
-  def singular_decomposion(self, array):
+  def singular_decomposion(self, array, *, try_num=5):
     """特異値分解
     Args:
       array (np.ndarray)   : 特異値分解したい行列(n,m) 
@@ -226,15 +228,23 @@ class Energy_NORM:
       sigma_array (np.ndarray) : 特異値の対角成分(r,r) -> sigma_array*sigma_array/m で(array, array.T)の固有値
       V_array (np.ndarray)     : アジョイント行列(n,m)
     """
-    
-    try:
-      #U_array, sigma_array, V_array = numpy.linalg.svd(array,full_matrices=True)
-      U_array, sigma_array, V_array = scipy.linalg.svd(array,full_matrices=True)
-      print('..... SUCCESS SINGULAR VECTOR CALCULATION ')
-      return U_array, sigma_array, V_array
+   
+    for _ in range(try_num):
+      try:
+        #U_array, sigma_array, V_array = numpy.linalg.svd(array,full_matrices=True)
+        U_array, sigma_array, V_array = scipy.linalg.svd(array)
+        print('..... SUCCESS SINGULAR VECTOR CALCULATION ')
+        return U_array, sigma_array, V_array
 
-    except:
-      import psutil
+      except Exception as e:
+        print('   >>> ONE MORE TRY <<<   ')
+        command = ["sleep", "5.0s"]
+        res = subprocess.call(command)
+      
+      else:
+        break
+    
+    else:
       print('..... NOT SUCCESS SINGULAR VECTOR CALCULATION ')
       mem = psutil.virtual_memory() 
       total, used, available = mem.total, mem.used, mem.available
@@ -244,7 +254,6 @@ class Energy_NORM:
         '..... CHECK MEMORY PERCENT MAX:{:.2f}, USED:{:.2f}, EMPTY:{:.2f}'.format(percent_total,percent_used,percent_available)
         )
       print('')
-
       sys.exit()
 
 

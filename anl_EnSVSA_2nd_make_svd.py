@@ -41,7 +41,7 @@ class Anl_ENSVSA:
       Z_array[(2*(EN.nz*dims_xy)):(2*(EN.nz*dims_xy)+((EN.nz-EN.surf)*dims_xy)),imem] = pertb_tmp[imem].reshape(-1)
       Z_array[(2*(EN.nz*dims_xy)+((EN.nz-EN.surf)*dims_xy)):dims,imem] = pertb_slp[imem].reshape(-1)
 
-    setup.save_list_ndarray(Z_array,'./','Z')
+    #setup.save_list_ndarray(Z_array,'./','Z')
     U_array, sigma_array, V_array = EN.singular_decomposion(Z_array)
     sys.exit()
 
