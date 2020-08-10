@@ -134,7 +134,7 @@ class Mapping:
     elif label == 'adjoint':
       levels = [0.01, 0.025, 0.05, 0.1, 0.2, 0.5, 1.0]
     
-    elif label == 'spread_init':
+    elif label == 'spread_00hr':
       levels = [5.0, 7.5, 10.0, 12.5, 15.0, 20.0, 30.0]
     
     elif label == 'spread_72hr':

@@ -23,7 +23,7 @@ class Anl_SPREAD:
   def __init__(self):
     pass
      
-  def main_driver(self, dry_energy_norm, hgt_data, target_region):
+  def main_driver(self, dry_energy_norm, hgt_data, target_region, ft, date):
     """Draw sensitivity area @dry enegy norm"""
     fig, ax = plt.subplots()
     mapp = MP.base(projection_mode='lcc')
@@ -39,9 +39,9 @@ class Anl_SPREAD:
     #vertifcation region
     MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
     
-    MP.norm_contourf(mapp, x, y, np.average(dry_energy_norm, axis=0), label='spread_72hr')
+    MP.norm_contourf(mapp, x, y, np.average(dry_energy_norm, axis=0), label='spread_{}hr'.format(ft))
     MP.contour(mapp, x, y, hgt_data[1], elem='500hPa')
-    MP.title('TE spread [ J/kg ] FT=00hr INIT = 20050902')
+    MP.title('TE spread [ J/kg ] FT={}hr INIT = {}'.format(ft,date))
     plt.show()
 
 if __name__ == "__main__":
@@ -108,6 +108,9 @@ if __name__ == "__main__":
       imem, np.sum(potential_term[imem, lat_min_index:lat_max_index,lon_min_index:lon_max_index])/dims)
     )
 
-  DR.main_driver(dry_energy_norm,np.average(hgt_data,axis=0),target_region)
+  print('')
+  print('..... @ MAKE EMSEMBLE MEMBER SPREAD @')
+  print('')
+  DR.main_driver(dry_energy_norm,np.average(hgt_data,axis=0),target_region, ft, date)
 
   print('Normal END')
