@@ -86,17 +86,17 @@ while ( ${s_yy} <= ${e_yy} )
         set nx = 144; set ny = 73; set nz = 4; set mem = 27 
 
         set i_file = ${i_dir}/Z__C_RJTD_${s_yy}${m0}${d0}${h0}0000_EPSW_GPV_Rgl_FD00-08_grib2.bin 
-        set i_list = ( ground 850 500 300 )
+        set i_list = ( "ground" "850" "500" "300" )
         set il = 1
 
         while ( ${il} <= 4 )
           set level = ${i_list[${il}]}
           echo ${level}
           if ( ${ft} == 'anl' ) then
-            wgrib2 -v ${i_file} | grep "UGRD" | grep "${level} " | grep "${ft}" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/uwnd_${s_yy}${m0}${d0}${h0}_${il}.grd
-            wgrib2 -v ${i_file} | grep "VGRD" | grep "${level} " | grep "${ft}" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/vwnd_${s_yy}${m0}${d0}${h0}_${il}.grd
+            wgrib2 -v ${i_file} | grep "UGRD" | grep "${level} mb" | grep "${ft}" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/uwnd_${s_yy}${m0}${d0}${h0}_${il}.grd
+            wgrib2 -v ${i_file} | grep "VGRD" | grep "${level} mb" | grep "${ft}" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/vwnd_${s_yy}${m0}${d0}${h0}_${il}.grd
             if ( ${il} == 1 ) then
-              wgrib2 -v ${i_file} | grep "PRMSL"   | grep "${ft}" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/hgt_${s_yy}${m0}${d0}${h0}_${il}.grd
+              wgrib2 -v ${i_file} | grep "PRMSL"   | grep "${ft}"    | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/hgt_${s_yy}${m0}${d0}${h0}_${il}.grd
               wgrib2 -v ${i_file} | grep "APCP"    | grep "0-8 day"  | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/tmp_${s_yy}${m0}${d0}${h0}_${il}.grd
               sleep 3s
             else if ( ${il} != 1 ) then
