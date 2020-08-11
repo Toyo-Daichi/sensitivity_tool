@@ -4,7 +4,6 @@ Created from 2020.8.10
 @author: Toyo_Daichi
 """
 
-import gc
 import os, sys
 sys.path.append(os.path.join(os.path.dirname(__file__), './module'))
 import numpy as np
@@ -71,10 +70,9 @@ if __name__ == "__main__":
       pertb_tmp[imem,i_level,:,:] = pertb_tmp[imem,i_level,:,:]*weight_lat
     pertb_slp[imem,:,:] = pertb_slp[imem,:,:]*weight_lat
 
-
   print('')
   print('..... @ MAKE Z_array @')
-  DR.make_z_array(pertb_uwnd,pertb_vwnd,pertb_tmp,pertb_slp)
+  DR.make_z_array(pertb_uwnd,pertb_vwnd,pertb_tmp,pertb_slp,date,ft)
   print('')
 
   print('Normal END')

@@ -3,6 +3,7 @@ import numpy as np
 import psutil
 import setup
 import scipy.linalg
+from scipy.sparse.linalg import svds
 from scipy import integrate
 import sys
 import subprocess
@@ -219,7 +220,7 @@ class Energy_NORM:
 
     return y_array
 
-  def singular_decomposion(self, array, *, try_num=5):
+  def singular_decomposion(self, array, *, try_num=10):
     """特異値分解
     Args:
       array (np.ndarray)   : 特異値分解したい行列(n,m) 
@@ -232,12 +233,13 @@ class Energy_NORM:
     for _ in range(try_num):
       try:
         #U_array, sigma_array, V_array = numpy.linalg.svd(array,full_matrices=True)
-        U_array, sigma_array, V_array = scipy.linalg.svd(array)
+        #U_array, sigma_array, V_array = scipy.linalg.svd(array)
+        U_array, sigma_array, V_array = svds(array, k=10)
         print('..... SUCCESS SINGULAR VECTOR CALCULATION ')
         return U_array, sigma_array, V_array
 
       except Exception as e:
-        print('   >>> ONE MORE TRY <<<   ')
+        print('   >>> {:04} cycle failed, ONE MORE TRY <<<   '.format(_+1))
         command = ["sleep", "5.0s"]
         res = subprocess.call(command)
       
