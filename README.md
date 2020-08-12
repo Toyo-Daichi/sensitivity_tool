@@ -1,7 +1,7 @@
 ## 基本情報(sensitivity_toolについて)
 - アンサンブル手法に基づく簡易予報感度解析(Enomoto et al. 2015; 榎本ほか 2014)
 
-### 基本となる考え方
+#### 基本となる考え方
 
 場の状態ベクトル`x`の時間発展が非線形モデル`M(x)`で記述されたとする。初期時刻`t=0`における摂動`y(i=1:m)`を与えた、メンバー数`m`のアンサンブル予報において、時刻`t`における擾乱は次のように表せる。
 
@@ -23,7 +23,7 @@ p(i=1:m)   = (p(i=1), p(i=2), ..., p(i=m)).T
 ```
 
 ## コードの紹介
-### アンサンブル随伴感度解析(Ensemble adjoint sensitivity analysis; EnASA)  
+#### アンサンブル随伴感度解析(Ensemble adjoint sensitivity analysis; EnASA)  
 - `anl_EnASA_rate.py` 
 
 `z(i=1:m)`を用いて**トータルエネルギーノルム`norm(i=1:m)`**(※1)を計算する。各メンバーから求めた`norm(i=1:m)`を用いて最適な係数`p(i=1:m)`を求める。
@@ -35,7 +35,7 @@ for i in range(m):
 
 ***
 
-### アンサンブル特異ベクトル感度解析(Ensemble singular vector analysis; EnSVSA)  
+#### アンサンブル特異ベクトル感度解析(Ensemble singular vector analysis; EnSVSA)  
 - `anl_EnSVSA_mode_svds.py`
 
 アンサンブル特異ベクトル法では、共分散`(y.T)G(y) = (p.T Y.T)G(Y p) = 1`の条件のもとで検証時刻における検証領域における擾乱`(p.T Z.T) H (Z)`を最大化する`p(i=1:m)`を求める。この問題ではラグランジュ関数からの微分から固有値問題を得る。
@@ -56,7 +56,7 @@ alt="Z=U \Sigma V^{\top}">
 
 ***
 
-### 計算時の注意点
+#### 計算時の注意点
 
 - 摂動はアンサンブル平均からの差ではなく、コントロールランからの差で構成される。
 
@@ -69,7 +69,7 @@ alt="Z=U \Sigma V^{\top}">
 
 `data_grib2bin.sh, data_encode.py` : データ形式をGrads形式に変更するコード(※2)
 
-### データにおける注意点
+#### データにおける注意点
 ※1. データ取得サイト利用時は、下記の点の注意が必要。
 >教育研究機関向けにデータを提供しています。企業活動等のためにデータを頻繁に必要とされる方は、気象業務支援センターからデータを直接購入し、データ提供スキーム全体の維持発展にご協力ください。（サイトより引用）
 
@@ -89,6 +89,5 @@ alt="Z=U \Sigma V^{\top}">
 1. 参考文献の再現実験を行う。　2. 近年の大気場でも同様の実験で行ってみる。 
 
 ## 参考文献
-Enomoto, T., S. Yamane, and W. Ohfuchi, 2015: Simple sensitivity analysis using ensemble forecasts. J. Meteor. Soc. Japan, 93, 199-	213.
-
+Enomoto, T., S. Yamane, and W. Ohfuchi, 2015: Simple sensitivity analysis using ensemble forecasts. J. Meteor. Soc. Japan, 93, 199-	213.  
 榎本剛, 山根省三, 大淵済, 2014: アンサンブル手法に基づく簡易予報感度解析. 京都大学防災研究所年報, 57(B), 163-168. 
