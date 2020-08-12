@@ -36,7 +36,7 @@ for i in range(m):
   p(i) = norm(i)/np.sum(norm(1:m))
 ```
 
-***
+<br>
 
 #### アンサンブル特異ベクトル感度解析(Ensemble singular vector analysis; EnSVSA)  
 - `anl_EnSVSA_mode_svds.py`
@@ -57,7 +57,7 @@ alt="Z=U \Sigma V^{\top}">
 
 2. `extraction_z（dims=1:ndims,i=1:m）`で特異値分解して、`p(i=1:m)`を取得する。
 
-***
+<br>
 
 #### 計算時の注意点
 
