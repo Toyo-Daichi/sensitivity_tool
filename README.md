@@ -23,9 +23,9 @@ p(i=1:m)   = (p(i=1), p(i=2), ..., p(i=m)).T
 ```
 
 ## コードの紹介
-`anl_EnASA_rate.py` : アンサンブル随伴感度解析
+`anl_EnASA_rate.py` : アンサンブル随伴感度解析(Ensemble adjoint sensitivity analysis; EnASA)
 
-`anl_EnSVSA_mode_svds.py` : アンサンブル特異ベクトル感度解析
+`anl_EnSVSA_mode_svds.py` : アンサンブル特異ベクトル感度解析(Ensemble singular vector analysis; EnSVSA)
 
 ## データ取得
 `data_get.sh` : grib形式のデータを取得するコード(※1)
