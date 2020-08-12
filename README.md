@@ -23,7 +23,8 @@ p(i=1:m)   = (p(i=1), p(i=2), ..., p(i=m)).T
 ```
 
 ## コードの紹介
-- `anl_EnASA_rate.py` : アンサンブル随伴感度解析(Ensemble adjoint sensitivity analysis; EnASA)
+### アンサンブル随伴感度解析(Ensemble adjoint sensitivity analysis; EnASA)  
+- `anl_EnASA_rate.py` 
 
 `z(i=1:m)`を用いて**トータルエネルギーノルム`norm(i=1:m)`**(※1)を計算する。各メンバーから求めた`norm(i=1:m)`を用いて最適な係数`p(i=1:m)`を求める。
 
@@ -32,7 +33,10 @@ for i in range(m):
   p(i) = norm(i)/np.sum(norm(1:m))
 ```
 
-- `anl_EnSVSA_mode_svds.py` : アンサンブル特異ベクトル感度解析(Ensemble singular vector analysis; EnSVSA)
+***
+
+### アンサンブル特異ベクトル感度解析(Ensemble singular vector analysis; EnSVSA)  
+- `anl_EnSVSA_mode_svds.py`
 
 アンサンブル特異ベクトル法では、共分散`(y.T)G(y) = (p.T Y.T)G(Y p) = 1`の条件のもとで検証時刻における検証領域における擾乱`(p.T Z.T) H (Z)`を最大化する`p(i=1:m)`を求める。この問題ではラグランジュ関数からの微分から固有値問題を得る。
 
