@@ -52,12 +52,16 @@ alt="\left(\mathrm{Y}^{\mathrm{T}} \mathrm{GY}\right)^{-1} \mathrm{Z}^{\mathrm{T
 
 この時、`Y.T G Y`は互いに直交している行列とその転置行列を掛け合う(?)ので対角行列となる。したがって、`Z`の特異値問題に置き換えることができる。
 
+<br>
+
 <img src="https://render.githubusercontent.com/render/math?math=%5Clarge+%5Cdisplaystyle+Z%3DU+%5CSigma+V%5E%7B%5Ctop%7D" 
 alt="Z=U \Sigma V^{\top}">
 
+<br>
+
 この時、左特異値ベクトル`U`が共分散`Z.T H Z`の固有ベクトル、すなわち`p(i=1:m)`に相当する。
 
-####簡単な手順
+#### 簡単な手順
 
 1. **検証領域**における検証時刻の摂動`z(i=1:m)`から抽出した`extraction_z（dims=1:ndims,i=1:m）`を作成する。
 
