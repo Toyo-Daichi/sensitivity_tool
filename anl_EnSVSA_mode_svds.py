@@ -15,7 +15,7 @@ import setup
 import statics_tool
 
 class Anl_ENSVSA:
-    """Ensemble Singular Vector sensitivity anaysis(特異値ベクトルを求める)
+  """Ensemble Singular Vector sensitivity anaysis(特異値ベクトルを求める)
     詳細は, README.md or Enomoto et al. (2015)に記載されている.
   """
 
@@ -23,20 +23,24 @@ class Anl_ENSVSA:
     pass
   
   def init_Z_array(self,dims_xy):
-    dims = 2*EN.nz*dims_xy+(EN.nz-EN.surf)*dims_xy+dims_xy # wind+tmp+slp
+    dims = (2*EN.nz*dims_xy)+(EN.nz-EN.surf)*dims_xy+dims_xy # wind+tmp+slp
     Z_array = np.zeros((dims,EN.mem-EN.ctrl))
-    return Z_array, dims_xy, dims
+    return Z_array, dims
 
   def singular_vector_sensitivity_driver(self, dims_xy, pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_slp,date,ft):
     """singular vector """
     Z_array, dims = self.init_Z_array(dims_xy)
-    mode_pertb_uwnd, mode_pertb_vwnd, mode_pertb_tmp, mode_pertb_slp = EN.init_array()
+    svd_pertb_tmp = pertb_tmp[:]*(np.sqrt(EN.cp/EN.Tr))
+    svd_pertb_slp = pertb_slp[:]*(np.sqrt((EN.R*EN.Tr)/EN.Pr))
+
+    print(svd_pertb_slp)
+    print(svd_pertb_slp.shape)
 
     for imem in range(EN.mem-EN.ctrl):
       Z_array[(0*dims_xy):(EN.nz*dims_xy),imem] = pertb_uwnd[imem].reshape(-1)
       Z_array[(EN.nz*dims_xy):(2*(EN.nz*dims_xy)),imem] = pertb_vwnd[imem].reshape(-1)
-      Z_array[(2*(EN.nz*dims_xy)):(2*(EN.nz*dims_xy)+((EN.nz-EN.surf)*dims_xy)),imem] = (pertb_tmp[imem]*np.sqrt(EN.cp/EN.Tr)).reshape(-1)
-      Z_array[(2*(EN.nz*dims_xy)+((EN.nz-EN.surf)*dims_xy)):dims,imem] = (pertb_slp[imem]*np.sqrt((EN.R*EN.Tr)/EN.Pr)).reshape(-1)
+      Z_array[(2*(EN.nz*dims_xy)):(2*(EN.nz*dims_xy)+((EN.nz-EN.surf)*dims_xy)),imem] = svd_pertb_tmp[imem].reshape(-1)
+      Z_array[(2*(EN.nz*dims_xy)+((EN.nz-EN.surf)*dims_xy)):dims,imem] = svd_pertb_slp[imem].reshape(-1)
 
     return_index, U_array, sigma_array, V_array = EN.singular_decomposion(Z_array, mode=10, try_num=10)
 
@@ -68,6 +72,7 @@ if __name__ == "__main__":
   pertb_uwnd,pertb_vwnd,pertb_tmp,pertb_slp = EN.data_pertb_driver(uwnd_data,vwnd_data,tmp_data,slp_data)
 
   #weight on latitude
+  print('')
   print('..... @ MAKE Pertubation array & REGION Extraction @')
   for imem in range(EN.mem-EN.ctrl):
     for i_level in range(EN.nz):
@@ -76,8 +81,6 @@ if __name__ == "__main__":
     for i_level in range(EN.nz-EN.surf):
       pertb_tmp[imem,i_level,:,:] = pertb_tmp[imem,i_level,:,:]*weight_lat
     pertb_slp[imem,:,:] = pertb_slp[imem,:,:]*weight_lat
-
-  print('')
 
   """Target region setting """
   lat_min_index, lat_max_index, lon_min_index, lon_max_index = \
@@ -88,15 +91,28 @@ if __name__ == "__main__":
     
   lat_grd = lat_max_index-lat_min_index +1
   lon_grd = lon_max_index-lon_min_index +1
-  dims = lat_grd*lon_grd
+  dims_xy = lat_grd*lon_grd
+  print(lat_grd, lon_grd, dims_xy)
+  print(lat_min_index,lat_max_index+1,lon_min_index,lon_max_index+1)
 
-  pertb_uwnd = pertb_uwnd[:,:,lat_min_index:lat_max_index,lon_min_index:lon_max_index]
-  pertb_vwnd = pertb_vwnd[:,:,lat_min_index:lat_max_index,lon_min_index:lon_max_index]
-  pertb_tmp  = pertb_tmp[:,:,lat_min_index:lat_max_index,lon_min_index:lon_max_index]
-  pertb_slp  = pertb_slp[:,lat_min_index:lat_max_index,lon_min_index:lon_max_index]
+  pertb_uwnd = pertb_uwnd[:,:,lat_min_index:lat_max_index+1,lon_min_index:lon_max_index+1]
+  pertb_vwnd = pertb_vwnd[:,:,lat_min_index:lat_max_index+1,lon_min_index:lon_max_index+1]
+  pertb_tmp  = pertb_tmp[:,:,lat_min_index:lat_max_index+1,lon_min_index:lon_max_index+1]
+  print(pertb_slp[0].shape) 
+  print(pertb_slp[0,lat_min_index:lat_max_index+1,lon_min_index:lon_max_index+1].shape) 
+  pertb_slp  = pertb_slp[:,lat_min_index:lat_max_index+1,lon_min_index:lon_max_index+1]
 
+  print('wnd')
+  print(pertb_uwnd[0])
+  print(pertb_vwnd[0])
+  print('tmp')
+  print(pertb_tmp[0])
+  print('slp')
+  print(pertb_slp[0]) 
+
+  print('')
   print('..... @ MAKE SV decomposion @')
-  U_array, sigma_array, V_array = DR.singular_vector_sensitivity_driver(dims,pertb_uwnd,pertb_vwnd,pertb_tmp,pertb_slp,date,ft)
+  U_array, sigma_array, V_array = DR.singular_vector_sensitivity_driver(dims_xy,pertb_uwnd,pertb_vwnd,pertb_tmp,pertb_slp,date,ft)
   print('')
 
   print(U_array)
