@@ -26,7 +26,7 @@ p(i=1:m)   = (p(i=1), p(i=2), ..., p(i=m)).T
 #### アンサンブル随伴感度解析(Ensemble adjoint sensitivity analysis; EnASA)  
 - `anl_EnASA_rate.py` 
 
-`z(i=1:m)`を用いて**トータルエネルギーノルム`norm(i=1:m)`**(※1)を計算する。各メンバーから求めた`norm(i=1:m)`を用いて最適な係数`p(i=1:m)`を求める。
+`z(i=1:m)`を用いて**トータルエネルギーノルム`norm(i=1:m)`** を計算する。各メンバーから求めた`norm(i=1:m)`を用いて最適な係数`p(i=1:m)`を求める。
 
 ```python
 for i in range(m):
