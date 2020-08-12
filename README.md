@@ -43,8 +43,12 @@ for i in range(m):
 
 アンサンブル特異ベクトル法では、共分散`(y.T)G(y) = (p.T Y.T)G(Y p) = 1`の条件のもとで検証時刻における検証領域における擾乱`(p.T Z.T) H (Z)`を最大化する`p(i=1:m)`を求める。この問題ではラグランジュ関数からの微分から固有値問題を得る。
 
+<br>
+
 <img src="https://render.githubusercontent.com/render/math?math=%5Clarge+%5Cdisplaystyle+%5Cleft%28%5Cmathrm%7BY%7D%5E%7B%5Cmathrm%7BT%7D%7D+%5Cmathrm%7BGY%7D%5Cright%29%5E%7B-1%7D+%5Cmathrm%7BZ%7D%5E%7B%5Cmathrm%7BT%7D%7D+%5Cmathrm%7BHZp%7D%3D%5CLambda+%5Cboldsymbol%7Bp%7D" 
 alt="\left(\mathrm{Y}^{\mathrm{T}} \mathrm{GY}\right)^{-1} \mathrm{Z}^{\mathrm{T}} \mathrm{HZp}=\Lambda \boldsymbol{p}">
+
+<br>
 
 この時、`Y.T G Y`は互いに直交している行列とその転置行列を掛け合う(?)ので対角行列となる。したがって、`Z`の特異値問題に置き換えることができる。
 
@@ -52,6 +56,8 @@ alt="\left(\mathrm{Y}^{\mathrm{T}} \mathrm{GY}\right)^{-1} \mathrm{Z}^{\mathrm{T
 alt="Z=U \Sigma V^{\top}">
 
 この時、左特異値ベクトル`U`が共分散`Z.T H Z`の固有ベクトル、すなわち`p(i=1:m)`に相当する。
+
+####簡単な手順
 
 1. **検証領域**における検証時刻の摂動`z(i=1:m)`から抽出した`extraction_z（dims=1:ndims,i=1:m）`を作成する。
 
