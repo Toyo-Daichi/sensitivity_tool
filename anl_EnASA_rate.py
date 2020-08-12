@@ -88,7 +88,7 @@ class Anl_ENASA:
       ave_pertb_vwnd[i_level,:,:] = EN.weight_average(pertb_vwnd[:,i_level,:,:],theta)
     for i_level in range(EN.nz-EN.surf):
       ave_pertb_tmp[i_level,:,:] = EN.weight_average(pertb_tmp[:,i_level,:,:],theta)
-    ave_pertb_slp[:,:] = EN.weight_average(pertb_slp,theta)
+    ave_pertb_slp[:,:] = EN.weight_average(pertb_slp[:,0],theta)
 
     lat_min_index, lat_max_index, lon_min_index, lon_max_index = \
       EN.verification_region(lon,lat,
@@ -154,7 +154,7 @@ if __name__ == "__main__":
   DR = Anl_ENASA()
   RG = readgpv.ReadGPV(dataset,date,ft)
   EN = readgpv.Energy_NORM(dataset)
-  MP = mapping.Mapping('NH')
+  MP = mapping.Mapping('CNH')
 
   lon, lat = RG.set_coordinate()
   weight_lat = RG.weight_latitude(lat)
@@ -172,7 +172,8 @@ if __name__ == "__main__":
       weight_pertb_vwnd[imem,i_level,:,:] = pertb_vwnd[imem,i_level,:,:]*weight_lat
     for i_level in range(EN.nz-EN.surf):
       weight_pertb_tmp[imem,i_level,:,:] = pertb_tmp[imem,i_level,:,:]*weight_lat
-    weight_pertb_slp[imem,:,:] = pertb_slp[imem,:,:]*weight_lat
+    weight_pertb_slp[imem,0,:,:] = pertb_slp[imem,0,:,:]*weight_lat
+
 
   print('')
   print('..... @ MAKE EMSEMBLE MEMBER WEIGHT @')
@@ -182,7 +183,7 @@ if __name__ == "__main__":
   """Calc. Sensitivity Region"""
   uwnd_data, vwnd_data, hgt_data, tmp_data, slp_data, rain_data = RG.data_read_init_driver(indir+date[0:8])
   pertb_uwnd,pertb_vwnd,pertb_tmp,pertb_slp = EN.data_pertb_driver(uwnd_data,vwnd_data,tmp_data,slp_data)
-  
+
   #weight on latitude
   weight_pertb_uwnd, weight_pertb_vwnd, weight_pertb_tmp, weight_pertb_slp = EN.init_array()
   for imem in range(EN.mem-EN.ctrl):
@@ -191,7 +192,7 @@ if __name__ == "__main__":
       weight_pertb_vwnd[imem,i_level,:,:] = pertb_vwnd[imem,i_level,:,:]*weight_lat
     for i_level in range(EN.nz-EN.surf):
       weight_pertb_tmp[imem,i_level,:,:] = pertb_tmp[imem,i_level,:,:]*weight_lat
-    weight_pertb_slp[imem,:,:] = pertb_slp[imem,:,:]*weight_lat
+    weight_pertb_slp[imem,0,:,:] = pertb_slp[imem,0,:,:]*weight_lat
 
   print('')
   print('..... @ MAKE SENSITIVITY REGION @')
