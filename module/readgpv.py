@@ -3,7 +3,7 @@ import numpy as np
 import psutil
 import setup
 import scipy.linalg
-from scipy.sparse.linalg import svds
+import scipy.sparse
 from scipy import integrate
 import sys
 import subprocess
@@ -142,7 +142,7 @@ class Energy_NORM:
     #print('..... CALCULATE WEIGHT AVE. SUM OF WEIGHT ', sum_of_weight)
     return weight_average
     
-  def calc_dry_EN_NORM(self,
+  def calc_dry_EN_NORM_adjoint(self,
     u_prime:np.ndarray, v_prime:np.ndarray, tmp_prime:np.ndarray, slp_prime:np.ndarray 
   ):
     """乾燥エネルギーノルムの計算
@@ -169,6 +169,40 @@ class Energy_NORM:
     tmp_term = (self.cp/self.Tr)*((tmp_prime)**2)
     vint_tmp_term = self._vint(tmp_term,self.press_levels[1:])/(2*self.Pr)
     slp_term = (self.R*self.Tr/self.Pr)*(slp_prime**2/self.Pr)*0.5
+    vint_potential_term = vint_tmp_term + slp_term
+
+    #SUM OF TERM
+    dry_energy_norm = vint_physical_term + vint_potential_term
+
+    return dry_energy_norm, vint_physical_term, vint_potential_term
+
+  def calc_dry_EN_NORM_svd(self,
+    u_prime:np.ndarray, v_prime:np.ndarray, tmp_prime:np.ndarray, slp_prime:np.ndarray 
+  ):
+    """乾燥エネルギーノルムの計算
+    Args:
+      u_prime   (np.ndarray): 東西風のコントロールランからの予測時間における摂動
+      v_prime   (np.ndarray): 南北風のコントロールランからの予測時間における摂動
+      tmp_prime (np.ndarray): 気温のコントロールランからの予測時間における摂動
+      slp_prime (np.ndarray): 海面更生気圧のコントロールランからの予測時間における摂動
+    Parameters:
+      self.Pr (float) : 経験的に求めた参照気圧. Defaults to 1000 hPa.
+      self.Tr (float) : 経験的に求めた参照気温. Defaults to 270 K.
+      self.cp (float) : 定圧比熱. Defaults to 1004 J/K*kg.
+      self.R  (float) : 気体の状態定数. Defaults to 287.0 J/K*kg.
+    Returns:
+      dry_energy_norm (np.ndarray): トータル乾燥エネルギーノルム(J/kg)
+      constitution -> [緯度, 経度] 
+    """
+
+    #Physics
+    physical_term = (u_prime)**2+(v_prime)**2
+    vint_physical_term = self._vint(physical_term,self.press_levels)/(2*self.Pr)
+    
+    #Potential
+    tmp_term = (tmp_prime)**2
+    vint_tmp_term = self._vint(tmp_term,self.press_levels[1:])/(2*self.Pr)
+    slp_term = (slp_prime**2)*0.5
     vint_potential_term = vint_tmp_term + slp_term
 
     #SUM OF TERM
@@ -220,10 +254,12 @@ class Energy_NORM:
 
     return y_array
 
-  def singular_decomposion(self, array, *, try_num=10):
+  def singular_decomposion(self, array, *, mode=10, try_num=10):
     """特異値分解
     Args:
-      array (np.ndarray)   : 特異値分解したい行列(n,m) 
+      array (np.ndarray) : 特異値分解したい行列(n,m) 
+      mode (int)    :　計算したいモード数 
+      try_num (int) : メモリ上を考慮してトライする回数
     Return:
       U_array (np.ndarray)     : ユニタリ行列(n,n)
       sigma_array (np.ndarray) : 特異値の対角成分(r,r) -> sigma_array*sigma_array/m で(array, array.T)の固有値
@@ -232,11 +268,12 @@ class Energy_NORM:
    
     for _ in range(try_num):
       try:
+        #U_array, sigma_array, V_array = scipy.sparse.linalg.svds(array, k=mode)
         #U_array, sigma_array, V_array = numpy.linalg.svd(array,full_matrices=True)
-        #U_array, sigma_array, V_array = scipy.linalg.svd(array)
-        U_array, sigma_array, V_array = svds(array, k=10)
+        U_array, sigma_array, V_array = scipy.linalg.svd(array)
+        return_index = 0
         print('..... SUCCESS SINGULAR VECTOR CALCULATION ')
-        return U_array, sigma_array, V_array
+        return return_index, U_array, sigma_array, V_array
 
       except Exception as e:
         print('   >>> {:04} cycle failed, ONE MORE TRY <<<   '.format(_+1))
@@ -248,6 +285,7 @@ class Energy_NORM:
     
     else:
       print('..... NOT SUCCESS SINGULAR VECTOR CALCULATION ')
+      return_index, _ = 1, np.zeros((1))
       mem = psutil.virtual_memory() 
       total, used, available = mem.total, mem.used, mem.available
       percent_total, percent_used, percent_available = (total/total)*100, (used/total)*100, (available/total)*100
@@ -256,7 +294,9 @@ class Energy_NORM:
         '..... CHECK MEMORY PERCENT MAX:{:.2f}, USED:{:.2f}, EMPTY:{:.2f}'.format(percent_total,percent_used,percent_available)
         )
       print('')
-      sys.exit()
+
+      return return_index, _, _, _
+   
 
 
 

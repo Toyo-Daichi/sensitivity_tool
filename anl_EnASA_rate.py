@@ -46,7 +46,7 @@ class Anl_ENASA:
 
     for imem in range(EN.mem-EN.ctrl):
       dry_energy_norm[imem], physical_term[imem], potential_term[imem] =\
-        EN.calc_dry_EN_NORM(pertb_uwnd[imem],pertb_vwnd[imem],pertb_tmp[imem],pertb_slp[imem])
+        EN.calc_dry_EN_NORM_adjoint(pertb_uwnd[imem],pertb_vwnd[imem],pertb_tmp[imem],pertb_slp[imem])
 
       region_TE[imem] = np.sum(dry_energy_norm[imem,lat_min_index:lat_max_index,lon_min_index:lon_max_index])/dims
       
@@ -100,7 +100,7 @@ class Anl_ENASA:
     lon_grd = lon_max_index-lon_min_index +1
     dims = lat_grd*lon_grd
 
-    dry_energy_norm, physical_term, potential_term = EN.calc_dry_EN_NORM(
+    dry_energy_norm, physical_term, potential_term = EN.calc_dry_EN_NORM_adjoint(
       ave_pertb_uwnd, ave_pertb_vwnd, ave_pertb_tmp, ave_pertb_slp
       )
 
