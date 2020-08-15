@@ -63,19 +63,25 @@ pについて微分すると、
 `Z.T G Z`の行列サイズを確認してみると、`(m, dims) (dims, dims) (dims, m) = (m, m)`とメンバー数`m`[~O(10)]と等しくなり、簡単に固有値問題を解くことができる。
 
 2. `Z`の特異値問題として解く。  
-`Z.T G Z`の固有値問題を解く方法には、`Z`の特異値問題と置き換えることができる。Zは次のように分解することができる。
+`Z.T G Z`の固有値問題を解く方法には、`Z`の特異値問題と置き換えることができる。Zは次のように分解することができる。  
+
 ![Z=U \Sigma V^{\top}](https://render.githubusercontent.com/render/math?math=%5Clarge+%5Cdisplaystyle+Z%3DU+%5CSigma+V%5E%7B%5Ctop%7D)
 
 左特異値ベクトル`U`が共分散`Z Z.T`の固有ベクトル、右特異値ベクトル`V.T`が共分散`Z.T Z`の正規化された主成分の固有値ベクトルを表す。行列`sigma`の対角成分は特異値である。この時、共分散`Z.T Z`の正規化された主成分の固有値ベクトルが`p(i=1:m)`に相当する。  
 
 1,2で作成した`p(i=1:m)`を下記のように初期場にかけて感度領域を作成する。固有値ベクトルの行列サイズが`(m, m)`であることに注意する。  
+
+<br>
+
 ![\mathbf{y}=\mathbf{Y} \mathbf{p}](https://render.githubusercontent.com/render/math?math=%5Clarge+%5Cdisplaystyle+%5Cmathbf%7Bx%7D%3D%5Cmathbf%7BY%7D+%5Cmathbf%7Bp%7D)
 
 #### 摂動が正負の組みで作成されている場合の対処方法
-> 1. `Z.T G Z`の固有値問題として解く。   
+> 1. `Z.T G Z`の固有値問題として解く。  
+
 メンバー数を半減して、正負の組みを片方のみにする。
 
-> 2. `Z`の特異値問題として解く。
+> 2. `Z`の特異値問題として解く。  
+
 モード数を分けて、固有ベクトルを作成する。この時、一般的な抽出ではなく固有ベクトルの抽出方法であることに注意する。  
 ![\frac{U \Sigma}{\sqrt{m}}](https://render.githubusercontent.com/render/math?math=%5Clarge+%5Cdisplaystyle+%5Cfrac%7BU+%5CSigma%7D%7B%5Csqrt%7Bm%7D%7D)
 
@@ -86,16 +92,14 @@ pについて微分すると、
 
 #### 検証領域の場合
 
-1. **検証領域**における検証時刻の摂動`z(i=1:m)`から抽出した`extraction_z（dims=1:ndims,i=1:m）`を作成する。
-
+1. **検証領域**における検証時刻の摂動`z(i=1:m)`から抽出した`extraction_z（dims=1:ndims,i=1:m）`を作成する。  
 2. `extraction_z（dims=1:ndims,i=1:m）`を用いて、固有値・特異値問題を解き、`p(i=1:m)`を取得する。
 
 <br>
 
 ### 計算時の注意点
 
-- 摂動はアンサンブル平均からの差ではなく、コントロールランからの差で構成される。
-
+- 摂動はアンサンブル平均からの差ではなく、コントロールランからの差で構成される。  
 - ノルムの計算は**検証領域**によって変化することが知られている。
 
 <br>
