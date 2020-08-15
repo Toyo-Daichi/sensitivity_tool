@@ -45,15 +45,14 @@ for i in range(m):
 
 <br>
 
-ラグランジュ 関数を次のように定義する。
-
-![F(\boldsymbol{p}, \lambda) \equiv \theta^{\top} \boldsymbol{p}+\lambda\left(1-\boldsymbol{p}^{\top} \mathbf{Y}^{\top} \mathbf{G}_{0} \mathbf{Y} \boldsymbol{p}\right)](https://render.githubusercontent.com/render/math?math=%5Clarge+%5Cdisplaystyle+F%28%5Cboldsymbol%7Bp%7D%2C+%5Clambda%29+%5Cequiv+%5Ctheta%5E%7B%5Ctop%7D+%5Cboldsymbol%7Bp%7D%2B%5Clambda%5Cleft%281-%5Cboldsymbol%7Bp%7D%5E%7B%5Ctop%7D+%5Cmathbf%7BY%7D%5E%7B%5Ctop%7D+%5Cmathbf%7BG%7D_%7B0%7D+%5Cmathbf%7BY%7D+%5Cboldsymbol%7Bp%7D%5Cright%29)
+ラグランジュ 関数を次のように定義する。  
+![F(\boldsymbol{p}, \lambda)=\boldsymbol{p}^{\top} \boldsymbol{Z}^{\top} \mathbf{G}_{t} \boldsymbol{Z} \boldsymbol{p}+\lambda\left(1-\boldsymbol{p}^{\top} \mathbf{Y}^{\top} \mathbf{G}_{0} \mathbf{Y} \boldsymbol{p}\right)](https://render.githubusercontent.com/render/math?math=%5Clarge+%5Cdisplaystyle+F%28%5Cboldsymbol%7Bp%7D%2C+%5Clambda%29%3D%5Cboldsymbol%7Bp%7D%5E%7B%5Ctop%7D+%5Cboldsymbol%7BZ%7D%5E%7B%5Ctop%7D+%5Cmathbf%7BG%7D_%7Bt%7D+%5Cboldsymbol%7BZ%7D+%5Cboldsymbol%7Bp%7D%2B%5Clambda%5Cleft%281-%5Cboldsymbol%7Bp%7D%5E%7B%5Ctop%7D+%5Cmathbf%7BY%7D%5E%7B%5Ctop%7D+%5Cmathbf%7BG%7D_%7B0%7D+%5Cmathbf%7BY%7D+%5Cboldsymbol%7Bp%7D%5Cright%29)
 
 <br>
 
 pについて微分すると、
 
-![F(\boldsymbol{p}, \lambda)=\boldsymbol{p}^{\top} \mathbf{Z}^{\top} \mathbf{G}_{t} \mathbf{Z} \boldsymbol{p}+\lambda\left(1-\boldsymbol{p}^{\top} \mathbf{Y}^{\top} \mathbf{G}_{0} \mathbf{Y} \boldsymbol{p}\right)](https://render.githubusercontent.com/render/math?math=%5Clarge+%5Cdisplaystyle+F%28%5Cboldsymbol%7Bp%7D%2C+%5Clambda%29%3D%5Cboldsymbol%7Bp%7D%5E%7B%5Ctop%7D+%5Cmathbf%7BZ%7D%5E%7B%5Ctop%7D+%5Cmathbf%7BG%7D_%7Bt%7D+%5Cmathbf%7BZ%7D+%5Cboldsymbol%7Bp%7D%2B%5Clambda%5Cleft%281-%5Cboldsymbol%7Bp%7D%5E%7B%5Ctop%7D+%5Cmathbf%7BY%7D%5E%7B%5Ctop%7D+%5Cmathbf%7BG%7D_%7B0%7D+%5Cmathbf%7BY%7D+%5Cboldsymbol%7Bp%7D%5Cright%29)
+![\frac{\partial F(\boldsymbol{p}, \lambda)}{\partial \boldsymbol{p}}=2 \boldsymbol{p}^{\top} \mathbf{Z}^{\top} \mathbf{G}_{t} \mathbf{Z}-2 \lambda \boldsymbol{p}^{\top} \mathbf{Y}^{\top} \mathbf{G}_{0} \mathbf{Y}=\mathbf{0}](https://render.githubusercontent.com/render/math?math=%5Clarge+%5Cdisplaystyle+%5Cfrac%7B%5Cpartial+F%28%5Cboldsymbol%7Bp%7D%2C+%5Clambda%29%7D%7B%5Cpartial+%5Cboldsymbol%7Bp%7D%7D%3D2+%5Cboldsymbol%7Bp%7D%5E%7B%5Ctop%7D+%5Cmathbf%7BZ%7D%5E%7B%5Ctop%7D+%5Cmathbf%7BG%7D_%7Bt%7D+%5Cmathbf%7BZ%7D-2+%5Clambda+%5Cboldsymbol%7Bp%7D%5E%7B%5Ctop%7D+%5Cmathbf%7BY%7D%5E%7B%5Ctop%7D+%5Cmathbf%7BG%7D_%7B0%7D+%5Cmathbf%7BY%7D%3D%5Cmathbf%7B0%7D)
 
 <br>
 
@@ -64,11 +63,15 @@ pについて微分すると、
 
 <br>
 
-この時、2つの解法が考えられる。  
-1. 一つは固有値問題として解く。
+はじめに、先ほど述べたように`Y.T G Y`は正規直交関数で対角行列になるので、`Y.T G Y`は考えなくて良い。`Z.T G Z`については2つの解法が考えられる。  
+1. `Z.T G Z`の固有値問題として解く。 
+`Z.T G Z`の行列サイズを確認してみると、`(m, dims) (dims, dims) (dims, m) = (m, m)`とメンバー数`m`[~O(10)]と等しくなり、簡単に固有値問題を解くことができる。
 
+2. `Z`の特異値問題として解く。  
+`Z.T G Z`の固有値問題を解く方法には、`Z`の特異値問題と置き換えることができる。Zは次のように分解することができる。
+![Z=U \Sigma V^{\top}](https://render.githubusercontent.com/render/math?math=%5Clarge+%5Cdisplaystyle+Z%3DU+%5CSigma+V%5E%7B%5Ctop%7D)
 
-この時、左特異値ベクトル`U`が共分散`Z.T H Z`の固有ベクトル、すなわち`p(i=1:m)`に相当する。
+左特異値ベクトル`U`が共分散`Z Z.T`の固有ベクトル、右特異値ベクトル`V.T`が共分散`Z.T Z`の正規化された主成分を表す。行列`sigma`の対角成分は特異値である。
 
 #### 簡単な手順
 
