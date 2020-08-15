@@ -75,15 +75,17 @@ pについて微分すると、
 
 ![\mathbf{y}=\mathbf{Y} \mathbf{p}](https://render.githubusercontent.com/render/math?math=%5Clarge+%5Cdisplaystyle+%5Cmathbf%7Bx%7D%3D%5Cmathbf%7BY%7D+%5Cmathbf%7Bp%7D)
 
-#### 摂動が正負の組みで作成されている場合の対処方法
+#### 摂動が正負の組で作成されている場合の対処方法
 > 1. `Z.T G Z`の固有値問題として解く。  
 
-メンバー数を半減して、正負の組みを片方のみにする。
+メンバー数を半減して、正負の組を片方のみにする。
 
 > 2. `Z`の特異値問題として解く。  
 
 モード数を分けて、固有ベクトルを作成する。この時、一般的な抽出ではなく固有ベクトルの抽出方法であることに注意する。  
+
 <br>
+
 ![\frac{U \Sigma}{\sqrt{m}}](https://render.githubusercontent.com/render/math?math=%5Clarge+%5Cdisplaystyle+%5Cfrac%7BU+%5CSigma%7D%7B%5Csqrt%7Bm%7D%7D)
 
 - 一般的な特異値抽出
