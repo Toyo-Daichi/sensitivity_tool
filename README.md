@@ -45,12 +45,20 @@ for i in range(m):
 
 <br>
 
-<img src="https://render.githubusercontent.com/render/math?math=%5Clarge+%5Cdisplaystyle+%5Cleft%28%5Cmathrm%7BY%7D%5E%7B%5Cmathrm%7BT%7D%7D+%5Cmathrm%7BGY%7D%5Cright%29%5E%7B-1%7D+%5Cmathrm%7BZ%7D%5E%7B%5Cmathrm%7BT%7D%7D+%5Cmathrm%7BHZp%7D%3D%5CLambda+%5Cboldsymbol%7Bp%7D" 
-alt="\left(\mathrm{Y}^{\mathrm{T}} \mathrm{GY}\right)^{-1} \mathrm{Z}^{\mathrm{T}} \mathrm{HZp}=\Lambda \boldsymbol{p}">
+ラグランジュ 関数を次のように定義する。
+
+![F(\boldsymbol{p}, \lambda) \equiv \theta^{\top} \boldsymbol{p}+\lambda\left(1-\boldsymbol{p}^{\top} \mathbf{Y}^{\top} \mathbf{G}_{0} \mathbf{Y} \boldsymbol{p}\right)](https://render.githubusercontent.com/render/math?math=%5Clarge+%5Cdisplaystyle+F%28%5Cboldsymbol%7Bp%7D%2C+%5Clambda%29+%5Cequiv+%5Ctheta%5E%7B%5Ctop%7D+%5Cboldsymbol%7Bp%7D%2B%5Clambda%5Cleft%281-%5Cboldsymbol%7Bp%7D%5E%7B%5Ctop%7D+%5Cmathbf%7BY%7D%5E%7B%5Ctop%7D+%5Cmathbf%7BG%7D_%7B0%7D+%5Cmathbf%7BY%7D+%5Cboldsymbol%7Bp%7D%5Cright%29)
 
 <br>
 
-この時、`Y.T G Y`は互いに直交している行列とその転置行列を掛け合う(?)ので対角行列となる。したがって、`Z`の特異値問題に置き換えることができる。
+pについて微分すると、
+
+![\frac{\partial F(p, \lambda)}{\partial p}=2 p^{\top} Z^{\top} G_{t} Z-2 \lambda p^{\top} Y^{\top} G_{0} Y=0](https://render.githubusercontent.com/render/math?math=%5Clarge+%5Cdisplaystyle+%5Cfrac%7B%5Cpartial+F%28p%2C+%5Clambda%29%7D%7B%5Cpartial+p%7D%3D2+p%5E%7B%5Ctop%7D+Z%5E%7B%5Ctop%7D+G_%7Bt%7D+Z-2+%5Clambda+p%5E%7B%5Ctop%7D+Y%5E%7B%5Ctop%7D+G_%7B0%7D+Y%3D0)
+
+<br>
+
+この時、`Y.T G Y`は互いに直交している行列とその転置行列を掛け合うので対角行列となる(`Y.T G Y`の成分`(a(i),a(j))`を正規直交系という)。  
+したがって、`Z`の固有値問題に置き換えることができる。
 
 <br>
 
