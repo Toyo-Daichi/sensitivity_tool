@@ -77,28 +77,17 @@ pについて微分すると、
 ![\mathbf{y}=\mathbf{Y} \mathbf{p}](https://render.githubusercontent.com/render/math?math=%5Clarge+%5Cdisplaystyle+%5Cmathbf%7Bx%7D%3D%5Cmathbf%7BY%7D+%5Cmathbf%7Bp%7D)
 
 #### 摂動が正負の組で作成されている場合の対処方法
-> 1. `Z.T G Z`の固有値問題として解く。 (Matsueda et al. 2011)
+- メンバー数を半減して、正負の組を片方のみにする。 (Matsueda et al. 2011)
+- モード数をメンバー数以下にして、固有ベクトルを作成する。`Z.T Z`の固有ベクトルの行列サイズ`(m, m)`はなので、モード抽出では`(m, mode)`とする。
 
-メンバー数を半減して、正負の組を片方のみにする。
-
-> 2. `Z`の特異値問題として解く。 (Enomoto et al. 2015; 榎本ほか 2014)
-
-モード数を分けて、固有ベクトルを作成する。この時、一般的な抽出ではなく固有ベクトルの抽出方法であることに注意する。  
-
-<br>
-
-![\frac{U \Sigma}{\sqrt{m}}](https://render.githubusercontent.com/render/math?math=%5Clarge+%5Cdisplaystyle+%5Cfrac%7BU+%5CSigma%7D%7B%5Csqrt%7Bm%7D%7D)
-
-- 一般的な特異値抽出
+(参考)一般的な特異値抽出
 モード別の一般的な抽出方法は、次のように行う。([参考サイト](https://thinkit.co.jp/article/16884))
 > ![A=\sigma_{1} u_{1} v_{1}^{T}+\sigma_{2} u_{2} v_{2}^{T}+\cdots+\sigma_{r} u_{r} v_{r}^{T}](https://render.githubusercontent.com/render/math?math=%5Clarge+%5Cdisplaystyle+A%3D%5Csigma_%7B1%7D+u_%7B1%7D+v_%7B1%7D%5E%7BT%7D%2B%5Csigma_%7B2%7D+u_%7B2%7D+v_%7B2%7D%5E%7BT%7D%2B%5Ccdots%2B%5Csigma_%7Br%7D+u_%7Br%7D+v_%7Br%7D%5E%7BT%7D)
 
-#### 検証領域の場合
+#### 検証領域を考慮する場合
 
 1. **検証領域**における検証時刻の摂動`z(i=1:m)`から抽出した`extraction_z（dims=1:ndims,i=1:m）`を作成する。  
 2. `extraction_z（dims=1:ndims,i=1:m）`を用いて、固有値・特異値問題を解き、`p(i=1:m)`を取得する。
-
-<br>
 
 ### 計算時の注意点
 
