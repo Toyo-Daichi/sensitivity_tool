@@ -53,15 +53,13 @@ pについて微分すると、
 
 ![\frac{\partial F(\boldsymbol{p}, \lambda)}{\partial \boldsymbol{p}}=2 \boldsymbol{p}^{\top} \mathbf{Z}^{\top} \mathbf{G}_{t} \mathbf{Z}-2 \lambda \boldsymbol{p}^{\top} \mathbf{Y}^{\top} \mathbf{G}_{0} \mathbf{Y}=\mathbf{0}](https://render.githubusercontent.com/render/math?math=%5Clarge+%5Cdisplaystyle+%5Cfrac%7B%5Cpartial+F%28%5Cboldsymbol%7Bp%7D%2C+%5Clambda%29%7D%7B%5Cpartial+%5Cboldsymbol%7Bp%7D%7D%3D2+%5Cboldsymbol%7Bp%7D%5E%7B%5Ctop%7D+%5Cmathbf%7BZ%7D%5E%7B%5Ctop%7D+%5Cmathbf%7BG%7D_%7Bt%7D+%5Cmathbf%7BZ%7D-2+%5Clambda+%5Cboldsymbol%7Bp%7D%5E%7B%5Ctop%7D+%5Cmathbf%7BY%7D%5E%7B%5Ctop%7D+%5Cmathbf%7BG%7D_%7B0%7D+%5Cmathbf%7BY%7D%3D%5Cmathbf%7B0%7D)
 
-この時、`Y.T G Y`は互いに直交している行列とその転置行列を掛け合うので対角行列となる(`Y.T G Y`の成分`(a(i),a(j))`を正規直交系という)。  
-
-<br>
-
 したがって、下記の固有値問題に置き換えることができる。
 
 ![\left(\mathrm{Y}^{\mathrm{T}} \mathrm{GY}\right)^{-1} \mathrm{Z}^{\mathrm{T}} \mathrm{HZp}=\Lambda \boldsymbol{p}](https://render.githubusercontent.com/render/math?math=%5Clarge+%5Cdisplaystyle+%5Cleft%28%5Cmathrm%7BY%7D%5E%7B%5Cmathrm%7BT%7D%7D+%5Cmathrm%7BGY%7D%5Cright%29%5E%7B-1%7D+%5Cmathrm%7BZ%7D%5E%7B%5Cmathrm%7BT%7D%7D+%5Cmathrm%7BHZp%7D%3D%5CLambda+%5Cboldsymbol%7Bp%7D)
 
-はじめに、先ほど述べたように`Y.T G Y`は正規直交関数で対角行列になるので、`Y.T G Y`は考えなくて良い。`Z.T G Z`については2つの解法が考えられる。  
+はじめに、`Y.T G Y`は正規直交関数で対角行列になるので、`Y.T G Y`は考えなくて良い。`Z.T G Z`については2つの解法が考えられる。   
+
+<br>
 
 1. `Z.T G Z`の固有値問題として解く。 
 `Z.T G Z`の行列サイズを確認してみると、`(m, dims) (dims, dims) (dims, m) = (m, m)`とメンバー数`m`[~O(10)]と等しくなり、簡単に固有値問題を解くことができる。
