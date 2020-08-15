@@ -53,19 +53,20 @@ for i in range(m):
 
 pについて微分すると、
 
-![\frac{\partial F(p, \lambda)}{\partial p}=2 p^{\top} Z^{\top} G_{t} Z-2 \lambda p^{\top} Y^{\top} G_{0} Y=0](https://render.githubusercontent.com/render/math?math=%5Clarge+%5Cdisplaystyle+%5Cfrac%7B%5Cpartial+F%28p%2C+%5Clambda%29%7D%7B%5Cpartial+p%7D%3D2+p%5E%7B%5Ctop%7D+Z%5E%7B%5Ctop%7D+G_%7Bt%7D+Z-2+%5Clambda+p%5E%7B%5Ctop%7D+Y%5E%7B%5Ctop%7D+G_%7B0%7D+Y%3D0)
+![F(\boldsymbol{p}, \lambda)=\boldsymbol{p}^{\top} \mathbf{Z}^{\top} \mathbf{G}_{t} \mathbf{Z} \boldsymbol{p}+\lambda\left(1-\boldsymbol{p}^{\top} \mathbf{Y}^{\top} \mathbf{G}_{0} \mathbf{Y} \boldsymbol{p}\right)](https://render.githubusercontent.com/render/math?math=%5Clarge+%5Cdisplaystyle+F%28%5Cboldsymbol%7Bp%7D%2C+%5Clambda%29%3D%5Cboldsymbol%7Bp%7D%5E%7B%5Ctop%7D+%5Cmathbf%7BZ%7D%5E%7B%5Ctop%7D+%5Cmathbf%7BG%7D_%7Bt%7D+%5Cmathbf%7BZ%7D+%5Cboldsymbol%7Bp%7D%2B%5Clambda%5Cleft%281-%5Cboldsymbol%7Bp%7D%5E%7B%5Ctop%7D+%5Cmathbf%7BY%7D%5E%7B%5Ctop%7D+%5Cmathbf%7BG%7D_%7B0%7D+%5Cmathbf%7BY%7D+%5Cboldsymbol%7Bp%7D%5Cright%29)
 
 <br>
 
 この時、`Y.T G Y`は互いに直交している行列とその転置行列を掛け合うので対角行列となる(`Y.T G Y`の成分`(a(i),a(j))`を正規直交系という)。  
-したがって、`Z`の固有値問題に置き換えることができる。
+したがって、下記の固有値問題に置き換えることができる。
+
+![\left(\mathrm{Y}^{\mathrm{T}} \mathrm{GY}\right)^{-1} \mathrm{Z}^{\mathrm{T}} \mathrm{HZp}=\Lambda \boldsymbol{p}](https://render.githubusercontent.com/render/math?math=%5Clarge+%5Cdisplaystyle+%5Cleft%28%5Cmathrm%7BY%7D%5E%7B%5Cmathrm%7BT%7D%7D+%5Cmathrm%7BGY%7D%5Cright%29%5E%7B-1%7D+%5Cmathrm%7BZ%7D%5E%7B%5Cmathrm%7BT%7D%7D+%5Cmathrm%7BHZp%7D%3D%5CLambda+%5Cboldsymbol%7Bp%7D)
 
 <br>
 
-<img src="https://render.githubusercontent.com/render/math?math=%5Clarge+%5Cdisplaystyle+Z%3DU+%5CSigma+V%5E%7B%5Ctop%7D" 
-alt="Z=U \Sigma V^{\top}">
+この時、2つの解法が考えられる。  
+1. 一つは固有値問題として解く。
 
-<br>
 
 この時、左特異値ベクトル`U`が共分散`Z.T H Z`の固有ベクトル、すなわち`p(i=1:m)`に相当する。
 
