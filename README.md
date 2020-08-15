@@ -69,7 +69,7 @@ pについて微分すると、
 左特異値ベクトル`U`が共分散`Z Z.T`の固有ベクトル、右特異値ベクトル`V.T`が共分散`Z.T Z`の正規化された主成分の固有値ベクトルを表す。行列`sigma`の対角成分は特異値である。この時、共分散`Z.T Z`の正規化された主成分の固有値ベクトルが`p(i=1:m)`に相当する。  
 
 1,2で作成した`p(i=1:m)`を下記のように初期場にかけて感度領域を作成する。固有値ベクトルの行列サイズが`(m, m)`であることに注意する。  
-![\mathbf{x}=\mathbf{Y} \mathbf{p}](https://render.githubusercontent.com/render/math?math=%5Clarge+%5Cdisplaystyle+%5Cmathbf%7Bx%7D%3D%5Cmathbf%7BY%7D+%5Cmathbf%7Bp%7D)
+![\mathbf{y}=\mathbf{Y} \mathbf{p}](https://render.githubusercontent.com/render/math?math=%5Clarge+%5Cdisplaystyle+%5Cmathbf%7Bx%7D%3D%5Cmathbf%7BY%7D+%5Cmathbf%7Bp%7D)
 
 #### 実践的な手順
 
