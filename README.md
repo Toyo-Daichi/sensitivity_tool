@@ -50,8 +50,6 @@ for i in range(m):
 
 ![F(\boldsymbol{p}, \lambda)=\boldsymbol{p}^{\top} \boldsymbol{Z}^{\top} \mathbf{G}_{t} \boldsymbol{Z} \boldsymbol{p}+\lambda\left(1-\boldsymbol{p}^{\top} \mathbf{Y}^{\top} \mathbf{G}_{0} \mathbf{Y} \boldsymbol{p}\right)](https://render.githubusercontent.com/render/math?math=%5Clarge+%5Cdisplaystyle+F%28%5Cboldsymbol%7Bp%7D%2C+%5Clambda%29%3D%5Cboldsymbol%7Bp%7D%5E%7B%5Ctop%7D+%5Cboldsymbol%7BZ%7D%5E%7B%5Ctop%7D+%5Cmathbf%7BG%7D_%7Bt%7D+%5Cboldsymbol%7BZ%7D+%5Cboldsymbol%7Bp%7D%2B%5Clambda%5Cleft%281-%5Cboldsymbol%7Bp%7D%5E%7B%5Ctop%7D+%5Cmathbf%7BY%7D%5E%7B%5Ctop%7D+%5Cmathbf%7BG%7D_%7B0%7D+%5Cmathbf%7BY%7D+%5Cboldsymbol%7Bp%7D%5Cright%29)
 
-<br>
-
 pについて微分すると、
 
 ![\frac{\partial F(\boldsymbol{p}, \lambda)}{\partial \boldsymbol{p}}=2 \boldsymbol{p}^{\top} \mathbf{Z}^{\top} \mathbf{G}_{t} \mathbf{Z}-2 \lambda \boldsymbol{p}^{\top} \mathbf{Y}^{\top} \mathbf{G}_{0} \mathbf{Y}=\mathbf{0}](https://render.githubusercontent.com/render/math?math=%5Clarge+%5Cdisplaystyle+%5Cfrac%7B%5Cpartial+F%28%5Cboldsymbol%7Bp%7D%2C+%5Clambda%29%7D%7B%5Cpartial+%5Cboldsymbol%7Bp%7D%7D%3D2+%5Cboldsymbol%7Bp%7D%5E%7B%5Ctop%7D+%5Cmathbf%7BZ%7D%5E%7B%5Ctop%7D+%5Cmathbf%7BG%7D_%7Bt%7D+%5Cmathbf%7BZ%7D-2+%5Clambda+%5Cboldsymbol%7Bp%7D%5E%7B%5Ctop%7D+%5Cmathbf%7BY%7D%5E%7B%5Ctop%7D+%5Cmathbf%7BG%7D_%7B0%7D+%5Cmathbf%7BY%7D%3D%5Cmathbf%7B0%7D)
