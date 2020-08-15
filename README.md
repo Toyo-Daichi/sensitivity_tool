@@ -71,11 +71,24 @@ pについて微分すると、
 1,2で作成した`p(i=1:m)`を下記のように初期場にかけて感度領域を作成する。固有値ベクトルの行列サイズが`(m, m)`であることに注意する。  
 ![\mathbf{y}=\mathbf{Y} \mathbf{p}](https://render.githubusercontent.com/render/math?math=%5Clarge+%5Cdisplaystyle+%5Cmathbf%7Bx%7D%3D%5Cmathbf%7BY%7D+%5Cmathbf%7Bp%7D)
 
-#### 実践的な手順
+#### 摂動が正負の組みで作成されている場合の対処方法
+> 1. `Z.T G Z`の固有値問題として解く。   
+メンバー数を半減して、正負の組みを片方のみにする。
+
+> 2. `Z`の特異値問題として解く。
+モード数を分けて、固有ベクトルを作成する。この時、一般的な抽出ではなく固有ベクトルの抽出方法であることに注意する。  
+![\frac{U \Sigma}{\sqrt{m}}](https://render.githubusercontent.com/render/math?math=%5Clarge+%5Cdisplaystyle+%5Cfrac%7BU+%5CSigma%7D%7B%5Csqrt%7Bm%7D%7D)
+
+- 一般的な特異値抽出
+モード別の一般的な抽出方法は、次のように行う。([参考サイト](https://thinkit.co.jp/article/16884))
+> ![A=\sigma_{1} u_{1} v_{1}^{T}+\sigma_{2} u_{2} v_{2}^{T}+\cdots+\sigma_{r} u_{r} v_{r}^{T}](https://render.githubusercontent.com/render/math?math=%5Clarge+%5Cdisplaystyle+A%3D%5Csigma_%7B1%7D+u_%7B1%7D+v_%7B1%7D%5E%7BT%7D%2B%5Csigma_%7B2%7D+u_%7B2%7D+v_%7B2%7D%5E%7BT%7D%2B%5Ccdots%2B%5Csigma_%7Br%7D+u_%7Br%7D+v_%7Br%7D%5E%7BT%7D)
+> ![A=\sigma_{1}\left(\begin{array}{ccc}u_{11}^{(1)} v_{11}^{(1)} & \ldots & u_{1 n}^{(1)} v_{1 n}^{(1)} \\ \vdots & \ddots & \vdots \\ u_{m 1}^{(1)} v_{m 1}^{(1)} & \ldots & u_{m n}^{(1)} v_{m n}^{(1)}\end{array}\right)+\sigma_{2}\left(\begin{array}{ccc}u_{11}^{(2)} v_{11}^{(2)} & \ldots & u_{1 n}^{(2)} v_{1 n}^{(2)} \\ \vdots & \ddots & \vdots \\ u_{m 1}^{(2)} v_{m 1}^{(2)} & \ldots & u_{m n}^{(2)} v_{m n}^{(2)}\end{array}\right)+\ldots \sigma_{r}\left(\begin{array}{ccc}u_{11}^{(r)} v_{11}^{(r)} & \ldots & u_{1 n}^{(r)} v_{1 n}^{(r)} \\ \vdots & \ddots & \vdots \\ u_{m 1}^{(r)} v_{m 1}^{(r)} & \ldots & u_{m n} v_{m n}^{(r)}(r)\end{array}\right)](https://render.githubusercontent.com/render/math?math=%5Clarge+%5Cdisplaystyle+A%3D%5Csigma_%7B1%7D%5Cleft%28%5Cbegin%7Barray%7D%7Bccc%7Du_%7B11%7D%5E%7B%281%29%7D+v_%7B11%7D%5E%7B%281%29%7D+%26+%5Cldots+%26+u_%7B1+n%7D%5E%7B%281%29%7D+v_%7B1+n%7D%5E%7B%281%29%7D+%5C%5C+%5Cvdots+%26+%5Cddots+%26+%5Cvdots+%5C%5C+u_%7Bm+1%7D%5E%7B%281%29%7D+v_%7Bm+1%7D%5E%7B%281%29%7D+%26+%5Cldots+%26+u_%7Bm+n%7D%5E%7B%281%29%7D+v_%7Bm+n%7D%5E%7B%281%29%7D%5Cend%7Barray%7D%5Cright%29%2B%5Csigma_%7B2%7D%5Cleft%28%5Cbegin%7Barray%7D%7Bccc%7Du_%7B11%7D%5E%7B%282%29%7D+v_%7B11%7D%5E%7B%282%29%7D+%26+%5Cldots+%26+u_%7B1+n%7D%5E%7B%282%29%7D+v_%7B1+n%7D%5E%7B%282%29%7D+%5C%5C+%5Cvdots+%26+%5Cddots+%26+%5Cvdots+%5C%5C+u_%7Bm+1%7D%5E%7B%282%29%7D+v_%7Bm+1%7D%5E%7B%282%29%7D+%26+%5Cldots+%26+u_%7Bm+n%7D%5E%7B%282%29%7D+v_%7Bm+n%7D%5E%7B%282%29%7D%5Cend%7Barray%7D%5Cright%29%2B%5Cldots+%5Csigma_%7Br%7D%5Cleft%28%5Cbegin%7Barray%7D%7Bccc%7Du_%7B11%7D%5E%7B%28r%29%7D+v_%7B11%7D%5E%7B%28r%29%7D+%26+%5Cldots+%26+u_%7B1+n%7D%5E%7B%28r%29%7D+v_%7B1+n%7D%5E%7B%28r%29%7D+%5C%5C+%5Cvdots+%26+%5Cddots+%26+%5Cvdots+%5C%5C+u_%7Bm+1%7D%5E%7B%28r%29%7D+v_%7Bm+1%7D%5E%7B%28r%29%7D+%26+%5Cldots+%26+u_%7Bm+n%7D+v_%7Bm+n%7D%5E%7B%28r%29%7D%28r%29%5Cend%7Barray%7D%5Cright%29)
+
+#### 検証領域の場合
 
 1. **検証領域**における検証時刻の摂動`z(i=1:m)`から抽出した`extraction_z（dims=1:ndims,i=1:m）`を作成する。
 
-2. `extraction_z（dims=1:ndims,i=1:m）`で特異値分解して、`p(i=1:m)`を取得する。
+2. `extraction_z（dims=1:ndims,i=1:m）`を用いて、固有値・特異値問題を解き、`p(i=1:m)`を取得する。
 
 <br>
 
