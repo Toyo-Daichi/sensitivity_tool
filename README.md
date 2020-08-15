@@ -83,6 +83,7 @@ pについて微分すると、
 > 2. `Z`の特異値問題として解く。  
 
 モード数を分けて、固有ベクトルを作成する。この時、一般的な抽出ではなく固有ベクトルの抽出方法であることに注意する。  
+<br>
 ![\frac{U \Sigma}{\sqrt{m}}](https://render.githubusercontent.com/render/math?math=%5Clarge+%5Cdisplaystyle+%5Cfrac%7BU+%5CSigma%7D%7B%5Csqrt%7Bm%7D%7D)
 
 - 一般的な特異値抽出
