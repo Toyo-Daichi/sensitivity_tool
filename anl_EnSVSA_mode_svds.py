@@ -95,18 +95,12 @@ if __name__ == "__main__":
   pertb_tmp  = pertb_tmp[:,:,lat_min_index:lat_max_index+1,lon_min_index:lon_max_index+1]
   pertb_slp  = pertb_slp[:,0,lat_min_index:lat_max_index+1,lon_min_index:lon_max_index+1]
 
-  print('wnd')
-  print(pertb_uwnd[0])
-  print(pertb_vwnd[0])
-  print('tmp')
-  print(pertb_tmp[0])
-  print('slp')
-  print(pertb_slp[0]) 
-
   print('')
   print('..... @ MAKE SV decomposion @')
   U_array, sigma_array, V_array = DR.singular_vector_sensitivity_driver(dims_xy,pertb_uwnd,pertb_vwnd,pertb_tmp,pertb_slp,date,ft)
   print('')
 
-  print(U_array)
+  print(U_array.shape)
+
+
   print('Normal END')

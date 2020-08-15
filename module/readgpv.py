@@ -265,12 +265,12 @@ class Energy_NORM:
       sigma_array (np.ndarray) : 特異値の対角成分(r,r) -> sigma_array*sigma_array/m で(array, array.T)の固有値
       V_array (np.ndarray)     : アジョイント行列(n,m)
     """
-   
+
     for _ in range(try_num):
       try:
-        #U_array, sigma_array, V_array = scipy.sparse.linalg.svds(array, k=mode)
         #U_array, sigma_array, V_array = numpy.linalg.svd(array,full_matrices=True)
         U_array, sigma_array, V_array = scipy.linalg.svd(array)
+        #U_array, sigma_array, V_array = scipy.sparse.linalg.svds(array, k=mode-1)
         return_index = 0
         print('..... SUCCESS SINGULAR VECTOR CALCULATION ')
         return return_index, U_array, sigma_array, V_array
@@ -297,6 +297,3 @@ class Energy_NORM:
 
       return return_index, _, _, _
    
-
-
-
