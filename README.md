@@ -1,5 +1,5 @@
 ## 基本情報(sensitivity_toolについて)
-- アンサンブル手法に基づく簡易予報感度解析(Enomoto et al. 2015; 榎本ほか 2014)
+- アンサンブル手法に基づく簡易予報感度解析(Enomoto et al. 2015; 榎本ほか 2014; Matsueda et al. 2011)
 
 #### 基本となる考え方
 
@@ -54,16 +54,16 @@ pについて微分すると、
 
 ![\frac{\partial F(\boldsymbol{p}, \lambda)}{\partial \boldsymbol{p}}=2 \boldsymbol{p}^{\top} \mathbf{Z}^{\top} \mathbf{G}_{t} \mathbf{Z}-2 \lambda \boldsymbol{p}^{\top} \mathbf{Y}^{\top} \mathbf{G}_{0} \mathbf{Y}=\mathbf{0}](https://render.githubusercontent.com/render/math?math=%5Clarge+%5Cdisplaystyle+%5Cfrac%7B%5Cpartial+F%28%5Cboldsymbol%7Bp%7D%2C+%5Clambda%29%7D%7B%5Cpartial+%5Cboldsymbol%7Bp%7D%7D%3D2+%5Cboldsymbol%7Bp%7D%5E%7B%5Ctop%7D+%5Cmathbf%7BZ%7D%5E%7B%5Ctop%7D+%5Cmathbf%7BG%7D_%7Bt%7D+%5Cmathbf%7BZ%7D-2+%5Clambda+%5Cboldsymbol%7Bp%7D%5E%7B%5Ctop%7D+%5Cmathbf%7BY%7D%5E%7B%5Ctop%7D+%5Cmathbf%7BG%7D_%7B0%7D+%5Cmathbf%7BY%7D%3D%5Cmathbf%7B0%7D)
 
+この時、`Y.T G Y`は互いに直交している行列とその転置行列を掛け合うので対角行列となる(`Y.T G Y`の成分`(a(i),a(j))`を正規直交系という)。  
+
 <br>
 
-この時、`Y.T G Y`は互いに直交している行列とその転置行列を掛け合うので対角行列となる(`Y.T G Y`の成分`(a(i),a(j))`を正規直交系という)。  
 したがって、下記の固有値問題に置き換えることができる。
 
 ![\left(\mathrm{Y}^{\mathrm{T}} \mathrm{GY}\right)^{-1} \mathrm{Z}^{\mathrm{T}} \mathrm{HZp}=\Lambda \boldsymbol{p}](https://render.githubusercontent.com/render/math?math=%5Clarge+%5Cdisplaystyle+%5Cleft%28%5Cmathrm%7BY%7D%5E%7B%5Cmathrm%7BT%7D%7D+%5Cmathrm%7BGY%7D%5Cright%29%5E%7B-1%7D+%5Cmathrm%7BZ%7D%5E%7B%5Cmathrm%7BT%7D%7D+%5Cmathrm%7BHZp%7D%3D%5CLambda+%5Cboldsymbol%7Bp%7D)
 
-<br>
-
 はじめに、先ほど述べたように`Y.T G Y`は正規直交関数で対角行列になるので、`Y.T G Y`は考えなくて良い。`Z.T G Z`については2つの解法が考えられる。  
+
 1. `Z.T G Z`の固有値問題として解く。 
 `Z.T G Z`の行列サイズを確認してみると、`(m, dims) (dims, dims) (dims, m) = (m, m)`とメンバー数`m`[~O(10)]と等しくなり、簡単に固有値問題を解くことができる。
 
@@ -71,9 +71,12 @@ pについて微分すると、
 `Z.T G Z`の固有値問題を解く方法には、`Z`の特異値問題と置き換えることができる。Zは次のように分解することができる。
 ![Z=U \Sigma V^{\top}](https://render.githubusercontent.com/render/math?math=%5Clarge+%5Cdisplaystyle+Z%3DU+%5CSigma+V%5E%7B%5Ctop%7D)
 
-左特異値ベクトル`U`が共分散`Z Z.T`の固有ベクトル、右特異値ベクトル`V.T`が共分散`Z.T Z`の正規化された主成分を表す。行列`sigma`の対角成分は特異値である。
+左特異値ベクトル`U`が共分散`Z Z.T`の固有ベクトル、右特異値ベクトル`V.T`が共分散`Z.T Z`の正規化された主成分の固有値ベクトルを表す。行列`sigma`の対角成分は特異値である。この時、共分散`Z.T Z`の正規化された主成分の固有値ベクトルが`p(i=1:m)`に相当する。  
 
-#### 簡単な手順
+1,2で作成した`p(i=1:m)`を下記のように初期場にかけて感度領域を作成する。
+![\mathbf{x}=\mathbf{Y} \mathbf{p}](https://render.githubusercontent.com/render/math?math=%5Clarge+%5Cdisplaystyle+%5Cmathbf%7Bx%7D%3D%5Cmathbf%7BY%7D+%5Cmathbf%7Bp%7D)
+
+#### 実践的な手順
 
 1. **検証領域**における検証時刻の摂動`z(i=1:m)`から抽出した`extraction_z（dims=1:ndims,i=1:m）`を作成する。
 
@@ -81,7 +84,7 @@ pについて微分すると、
 
 <br>
 
-#### 計算時の注意点
+### 計算時の注意点
 
 - 摂動はアンサンブル平均からの差ではなく、コントロールランからの差で構成される。
 
