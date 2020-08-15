@@ -30,19 +30,16 @@ class Anl_ENSVSA:
   def singular_vector_sensitivity_driver(self, dims_xy, pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_slp,date,ft):
     """singular vector """
     Z_array, dims = self.init_Z_array(dims_xy)
-    svd_pertb_tmp = pertb_tmp[:]*(np.sqrt(EN.cp/EN.Tr))
-    svd_pertb_slp = pertb_slp[:]*(np.sqrt((EN.R*EN.Tr)/EN.Pr))
-
-    print(svd_pertb_slp)
-    print(svd_pertb_slp.shape)
+    svd_pertb_tmp = pertb_tmp[:]*np.sqrt(EN.cp/EN.Tr)
+    svd_pertb_slp = pertb_slp[:,0]*np.sqrt((EN.R*EN.Tr)/EN.Pr)
 
     for imem in range(EN.mem-EN.ctrl):
       Z_array[(0*dims_xy):(EN.nz*dims_xy),imem] = pertb_uwnd[imem].reshape(-1)
       Z_array[(EN.nz*dims_xy):(2*(EN.nz*dims_xy)),imem] = pertb_vwnd[imem].reshape(-1)
       Z_array[(2*(EN.nz*dims_xy)):(2*(EN.nz*dims_xy)+((EN.nz-EN.surf)*dims_xy)),imem] = svd_pertb_tmp[imem].reshape(-1)
-      Z_array[(2*(EN.nz*dims_xy)+((EN.nz-EN.surf)*dims_xy)):dims,imem] = svd_pertb_slp[imem].reshape(-1)
+      Z_array[(2*(EN.nz*dims_xy)+((EN.nz-EN.surf)*dims_xy)):dims,imem] = svd_pertb_slp[imem,0].reshape(-1)
 
-    return_index, U_array, sigma_array, V_array = EN.singular_decomposion(Z_array, mode=10, try_num=10)
+    return_index, U_array, sigma_array, V_array = EN.singular_decomposion(Z_array, mode=EN.mem-EN.ctrl, try_num=10)
 
     if ( return_index == 1 ):
       setup.save_list_ndarray(Z_array,'./work/','Z_array_{}_{}hr'.format(date,ft))
@@ -92,15 +89,11 @@ if __name__ == "__main__":
   lat_grd = lat_max_index-lat_min_index +1
   lon_grd = lon_max_index-lon_min_index +1
   dims_xy = lat_grd*lon_grd
-  print(lat_grd, lon_grd, dims_xy)
-  print(lat_min_index,lat_max_index+1,lon_min_index,lon_max_index+1)
 
   pertb_uwnd = pertb_uwnd[:,:,lat_min_index:lat_max_index+1,lon_min_index:lon_max_index+1]
   pertb_vwnd = pertb_vwnd[:,:,lat_min_index:lat_max_index+1,lon_min_index:lon_max_index+1]
   pertb_tmp  = pertb_tmp[:,:,lat_min_index:lat_max_index+1,lon_min_index:lon_max_index+1]
-  print(pertb_slp[0].shape) 
-  print(pertb_slp[0,lat_min_index:lat_max_index+1,lon_min_index:lon_max_index+1].shape) 
-  pertb_slp  = pertb_slp[:,lat_min_index:lat_max_index+1,lon_min_index:lon_max_index+1]
+  pertb_slp  = pertb_slp[:,0,lat_min_index:lat_max_index+1,lon_min_index:lon_max_index+1]
 
   print('wnd')
   print(pertb_uwnd[0])
@@ -116,5 +109,4 @@ if __name__ == "__main__":
   print('')
 
   print(U_array)
-
   print('Normal END')
