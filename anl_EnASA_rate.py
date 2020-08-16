@@ -100,7 +100,7 @@ class Anl_ENASA:
     lon_grd = lon_max_index-lon_min_index +1
     dims = lat_grd*lon_grd
 
-    dry_energy_norm, physical_term, potential_term = EN.calc_dry_EN_NORM_adjoint(
+    dry_energy_norm, physical_term, potential_term = EN.calc_dry_EN_NORM(
       ave_pertb_uwnd, ave_pertb_vwnd, ave_pertb_tmp, ave_pertb_slp
       )
 

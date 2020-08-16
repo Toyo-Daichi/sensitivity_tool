@@ -142,7 +142,7 @@ class Energy_NORM:
     #print('..... CALCULATE WEIGHT AVE. SUM OF WEIGHT ', sum_of_weight)
     return weight_average
     
-  def calc_dry_EN_NORM_adjoint(self,
+  def calc_dry_EN_NORM(self,
     u_prime:np.ndarray, v_prime:np.ndarray, tmp_prime:np.ndarray, slp_prime:np.ndarray 
   ):
     """乾燥エネルギーノルムの計算
@@ -175,41 +175,6 @@ class Energy_NORM:
     dry_energy_norm = vint_physical_term + vint_potential_term
 
     return dry_energy_norm, vint_physical_term, vint_potential_term
-
-  def calc_dry_EN_NORM_svd(self,
-    u_prime:np.ndarray, v_prime:np.ndarray, tmp_prime:np.ndarray, slp_prime:np.ndarray 
-  ):
-    """乾燥エネルギーノルムの計算
-    Args:
-      u_prime   (np.ndarray): 東西風のコントロールランからの予測時間における摂動
-      v_prime   (np.ndarray): 南北風のコントロールランからの予測時間における摂動
-      tmp_prime (np.ndarray): 気温のコントロールランからの予測時間における摂動
-      slp_prime (np.ndarray): 海面更生気圧のコントロールランからの予測時間における摂動
-    Parameters:
-      self.Pr (float) : 経験的に求めた参照気圧. Defaults to 1000 hPa.
-      self.Tr (float) : 経験的に求めた参照気温. Defaults to 270 K.
-      self.cp (float) : 定圧比熱. Defaults to 1004 J/K*kg.
-      self.R  (float) : 気体の状態定数. Defaults to 287.0 J/K*kg.
-    Returns:
-      dry_energy_norm (np.ndarray): トータル乾燥エネルギーノルム(J/kg)
-      constitution -> [緯度, 経度] 
-    """
-
-    #Physics
-    physical_term = (u_prime)**2+(v_prime)**2
-    vint_physical_term = self._vint(physical_term,self.press_levels)/(2*self.Pr)
-
-    
-    #Potential
-    tmp_term = (tmp_prime)**2
-    vint_tmp_term = self._vint(tmp_term,self.press_levels[1:])/(2*self.Pr)
-    slp_term = (slp_prime**2)*0.5
-    vint_potential_term = vint_tmp_term + slp_term
-
-    #SUM OF TERM
-    dry_energy_norm = vint_physical_term + vint_potential_term
-
-    return dry_energy_norm, vint_physical_term, vint_potential_term 
 
   def calc_humid_EN_NORM(self):
     pass

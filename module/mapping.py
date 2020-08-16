@@ -173,10 +173,10 @@ class Mapping:
     pass
 
   def point_linear(self, basemap, lon, lat, x_min, x_max, y_min, y_max, *, color='red', ls='-', lw=2.0):
-    basemap.plot(lon[y_min:y_max,x_max], lat[y_min:y_max,x_max], color=color, ls=ls, lw=lw)
-    basemap.plot(lon[y_min:y_max,x_min], lat[y_min:y_max,x_min], color=color, ls=ls, lw=lw)
+    basemap.plot(lon[y_min:y_max+1,x_max], lat[y_min:y_max+1,x_max], color=color, ls=ls, lw=lw)
+    basemap.plot(lon[y_min:y_max+1,x_min], lat[y_min:y_max+1,x_min], color=color, ls=ls, lw=lw)
     basemap.plot(lon[y_min,x_min:x_max+1], lat[y_min,x_min:x_max+1], color=color, ls=ls, lw=lw)
-    basemap.plot(lon[y_max-1,x_min:x_max+1], lat[y_max-1,x_min:x_max+1], color=color, ls=ls, lw=lw)
+    basemap.plot(lon[y_max,x_min:x_max+1], lat[y_max,x_min:x_max+1], color=color, ls=ls, lw=lw)
 
   def point(self, basemap, lon, lat, x, y, *, marker="*", markersize=30):
     basemap.plot(
