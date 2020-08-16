@@ -66,7 +66,7 @@ class Anl_ENSVSA:
 
     svd_pertb_uwnd[:,:,:] = array[(0*dims_xy):(EN.nz*dims_xy)].reshape(EN.nz,EN.ny,EN.nx)
     svd_pertb_vwnd[:,:,:] = array[(EN.nz*dims_xy):(2*(EN.nz*dims_xy))].reshape(EN.nz,EN.ny,EN.nx)
-    svd_pertb_tmp[:,:,:] = array[(2*(EN.nz*dims_xy)):(2*(EN.nz*dims_xy)+((EN.nz-EN.surf)*dims_xy))].reshape(EN.nz-EN.svd_surf,EN.ny,EN.nx)
+    svd_pertb_tmp[:,:,:] = array[(2*(EN.nz*dims_xy)):(2*(EN.nz*dims_xy)+((EN.nz-EN.surf)*dims_xy))].reshape(EN.nz-EN.surf,EN.ny,EN.nx)
     svd_pertb_slp[:,:] = array[(2*(EN.nz*dims_xy)+((EN.nz-EN.surf)*dims_xy)):dims].reshape(EN.surf,EN.ny,EN.nx)
 
     return svd_pertb_uwnd, svd_pertb_vwnd, svd_pertb_tmp, svd_pertb_slp
@@ -185,7 +185,7 @@ if __name__ == "__main__":
   print('')
 
   """Calc. Sensitivity Region"""
-  uwnd_data, vwnd_data, hgt_data, tmp_data, slp_data, rain_data = RG.data_read_ft_driver(indir+date[0:8])
+  uwnd_data, vwnd_data, hgt_data, tmp_data, slp_data, rain_data = RG.data_read_init_driver(indir+date[0:8])
   pertb_uwnd,pertb_vwnd,pertb_tmp,pertb_slp = EN.data_pertb_driver(uwnd_data,vwnd_data,tmp_data,slp_data)
   dims_xy = EN.ny*EN.nx 
 
@@ -203,7 +203,8 @@ if __name__ == "__main__":
   print('')
   print('..... @ MAKE SENSITIVITY REGION @')
   svd_pertb_uwnd,svd_pertb_vwnd,svd_pertb_tmp,svd_pertb_slp = DR.making_initial_pertb_array(dims_xy,pertb_uwnd,pertb_vwnd,pertb_tmp,pertb_slp,p_array)
-  energy_norm, _, _ = DR.sensitivity_driver(pertb_uwnd,pertb_vwnd,pertb_tmp,pertb_slp,target_region)
+
+  energy_norm, _, _ = DR.sensitivity_driver(svd_pertb_uwnd,svd_pertb_vwnd,svd_pertb_tmp,svd_pertb_slp,target_region)
 
   #normalize
   print('..... @ MAKE NORMALIZE ENERGY NORM @')

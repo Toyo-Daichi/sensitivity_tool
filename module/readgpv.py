@@ -198,6 +198,7 @@ class Energy_NORM:
     #Physics
     physical_term = (u_prime)**2+(v_prime)**2
     vint_physical_term = self._vint(physical_term,self.press_levels)/(2*self.Pr)
+
     
     #Potential
     tmp_term = (tmp_prime)**2
