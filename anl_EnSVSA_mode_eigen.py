@@ -8,6 +8,8 @@ import os, sys
 sys.path.append(os.path.join(os.path.dirname(__file__), './module'))
 import numpy as np
 import matplotlib.pyplot as plt
+import warnings
+warnings.filterwarnings('ignore')
 
 #my_module
 import mapping
@@ -51,13 +53,12 @@ class Anl_ENSVSA:
 
   def making_initial_pertb_array(self, dims_xy, pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_slp, p_array, *, mode=10):
     Z_array, dims = self.init_Z_array(dims_xy)
+    array = np.zeros((dims,mode))
     for imem in range(EN.mem-EN.ctrl):
       Z_array[(0*dims_xy):(EN.nz*dims_xy),imem] = pertb_uwnd[imem].reshape(-1)
       Z_array[(EN.nz*dims_xy):(2*(EN.nz*dims_xy)),imem] = pertb_vwnd[imem].reshape(-1)
       Z_array[(2*(EN.nz*dims_xy)):(2*(EN.nz*dims_xy)+((EN.nz-EN.surf)*dims_xy)),imem] = pertb_tmp[imem].reshape(-1)
       Z_array[(2*(EN.nz*dims_xy)+((EN.nz-EN.surf)*dims_xy)):dims,imem] = pertb_slp[imem,0].reshape(-1)
-
-    array = np.zeros((dims_xy,mode))
 
     for _ in range(mode):
       array[:,_] = Z_array @ p_array[:,mode]
@@ -73,7 +74,7 @@ class Anl_ENSVSA:
     svd_pertb_tmp[:,:,:] = sum_array[(2*(EN.nz*dims_xy)):(2*(EN.nz*dims_xy)+((EN.nz-EN.surf)*dims_xy))].reshape(EN.nz-EN.surf,EN.ny,EN.nx)
     svd_pertb_slp[:,:] = sum_array[(2*(EN.nz*dims_xy)+((EN.nz-EN.surf)*dims_xy)):dims].reshape(EN.surf,EN.ny,EN.nx)
 
-    return svd_pertb_uwnd, svd_pertb_vwnd, svd_pertb_tmp, svd_pertb_slp, contribute
+    return svd_pertb_uwnd, svd_pertb_vwnd, svd_pertb_tmp, svd_pertb_slp
 
   def sensitivity_driver(self, pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_slp, target_region):
     """Total Energy NORM を計算する """
@@ -129,9 +130,9 @@ class Anl_ENSVSA:
     MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
 
     #norm draw
-    MP.norm_contourf(mapp, x, y, energy_norm, label='scope')
+    MP.norm_contourf(mapp, x, y, energy_norm, label='normal')
     MP.contour(mapp, x, y, hgt_data[1], elem='500hPa')
-    MP.title('NORMALIZE TE [ J/kg ] mode = 1-{} contribute={:02}%, FT= {}hr, INIT = {}'.format(mode,contribute,ft,date))
+    MP.title('NORMALIZE TE [ J/kg ] mode = 1-{0:} contribute={1:.1f}%, FT= {2:}hr, INIT = {3:}'.format(mode,contribute,ft,date),fontsize=8)
     plt.show()
     
 if __name__ == "__main__":
@@ -140,7 +141,7 @@ if __name__ == "__main__":
   date = yyyy+mm+dd+hh
   dataset = 'WFM' # 'WFM' or 'EPSW'
   target_region = ( 25, 50, 125, 150 ) # lat_min/max, lon_min/max
-  mode = 10
+  mode = 10 
 
   """Class & parm set """
   DR = Anl_ENSVSA()
@@ -185,7 +186,7 @@ if __name__ == "__main__":
 
   print('')
   print('..... @ MAKE Eigen VALUE & VECTOR @')
-  eigen_value, p_array = DR.eigen_value_and_vector_driver(dims_xy,pertb_uwnd,pertb_vwnd,pertb_tmp,pertb_slp,date,ft)
+  eigen_value, p_array = DR.eigen_value_and_vector_driver(dims_xy,pertb_uwnd,pertb_vwnd,pertb_tmp,pertb_slp)
   print('')
 
   """Calc. Sensitivity Region"""
@@ -208,13 +209,13 @@ if __name__ == "__main__":
   print('..... @ MAKE SENSITIVITY REGION @')
   svd_pertb_uwnd,svd_pertb_vwnd,svd_pertb_tmp,svd_pertb_slp = DR.making_initial_pertb_array(dims_xy,pertb_uwnd,pertb_vwnd,pertb_tmp,pertb_slp,p_array,mode=mode)
   energy_norm, _, _ = DR.sensitivity_driver(svd_pertb_uwnd,svd_pertb_vwnd,svd_pertb_tmp,svd_pertb_slp,target_region)
-  contribute = np.sum(eigen_value[:mode+1])/np.sum(eigen_value)
+  contribute = float((np.sum(eigen_value[:mode+1])/np.sum(eigen_value))*100)
 
   #normalize
   print('..... @ MAKE NORMALIZE ENERGY NORM @')
   print('')
   normal_energy_norm = statics_tool.normalize(energy_norm)
-
   DR.draw_driver(normal_energy_norm,np.average(hgt_data,axis=0),ft,date,mode,contribute)
+  #DR.draw_driver(energy_norm,np.average(hgt_data,axis=0),ft,date,mode,contribute)
 
   print('Normal END')

@@ -141,6 +141,9 @@ class Mapping:
     elif label == 'adjoint':
       levels = [0.01, 0.025, 0.05, 0.1, 0.2, 0.5, 1.0]
     
+    elif label == 'svd':
+      levels = [7.5, 10.0, 15.0, 30.0, 50.0, 70.0, 100.0]
+
     elif label == 'spread_00hr':
       levels = [5.0, 7.5, 10.0, 12.5, 15.0, 20.0, 30.0]
     
@@ -150,7 +153,7 @@ class Mapping:
     colors = ['#FFFFFF', '#00FFFF', '#000080', '#228B22', '#FFFF00', '#FF8000', '#FF0000', '#FF00FF']
     cmap = plt.contourf(x, y, data, levels, colors=colors, extend='both')
     cbar = basemap.colorbar(cmap, 'right', size='2.5%')
-    cbar.set_label('[J/kg]', size=6)
+    cbar.set_label('[ J/kg ]', size=8)
 
   def contour(self, basemap, x, y, data, *, elem='default', colors="black", linestyles='-', linewidths=0.5):
     if elem == 'default':
@@ -186,8 +189,8 @@ class Mapping:
   def text(self, basemap, x, y, string, *, size=20, color="black"):
     plt.text(x, y, string, size=size, color=color)
 
-  def title(self, txt):
-    plt.title(txt, loc='left', fontsize=10)
+  def title(self, txt, *, fontsize=10):
+    plt.title(txt, loc='left', fontsize=fontsize)
 
   def saving(self, title, outpath):
     plt.savefig(outpath + title + '.png')
