@@ -8,6 +8,8 @@ import os, sys
 sys.path.append(os.path.join(os.path.dirname(__file__), './module'))
 import numpy as np
 import matplotlib.pyplot as plt
+import warnings
+warnings.filterwarnings('ignore')
 
 #my_module
 import mapping
@@ -46,7 +48,7 @@ class Anl_ENASA:
 
     for imem in range(EN.mem-EN.ctrl):
       dry_energy_norm[imem], physical_term[imem], potential_term[imem] =\
-        EN.calc_dry_EN_NORM_adjoint(pertb_uwnd[imem],pertb_vwnd[imem],pertb_tmp[imem],pertb_slp[imem])
+        EN.calc_dry_EN_NORM(pertb_uwnd[imem],pertb_vwnd[imem],pertb_tmp[imem],pertb_slp[imem])
 
       region_TE[imem] = np.sum(dry_energy_norm[imem,lat_min_index:lat_max_index,lon_min_index:lon_max_index])/dims
       
@@ -138,14 +140,14 @@ class Anl_ENASA:
     MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
 
     #norm draw
-    MP.norm_contourf(mapp, x, y, energy_norm, label='scope')
+    MP.norm_contourf(mapp, x, y, energy_norm, label='adjoint')
     MP.contour(mapp, x, y, hgt_data[1], elem='500hPa')
     MP.title('NORMALIZE TE [ J/kg ] Adjoint sensitivity, FT= {}hr, INIT = {}'.format(ft,date))
     plt.show()
 
 if __name__ == "__main__":
   """Set basic info. """
-  yyyy, mm, dd, hh, init, ft = '2003', '08', '05', '12', '00', '72'
+  yyyy, mm, dd, hh, init, ft = '2003', '01', '21', '12', '00', '72'
   date = yyyy+mm+dd+hh
   dataset = 'WFM' # 'WFM' or 'EPSW'
   target_region = ( 25, 50, 125, 150 ) # lat_min/max, lon_min/max

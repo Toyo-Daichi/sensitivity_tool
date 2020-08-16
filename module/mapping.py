@@ -43,7 +43,7 @@ class Mapping:
 
     elif area == 'CNH':
       self.area = area
-      self.lon_min, self.lon_max = 100, 180
+      self.lon_min, self.lon_max = 100, 200
       self.lat_min, self.lat_max = 10, 60 
       self.lat_0, self.lon_0 = 35, 135
 
@@ -142,7 +142,8 @@ class Mapping:
       levels = [0.01, 0.025, 0.05, 0.1, 0.2, 0.5, 1.0]
     
     elif label == 'svd':
-      levels = [7.5, 10.0, 15.0, 30.0, 50.0, 70.0, 100.0]
+      levels = [0.075, 0.100, 0.125, 0.150, 0.200, 0.300, 0.400]
+      #levels = [7.5, 10.0, 15.0, 30.0, 50.0, 70.0, 100.0]
 
     elif label == 'spread_00hr':
       levels = [5.0, 7.5, 10.0, 12.5, 15.0, 20.0, 30.0]
@@ -163,7 +164,9 @@ class Mapping:
     elif elem == 'norm':
       clevs = np.arange(0.0, 5.0, 0.1) 
     elif elem == '500hPa':
-      clevs = np.arange(500.0, 6000.0, 100) 
+      clevs = np.arange(5000.0, 6000.0, 100) 
+    elif elem == '800hPa':
+      clevs = np.arange(500.0, 2000.0, 100) 
 
     contour = basemap.contour(x, y, data, clevs, colors=colors, linestyles=linestyles, linewidths=linewidths)
     contour.clabel(fmt='%1.1f', fontsize=8)

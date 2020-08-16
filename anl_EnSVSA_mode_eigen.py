@@ -130,14 +130,14 @@ class Anl_ENSVSA:
     MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
 
     #norm draw
-    MP.norm_contourf(mapp, x, y, energy_norm, label='normal')
+    MP.norm_contourf(mapp, x, y, energy_norm, label='svd')
     MP.contour(mapp, x, y, hgt_data[1], elem='500hPa')
     MP.title('NORMALIZE TE [ J/kg ] mode = 1-{0:} contribute={1:.1f}%, FT= {2:}hr, INIT = {3:}'.format(mode,contribute,ft,date),fontsize=8)
     plt.show()
     
 if __name__ == "__main__":
   """Set basic info. """
-  yyyy, mm, dd, hh, init, ft = '2003', '08', '05', '12', '00', '72'
+  yyyy, mm, dd, hh, init, ft = '2003', '01', '21', '12', '00', '72'
   date = yyyy+mm+dd+hh
   dataset = 'WFM' # 'WFM' or 'EPSW'
   target_region = ( 25, 50, 125, 150 ) # lat_min/max, lon_min/max
@@ -187,6 +187,10 @@ if __name__ == "__main__":
   print('')
   print('..... @ MAKE Eigen VALUE & VECTOR @')
   eigen_value, p_array = DR.eigen_value_and_vector_driver(dims_xy,pertb_uwnd,pertb_vwnd,pertb_tmp,pertb_slp)
+  print('')
+
+  print('..... @ CHECK Eigen VALUE @')
+  print(eigen_value)
   print('')
 
   """Calc. Sensitivity Region"""
