@@ -306,11 +306,10 @@ class Energy_NORM:
         eig_vec (np.ndarray]): 正規化された固有ベクトル
     """
 
-    eig_val, eig_vec = scipy.linalg.eig(array, left=True, right=True, overwrite_a=True, check_finite=True)
+    eig_val, eig_vec = scipy.linalg.eig(array, left=False, right=True, overwrite_a=True, check_finite=True)
     print('..... SUCCESS SINGULAR VECTOR CALCULATION ')
 
     for i in range(len(eig_vec)): #normalize
       eig_vec [i] = eig_vec[i]/np.linalg.norm(eig_vec[i])
     
     return eig_val, eig_vec
-   

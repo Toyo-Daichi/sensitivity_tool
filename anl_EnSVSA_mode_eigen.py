@@ -27,14 +27,19 @@ class Anl_ENSVSA:
   def __init__(self):
     pass
   
-  def init_Z_array(self,dims_xy):
+  def init_Z_extract_array(self,dims_xy):
+    dims = (2*EN.nz*dims_xy)+(EN.nz-EN.surf)*dims_xy+dims_xy # wind+tmp+slp
+    Z_array = np.zeros((dims,EN.mem-EN.ctrl))
+    return Z_array, dims
+
+  def init_Z_full_array(self,dims_xy):
     dims = (2*EN.nz*dims_xy)+(EN.nz-EN.surf)*dims_xy+dims_xy # wind+tmp+slp
     Z_array = np.zeros((dims,EN.mem-EN.ctrl))
     return Z_array, dims
 
   def singular_vector_sensitivity_driver(self, dims_xy, pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_slp,date,ft):
     """singular vector """
-    Z_array, dims = self.init_Z_array(dims_xy)
+    Z_array, dims = self.init_Z_extract_array(dims_xy)
     svd_pertb_tmp = pertb_tmp[:]*np.sqrt(EN.cp/EN.Tr)
     svd_pertb_slp = pertb_slp[:,0]*np.sqrt((EN.R*EN.Tr)/EN.Pr)
 
@@ -45,9 +50,85 @@ class Anl_ENSVSA:
       Z_array[(2*(EN.nz*dims_xy)+((EN.nz-EN.surf)*dims_xy)):dims,imem] = svd_pertb_slp[imem,0].reshape(-1)
 
     array = Z_array.T @ Z_array
-    eig_val, eig_vec = EN.eigen_decomposion(array)
+    eigen_value, eigen_vector = EN.eigen_decomposion(array)
 
-    return eig_val, eig_vec
+    return eigen_value, eigen_vector
+
+  def sensitivity_driver(self, pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_slp, p_array, *, mode=10):
+    """Total Energy NORM を計算する """
+
+    dry_energy_norm = np.zeros((EN.ny,EN.nx))
+    physical_term   = np.zeros((EN.ny,EN.nx))
+    potential_term  = np.zeros((EN.ny,EN.nx))
+
+    Z_array, dims = self.init_Z_extract_array(dims_xy)
+    for imem in range(EN.mem-EN.ctrl):
+      Z_array[(0*dims_xy):(EN.nz*dims_xy),imem] = pertb_uwnd[imem].reshape(-1)
+      Z_array[(EN.nz*dims_xy):(2*(EN.nz*dims_xy)),imem] = pertb_vwnd[imem].reshape(-1)
+      Z_array[(2*(EN.nz*dims_xy)):(2*(EN.nz*dims_xy)+((EN.nz-EN.surf)*dims_xy)),imem] = pertb_tmp[imem].reshape(-1)
+      Z_array[(2*(EN.nz*dims_xy)+((EN.nz-EN.surf)*dims_xy)):dims,imem] = pertb_slp[imem,0].reshape(-1)
+
+    array = Z_array @ p_array[:,mode]
+    pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_slp = EN.init_array()
+
+    for imem in range(EN.mem-EN.ctrl):
+      pertb_uwnd[imem,:,:,:] = array[(0*dims_xy):(EN.nz*dims_xy),imem].reshape(EN.mem-EN.ctrl, EN.nz, EN.ny, EN.nx)
+      pertb_vwnd[imem,:,:,:] = array[(EN.nz*dims_xy):(2*(EN.nz*dims_xy)),imem].reshape(EN.mem-EN.ctrl, EN.nz, EN.ny, EN.nx)
+      pertb_tmp[imem,:,:,:]  = array[(2*(EN.nz*dims_xy)):(2*(EN.nz*dims_xy)+((EN.nz-EN.surf)*dims_xy)),imem].reshape(EN.mem-EN.ctrl, EN.nz-EN.surf, EN.ny, EN.nx)
+      pertb_slp[imem,0,:,:]  = array[(2*(EN.nz*dims_xy)+((EN.nz-EN.surf)*dims_xy)):dims,imem].reshape(EN.mem-EN.ctrl, EN.surf, EN.ny, EN.nx)
+
+    lat_min_index, lat_max_index, lon_min_index, lon_max_index = \
+      EN.verification_region(lon,lat,
+          area_lat_min=target_region[1], area_lat_max=target_region[0],
+          area_lon_min=target_region[2], area_lon_max=target_region[3]
+      )
+    
+    lat_grd = lat_max_index-lat_min_index +1
+    lon_grd = lon_max_index-lon_min_index +1
+    dims = lat_grd*lon_grd
+
+    dry_energy_norm, physical_term, potential_term = EN.calc_dry_EN_NORM_adjoint(
+      pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_slp
+      )
+
+    print('')
+    print('..... Check Vertification area Norm SUM {} {}'.format(
+      'SVD MODE', np.sum(dry_energy_norm[lat_min_index:lat_max_index,lon_min_index:lon_max_index])/dims
+    ))
+    print('..... Check Vertification area physical_term {} {}'.format(
+      'SVD MODE', np.sum(physical_term[lat_min_index:lat_max_index,lon_min_index:lon_max_index])/dims
+    ))
+    print('..... Check Vertification area potential_term {} {}'.format(
+      'SVD MODE', np.sum(potential_term[lat_min_index:lat_max_index,lon_min_index:lon_max_index])/dims
+    ))
+
+    print('')
+    #print(dry_energy_norm[lat_min_index:lat_max_index,lon_min_index:lon_max_index])
+
+    return dry_energy_norm, physical_term, potential_term
+
+  def draw_driver(self, energy_norm, hgt_data, ft, date):
+    """Draw sensitivity area @dry enegy norm"""
+    fig, ax = plt.subplots()
+    mapp = MP.base(projection_mode='lcc')
+    lon, lat = RG.set_coordinate() 
+    x, y = MP.coord_change(mapp, lon, lat)
+
+    lat_min_index, lat_max_index, lon_min_index, lon_max_index = \
+      EN.verification_region(lon,lat,
+          area_lat_min=target_region[1], area_lat_max=target_region[0],
+          area_lon_min=target_region[2], area_lon_max=target_region[3]
+      )
+    
+
+    #vertifcation region
+    MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
+
+    #norm draw
+    MP.norm_contourf(mapp, x, y, energy_norm, label='scope')
+    MP.contour(mapp, x, y, hgt_data[1], elem='500hPa')
+    MP.title('NORMALIZE TE [ J/kg ] Adjoint sensitivity, FT= {}hr, INIT = {}'.format(ft,date))
+    plt.show()
     
 if __name__ == "__main__":
   """Set basic info. """
@@ -60,7 +141,8 @@ if __name__ == "__main__":
   DR = Anl_ENSVSA()
   RG = readgpv.ReadGPV(dataset,date,ft)
   EN = readgpv.Energy_NORM(dataset)
-
+  MP = mapping.Mapping('CNH')
+  
   lon, lat = RG.set_coordinate()
   weight_lat = RG.weight_latitude(lat)
 
@@ -78,7 +160,7 @@ if __name__ == "__main__":
       pertb_vwnd[imem,i_level,:,:] = pertb_vwnd[imem,i_level,:,:]*weight_lat
     for i_level in range(EN.nz-EN.surf):
       pertb_tmp[imem,i_level,:,:] = pertb_tmp[imem,i_level,:,:]*weight_lat
-    pertb_slp[imem,:,:] = pertb_slp[imem,:,:]*weight_lat
+    pertb_slp[imem,0,:,:] = pertb_slp[imem,0,:,:]*weight_lat
 
   """Target region setting """
   lat_min_index, lat_max_index, lon_min_index, lon_max_index = \
@@ -98,8 +180,33 @@ if __name__ == "__main__":
 
   print('')
   print('..... @ MAKE Eigen VALUE & VECTOR @')
-  eig_val, eig_vec = DR.singular_vector_sensitivity_driver(dims_xy,pertb_uwnd,pertb_vwnd,pertb_tmp,pertb_slp,date,ft)
+  eigen_value, p_array = DR.singular_vector_sensitivity_driver(dims_xy,pertb_uwnd,pertb_vwnd,pertb_tmp,pertb_slp,date,ft)
   print('')
 
-  print(eig_val)
+  """Calc. Sensitivity Region"""
+  uwnd_data, vwnd_data, hgt_data, tmp_data, slp_data, rain_data = RG.data_read_ft_driver(indir+date[0:8])
+  pertb_uwnd,pertb_vwnd,pertb_tmp,pertb_slp = EN.data_pertb_driver(uwnd_data,vwnd_data,tmp_data,slp_data)
+
+  #weight on latitude
+  print('')
+  print('..... @ MAKE Pertubation array & REGION Extraction @')
+  for imem in range(EN.mem-EN.ctrl):
+    for i_level in range(EN.nz):
+      pertb_uwnd[imem,i_level,:,:] = pertb_uwnd[imem,i_level,:,:]*weight_lat
+      pertb_vwnd[imem,i_level,:,:] = pertb_vwnd[imem,i_level,:,:]*weight_lat
+    for i_level in range(EN.nz-EN.surf):
+      pertb_tmp[imem,i_level,:,:] = pertb_tmp[imem,i_level,:,:]*weight_lat
+    pertb_slp[imem,:,:] = pertb_slp[imem,:,:]*weight_lat
+
+  print('')
+  print('..... @ MAKE SENSITIVITY REGION @')
+  energy_norm, _, _ = DR.sensitivity_driver(pertb_uwnd,pertb_vwnd,pertb_tmp,pertb_slp,p_array)
+
+  #normalize
+  print('..... @ MAKE NORMALIZE ENERGY NORM @')
+  print('')
+  normal_energy_norm = statics_tool.normalize(energy_norm)
+
+  DR.draw_driver(normal_energy_norm,np.average(hgt_data,axis=0),ft,date)
+
   print('Normal END')
