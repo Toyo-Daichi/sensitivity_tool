@@ -46,16 +46,16 @@ class Anl_SPREAD:
 
 if __name__ == "__main__":
   """Set basic info. """
-  yyyy, mm, dd, hh, ft = '2003', '08', '05', '12', '00'
+  yyyy, mm, dd, hh, ft = '2018', '07', '04', '12', '00'
   date = yyyy+mm+dd+hh
-  dataset = 'WFM' # 'WFM' or 'EPSW'
+  dataset = 'EPSW' # 'WFM' or 'EPSW'
   target_region = ( 25, 50, 125, 150 ) # lat_min/max, lon_min/max
 
   """Class & parm set """
   DR = Anl_SPREAD()
   RG = readgpv.ReadGPV(dataset,date,ft)
   EN = readgpv.Energy_NORM(dataset)
-  MP = mapping.Mapping('NH')
+  MP = mapping.Mapping('CNH')
 
   lon, lat = RG.set_coordinate()
   weight_lat = RG.weight_latitude(lat)

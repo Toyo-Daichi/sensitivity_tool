@@ -137,9 +137,9 @@ class Anl_ENSVSA:
     
 if __name__ == "__main__":
   """Set basic info. """
-  yyyy, mm, dd, hh, init, ft = '2003', '01', '21', '12', '00', '72'
+  yyyy, mm, dd, hh, init, ft = '2018', '07', '04', '12', '00', '72'
   date = yyyy+mm+dd+hh
-  dataset = 'WFM' # 'WFM' or 'EPSW'
+  dataset = 'EPSW' # 'WFM' or 'EPSW'
   target_region = ( 25, 50, 125, 150 ) # lat_min/max, lon_min/max
   mode = 10 
 

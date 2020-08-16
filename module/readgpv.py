@@ -75,17 +75,19 @@ class ReadGPV:
 
     return uwnd_data, vwnd_data, hgt_data, tmp_data, slp_data, rain_data
 
-  def set_gpv(self, gpv_file, elem):
-    return self._open_gpv(gpv_file).reshape(elem, self.nz, self.mem, self.ny, self.nx)
+  def set_gpv(self, gpv_file, elem, endian='default'):
+    return self._open_gpv(gpv_file,mode=endian).reshape(elem, self.nz, self.mem, self.ny, self.nx)
 
-  def read_gpv(self, gpv_file, elem):
-    return self._open_gpv(gpv_file).reshape(elem, self.nz, self.ny, self.nx)
+  def read_gpv(self, gpv_file, elem, endian='default'):
+    return self._open_gpv(gpv_file,mode=endian).reshape(elem, self.nz, self.ny, self.nx)
 
   def _open_gpv(self, gpv_file, *, mode='default'):
     print('...... Preparating for {}'.format(gpv_file))
     with open(gpv_file, 'rb') as ifile:
       if mode == 'default':
         data = np.fromfile(ifile, dtype='<f', sep = '')
+      elif mode == 'big':
+        data = np.fromfile(ifile, dtype='>f', sep = '')
     return data
 
   def set_coordinate(self, dx=2.5, dy=2.5):

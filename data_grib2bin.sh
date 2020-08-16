@@ -13,9 +13,9 @@ foreach ft ( ${ft_list} )
 echo ${ft}
 
 # set date
-set s_yy = 2003; set e_yy = 2003
-set s_mm = 8   ; set e_mm = 8
-set s_dd = 5   ; set e_dd = 5
+set s_yy = 2018; set e_yy = 2018
+set s_mm = 7   ; set e_mm = 7
+set s_dd = 4   ; set e_dd = 4
 set s_hh = 12  ; set e_hh = 12
 
 
@@ -93,35 +93,37 @@ while ( ${s_yy} <= ${e_yy} )
           set level = ${i_list[${il}]}
           echo ${level}
           if ( ${ft} == 'anl' ) then
-            wgrib2 -v ${i_file} | grep "UGRD" | grep "${level} mb" | grep "${ft}" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/uwnd_${s_yy}${m0}${d0}${h0}_${il}.grd
-            wgrib2 -v ${i_file} | grep "VGRD" | grep "${level} mb" | grep "${ft}" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/vwnd_${s_yy}${m0}${d0}${h0}_${il}.grd
             if ( ${il} == 1 ) then
-              wgrib2 -v ${i_file} | grep "PRMSL"   | grep "${ft}"    | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/hgt_${s_yy}${m0}${d0}${h0}_${il}.grd
-              wgrib2 -v ${i_file} | grep "APCP"    | grep "0-8 day"  | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/tmp_${s_yy}${m0}${d0}${h0}_${il}.grd
+              wgrib2 -v ${i_file} | grep "UGRD"  | grep "${level}" | grep ":${ft}:" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/uwnd_${s_yy}${m0}${d0}${h0}_${il}.grd
+              wgrib2 -v ${i_file} | grep "VGRD"  | grep "${level}" | grep ":${ft}:" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/vwnd_${s_yy}${m0}${d0}${h0}_${il}.grd
+              wgrib2 -v ${i_file} | grep "PRMSL" | grep ":${ft}:"    | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/hgt_${s_yy}${m0}${d0}${h0}_${il}.grd
+              wgrib2 -v ${i_file} | grep "APCP"  | grep ":0-3 day acc fcst:"  | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/tmp_${s_yy}${m0}${d0}${h0}_${il}.grd
               sleep 3s
             else if ( ${il} != 1 ) then
-              wgrib2 -v ${i_file} | grep "HGT"  | grep "${level} " | grep "${ft}" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/hgt_${s_yy}${m0}${d0}${h0}_${il}.grd
-              wgrib2 -v ${i_file} | grep "TMP"  | grep "${level} " | grep "${ft}" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/tmp_${s_yy}${m0}${d0}${h0}_${il}.grd
+              wgrib2 -v ${i_file} | grep "UGRD" | grep ":${level} mb:" | grep ":${ft}:" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/uwnd_${s_yy}${m0}${d0}${h0}_${il}.grd
+              wgrib2 -v ${i_file} | grep "VGRD" | grep ":${level} mb:" | grep ":${ft}:" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/vwnd_${s_yy}${m0}${d0}${h0}_${il}.grd
+              wgrib2 -v ${i_file} | grep "HGT"  | grep ":${level} mb:" | grep ":${ft}:" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/hgt_${s_yy}${m0}${d0}${h0}_${il}.grd
+              wgrib2 -v ${i_file} | grep "TMP"  | grep ":${level} mb:" | grep ":${ft}:" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/tmp_${s_yy}${m0}${d0}${h0}_${il}.grd
               sleep 3s
             endif
 
           else if ( ${ft} != 'anl' ) then
             @ ft_day = ${ft} / 24
-            echo ${ft_day}
+            echo '....................................................'${ft_day}
 
-            wgrib2 -v ${i_file} | grep "UGRD" | grep "${level} " | grep "${ft}" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/uwnd_${s_yy}${m0}${d0}${h0}_${il}.grd
-            wgrib2 -v ${i_file} | grep "VGRD" | grep "${level} " | grep "${ft}" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/vwnd_${s_yy}${m0}${d0}${h0}_${il}.grd
             if ( ${il} == 1 ) then
-              wgrib2 -v ${i_file} | grep "PRMSL"   | grep "${ft}" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/hgt_${s_yy}${m0}${d0}${h0}_${il}.grd
-              if ( ${ft_day} <= 2 ) then
-                wgrib2 -v ${i_file} | grep "APCP"  | grep "0-${ft} hour"  | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/tmp_${s_yy}${m0}${d0}${h0}_${il}.grd
-              else if ( ${ft_day} > 2 ) then
-                wgrib2 -v ${i_file} | grep "APCP"  | grep "0-${ft_day} day"  | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/tmp_${s_yy}${m0}${d0}${h0}_${il}.grd
-              endif
+              wgrib2 -v ${i_file} | grep "UGRD"  | grep "${level}" | grep ":${ft} hour fcst:" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/uwnd_${s_yy}${m0}${d0}${h0}_${il}.grd
+              wgrib2 -v ${i_file} | grep "VGRD"  | grep "${level}" | grep ":${ft} hour fcst:" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/vwnd_${s_yy}${m0}${d0}${h0}_${il}.grd
+              wgrib2 -v ${i_file} | grep "PRMSL" | grep ":${ft} hour fcst:" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/hgt_${s_yy}${m0}${d0}${h0}_${il}.grd
+              wgrib2 -v ${i_file} | grep "APCP"  | grep ":0-${ft_day} day acc fcst:"  | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/tmp_${s_yy}${m0}${d0}${h0}_${il}.grd
+              
               sleep 3s
+            
             else if ( ${il} != 1 ) then
-              wgrib2 -v ${i_file} | grep "HGT"  | grep "${level} mb" | grep "${ft}" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/hgt_${s_yy}${m0}${d0}${h0}_${il}.grd
-              wgrib2 -v ${i_file} | grep "TMP"  | grep "${level} mb" | grep "${ft}" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/tmp_${s_yy}${m0}${d0}${h0}_${il}.grd
+              wgrib2 -v ${i_file} | grep "UGRD" | grep "${level} mb" | grep ":${ft} hour fcst:" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/uwnd_${s_yy}${m0}${d0}${h0}_${il}.grd
+              wgrib2 -v ${i_file} | grep "VGRD" | grep "${level} mb" | grep ":${ft} hour fcst:" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/vwnd_${s_yy}${m0}${d0}${h0}_${il}.grd
+              wgrib2 -v ${i_file} | grep "HGT"  | grep "${level} mb" | grep ":${ft} hour fcst:" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/hgt_${s_yy}${m0}${d0}${h0}_${il}.grd
+              wgrib2 -v ${i_file} | grep "TMP"  | grep "${level} mb" | grep ":${ft} hour fcst:" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/tmp_${s_yy}${m0}${d0}${h0}_${il}.grd
               sleep 3s
             endif
           endif

@@ -140,16 +140,16 @@ class Anl_ENASA:
     MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
 
     #norm draw
-    MP.norm_contourf(mapp, x, y, energy_norm, label='adjoint')
+    MP.norm_contourf(mapp, x, y, energy_norm, label='scope')
     MP.contour(mapp, x, y, hgt_data[1], elem='500hPa')
     MP.title('NORMALIZE TE [ J/kg ] Adjoint sensitivity, FT= {}hr, INIT = {}'.format(ft,date))
     plt.show()
 
 if __name__ == "__main__":
   """Set basic info. """
-  yyyy, mm, dd, hh, init, ft = '2003', '01', '21', '12', '00', '72'
+  yyyy, mm, dd, hh, init, ft = '2018', '07', '04', '12', '00', '72'
   date = yyyy+mm+dd+hh
-  dataset = 'WFM' # 'WFM' or 'EPSW'
+  dataset = 'EPSW' # 'WFM' or 'EPSW'
   target_region = ( 25, 50, 125, 150 ) # lat_min/max, lon_min/max
 
   """Class & parm set """
