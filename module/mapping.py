@@ -167,6 +167,8 @@ class Mapping:
       clevs = np.arange(5000.0, 6000.0, 100) 
     elif elem == '800hPa':
       clevs = np.arange(500.0, 2000.0, 100) 
+    elif elem == 'slp':
+      clevs = np.arange(950.0, 1020.0, 10) 
 
     contour = basemap.contour(x, y, data, clevs, colors=colors, linestyles=linestyles, linewidths=linewidths)
     contour.clabel(fmt='%1.1f', fontsize=8)

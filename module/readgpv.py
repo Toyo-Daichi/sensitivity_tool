@@ -12,6 +12,7 @@ class ReadGPV:
   def __init__(self,dataset,date,ft):
     """使用する各種の設定"""
     ST = setup.Setup(dataset)
+    self.dataset = dataset
     self.nx, self.ny, self.nz, self.mem = ST.set_prm()
     self.surf = 1
     self.press_levels = ST.set_pressure_levels()
@@ -95,7 +96,8 @@ class ReadGPV:
     for ix in range(self.nx):
       lon += [ float('{:.2f}'.format(dx*ix)) ]
     for iy in range(self.ny):
-      lat += [ float('{:.2f}'.format(90.0-dy*iy)) ]
+      lat += [ float('{:.2f}'.format(-90.0+dy*iy)) ]
+      #lat += [ float('{:.2f}'.format(90.0-dy*iy)) ]
     X, Y = np.meshgrid(lon, lat)
     return X, Y
 

@@ -40,13 +40,13 @@ class Anl_SPREAD:
     MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
     
     MP.norm_contourf(mapp, x, y, np.average(dry_energy_norm, axis=0), label='spread_{}hr'.format(ft))
-    MP.contour(mapp, x, y, hgt_data[1], elem='500hPa')
+    MP.contour(mapp, x, y, hgt_data[0], elem='slp')
     MP.title('TE spread [ J/kg ] FT={}hr INIT = {}'.format(ft,date))
     plt.show()
 
 if __name__ == "__main__":
   """Set basic info. """
-  yyyy, mm, dd, hh, ft = '2018', '07', '04', '12', '00'
+  yyyy, mm, dd, hh, ft = '2019', '10', '11', '12', '00'
   date = yyyy+mm+dd+hh
   dataset = 'EPSW' # 'WFM' or 'EPSW'
   target_region = ( 25, 50, 125, 150 ) # lat_min/max, lon_min/max
@@ -58,6 +58,7 @@ if __name__ == "__main__":
   MP = mapping.Mapping('CNH')
 
   lon, lat = RG.set_coordinate()
+  print(lat)
   weight_lat = RG.weight_latitude(lat)
 
   """Making pretubation data"""
@@ -111,6 +112,9 @@ if __name__ == "__main__":
   print('')
   print('..... @ MAKE EMSEMBLE MEMBER SPREAD @')
   print('')
-  DR.main_driver(dry_energy_norm,np.average(hgt_data,axis=0),target_region, ft, date)
+
+  print(slp_data.shape)
+  #DR.main_driver(dry_energy_norm,np.average(hgt_data,axis=0),target_region, ft, date)
+  DR.main_driver(dry_energy_norm,slp_data[0],target_region, ft, date)
 
   print('Normal END')

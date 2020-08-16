@@ -13,9 +13,9 @@ foreach ft ( ${ft_list} )
 echo ${ft}
 
 # set date
-set s_yy = 2018; set e_yy = 2018
-set s_mm = 7   ; set e_mm = 7
-set s_dd = 4   ; set e_dd = 4
+set s_yy = 2019; set e_yy = 2019
+set s_mm = 10  ; set e_mm = 10
+set s_dd = 11  ; set e_dd = 11
 set s_hh = 12  ; set e_hh = 12
 
 

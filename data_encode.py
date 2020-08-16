@@ -14,7 +14,7 @@ import subprocess
 
 if __name__ == "__main__":
   """Set basic info. """
-  yyyy, mm, dd, hh, ft = 2018, 7, 4, 12, 72 
+  yyyy, mm, dd, hh, ft = 2019, 10, 11, 12, 72 
   date = '{:04}{:02}{:02}{:02}'.format(yyyy,mm,dd,hh)
   dataset = 'EPSW' # 'WFM' or 'EPSW'
   var_list = ('UGRD', 'VGRD', 'HGT', 'TMP') #level=surf, HGT, TMP -> PRMSL, APCP
