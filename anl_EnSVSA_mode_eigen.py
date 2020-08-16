@@ -10,8 +10,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 #my_module
+import mapping
 import readgpv
-import setup
 import statics_tool
 
 class Anl_ENSVSA:
@@ -27,19 +27,14 @@ class Anl_ENSVSA:
   def __init__(self):
     pass
   
-  def init_Z_extract_array(self,dims_xy):
-    dims = (2*EN.nz*dims_xy)+(EN.nz-EN.surf)*dims_xy+dims_xy # wind+tmp+slp
-    Z_array = np.zeros((dims,EN.mem-EN.ctrl))
-    return Z_array, dims
-
-  def init_Z_full_array(self,dims_xy):
+  def init_Z_array(self,dims_xy):
     dims = (2*EN.nz*dims_xy)+(EN.nz-EN.surf)*dims_xy+dims_xy # wind+tmp+slp
     Z_array = np.zeros((dims,EN.mem-EN.ctrl))
     return Z_array, dims
 
   def singular_vector_sensitivity_driver(self, dims_xy, pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_slp,date,ft):
     """singular vector """
-    Z_array, dims = self.init_Z_extract_array(dims_xy)
+    Z_array, dims = self.init_Z_array(dims_xy)
     svd_pertb_tmp = pertb_tmp[:]*np.sqrt(EN.cp/EN.Tr)
     svd_pertb_slp = pertb_slp[:,0]*np.sqrt((EN.R*EN.Tr)/EN.Pr)
 
@@ -54,14 +49,8 @@ class Anl_ENSVSA:
 
     return eigen_value, eigen_vector
 
-  def sensitivity_driver(self, pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_slp, p_array, *, mode=10):
-    """Total Energy NORM を計算する """
-
-    dry_energy_norm = np.zeros((EN.ny,EN.nx))
-    physical_term   = np.zeros((EN.ny,EN.nx))
-    potential_term  = np.zeros((EN.ny,EN.nx))
-
-    Z_array, dims = self.init_Z_extract_array(dims_xy)
+  def making_initial_pertb_array(pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_slp, p_array, *, mode=10):
+    Z_array, dims = self.init_Z_array(dims_xy)
     for imem in range(EN.mem-EN.ctrl):
       Z_array[(0*dims_xy):(EN.nz*dims_xy),imem] = pertb_uwnd[imem].reshape(-1)
       Z_array[(EN.nz*dims_xy):(2*(EN.nz*dims_xy)),imem] = pertb_vwnd[imem].reshape(-1)
@@ -74,8 +63,17 @@ class Anl_ENSVSA:
     for imem in range(EN.mem-EN.ctrl):
       pertb_uwnd[imem,:,:,:] = array[(0*dims_xy):(EN.nz*dims_xy),imem].reshape(EN.mem-EN.ctrl, EN.nz, EN.ny, EN.nx)
       pertb_vwnd[imem,:,:,:] = array[(EN.nz*dims_xy):(2*(EN.nz*dims_xy)),imem].reshape(EN.mem-EN.ctrl, EN.nz, EN.ny, EN.nx)
-      pertb_tmp[imem,:,:,:]  = array[(2*(EN.nz*dims_xy)):(2*(EN.nz*dims_xy)+((EN.nz-EN.surf)*dims_xy)),imem].reshape(EN.mem-EN.ctrl, EN.nz-EN.surf, EN.ny, EN.nx)
-      pertb_slp[imem,0,:,:]  = array[(2*(EN.nz*dims_xy)+((EN.nz-EN.surf)*dims_xy)):dims,imem].reshape(EN.mem-EN.ctrl, EN.surf, EN.ny, EN.nx)
+      pertb_tmp[imem,:,:,:] = array[(2*(EN.nz*dims_xy)):(2*(EN.nz*dims_xy)+((EN.nz-EN.surf)*dims_xy)),imem].reshape(EN.mem-EN.ctrl, EN.nz-EN.surf, EN.ny, EN.nx)
+      pertb_slp[imem,0,:,:] = array[(2*(EN.nz*dims_xy)+((EN.nz-EN.surf)*dims_xy)):dims,imem].reshape(EN.mem-EN.ctrl, EN.surf, EN.ny, EN.nx)
+
+    return pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_slp
+
+  def sensitivity_driver(self, pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_slp, target_region):
+    """Total Energy NORM を計算する """
+
+    dry_energy_norm = np.zeros((EN.ny,EN.nx))
+    physical_term   = np.zeros((EN.ny,EN.nx))
+    potential_term  = np.zeros((EN.ny,EN.nx))
 
     lat_min_index, lat_max_index, lon_min_index, lon_max_index = \
       EN.verification_region(lon,lat,
@@ -200,7 +198,8 @@ if __name__ == "__main__":
 
   print('')
   print('..... @ MAKE SENSITIVITY REGION @')
-  energy_norm, _, _ = DR.sensitivity_driver(pertb_uwnd,pertb_vwnd,pertb_tmp,pertb_slp,p_array)
+  pertb_uwnd,pertb_vwnd,pertb_tmp,pertb_slp = DR.making_initial_pertb_array(pertb_uwnd,pertb_vwnd,pertb_tmp,pertb_slp,p_array)
+  energy_norm, _, _ = DR.sensitivity_driver(pertb_uwnd,pertb_vwnd,pertb_tmp,pertb_slp,target_region)
 
   #normalize
   print('..... @ MAKE NORMALIZE ENERGY NORM @')
