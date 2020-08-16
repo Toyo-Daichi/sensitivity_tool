@@ -58,18 +58,18 @@ class Anl_ENSVSA:
       Z_array[(2*(EN.nz*dims_xy)+((EN.nz-EN.surf)*dims_xy)):dims,imem] = pertb_slp[imem,0].reshape(-1)
 
     array = Z_array @ p_array[:,mode]
-    pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_slp = EN.init_array()
+    
+    svd_pertb_uwnd = np.zeros((EN.nz,EN.ny,EN.nx))
+    svd_pertb_vwnd = np.zeros((EN.nz,EN.ny,EN.nx))
+    svd_pertb_tmp  = np.zeros((EN.nz-EN.surf,EN.ny,EN.nx))
+    svd_pertb_slp  = np.zeros((EN.ny,EN.nx))
 
-    print(pertb_uwnd.shape)
-    print(array.shape)
+    svd_pertb_uwnd[:,:,:] = array[(0*dims_xy):(EN.nz*dims_xy)].reshape(EN.nz,EN.ny,EN.nx)
+    svd_pertb_vwnd[:,:,:] = array[(EN.nz*dims_xy):(2*(EN.nz*dims_xy))].reshape(EN.nz,EN.ny,EN.nx)
+    svd_pertb_tmp[:,:,:] = array[(2*(EN.nz*dims_xy)):(2*(EN.nz*dims_xy)+((EN.nz-EN.surf)*dims_xy))].reshape(EN.nz-EN.svd_surf,EN.ny,EN.nx)
+    svd_pertb_slp[:,:] = array[(2*(EN.nz*dims_xy)+((EN.nz-EN.surf)*dims_xy)):dims].reshape(EN.surf,EN.ny,EN.nx)
 
-    for imem in range(EN.mem-EN.ctrl):
-      pertb_uwnd[imem,:,:,:] = array[(0*dims_xy):(EN.nz*dims_xy)].reshape(EN.nz,EN.ny,EN.nx)
-      pertb_vwnd[imem,:,:,:] = array[(EN.nz*dims_xy):(2*(EN.nz*dims_xy))].reshape(EN.nz,EN.ny,EN.nx)
-      pertb_tmp[imem,:,:,:] = array[(2*(EN.nz*dims_xy)):(2*(EN.nz*dims_xy)+((EN.nz-EN.surf)*dims_xy))].reshape(EN.nz-EN.surf,EN.ny,EN.nx)
-      pertb_slp[imem,0,:,:] = array[(2*(EN.nz*dims_xy)+((EN.nz-EN.surf)*dims_xy)):dims,imem].reshape(EN.surf,EN.ny,EN.nx)
-
-    return pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_slp
+    return svd_pertb_uwnd, svd_pertb_vwnd, svd_pertb_tmp, svd_pertb_slp
 
   def sensitivity_driver(self, pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_slp, target_region):
     """Total Energy NORM を計算する """
@@ -202,7 +202,7 @@ if __name__ == "__main__":
 
   print('')
   print('..... @ MAKE SENSITIVITY REGION @')
-  pertb_uwnd,pertb_vwnd,pertb_tmp,pertb_slp = DR.making_initial_pertb_array(dims_xy,pertb_uwnd,pertb_vwnd,pertb_tmp,pertb_slp,p_array)
+  svd_pertb_uwnd,svd_pertb_vwnd,svd_pertb_tmp,svd_pertb_slp = DR.making_initial_pertb_array(dims_xy,pertb_uwnd,pertb_vwnd,pertb_tmp,pertb_slp,p_array)
   energy_norm, _, _ = DR.sensitivity_driver(pertb_uwnd,pertb_vwnd,pertb_tmp,pertb_slp,target_region)
 
   #normalize

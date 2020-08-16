@@ -136,5 +136,5 @@ pについて微分すると、
 
 ## 参考文献
 Enomoto, T., S. Yamane, and W. Ohfuchi, 2015: Simple sensitivity analysis using ensemble forecasts. J. Meteor. Soc. Japan, 93, 199-	213.  
-榎本剛, 山根省三, 大淵済, 2014: アンサンブル手法に基づく簡易予報感度解析. 京都大学防災研究所年報, 57(B), 163-168. 
+榎本剛, 山根省三, 大淵済, 2014: アンサンブル手法に基づく簡易予報感度解析. 京都大学防災研究所年報, 57(B), 163-168.  
 Matsueda, M., M. Kyouda, Z. Toth, H. L. Tanaka, and T. Tsuyuki, 2011: Predictability of an atmospheric blocking event that occurred on 15 December 2005. Mon. Wea. Rev., 139, 957-974.
