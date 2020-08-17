@@ -26,17 +26,20 @@ case ${center} in
 esac
 
 if [ ${e_dd} -ge ${dd} ]; then
+
   M=`printf %2.2i ${mm}`
   while [ ${dd} -le ${e_dd} ]; do
     D=`printf %2.2i ${dd}`
     H=`printf %2.2i ${hh}`
+
     echo '@ READING DAY ' ${yyyy}${M}${D}${H} ' @'
+    
     o_dir=${outdata_path}/${yyyy}${M}${D}${H}/
     mkdir -p ${o_dir}
     i_U_file=${indata_path}/${yyyy}${M}/U_${center}_${yyyy}${M}${D}${H}.grib2
     i_V_file=${indata_path}/${yyyy}${M}/V_${center}_${yyyy}${M}${D}${H}.grib2
-    i_T_file=${indata_path}/${yyyy}${M}/T_${center}_${yyyy}${M}${D}${H}.grib2
     i_Z_file=${indata_path}/${yyyy}${M}/Z_${center}_${yyyy}${M}${D}${H}.grib2
+    i_T_file=${indata_path}/${yyyy}${M}/T_${center}_${yyyy}${M}${D}${H}.grib2
     i_Q_file=${indata_path}/${yyyy}${M}/Q_${center}_${yyyy}${M}${D}${H}.grib2
     i_PS_file=${indata_path}/${yyyy}${M}/PS_${center}_${yyyy}${M}${D}${H}.grib2
 
@@ -47,18 +50,18 @@ if [ ${e_dd} -ge ${dd} ]; then
         if [ ${ft} = "anl" ]; then
           wgrib2 -v ${i_U_file}  | grep "${level} mb" | grep ":anl:" | wgrib2 ${i_U_file} -i -no_header -append -ieee ${o_dir}/uwnd_${yyyy}${M}${D}${H}_${L}_level.grd
           wgrib2 -v ${i_V_file}  | grep "${level} mb" | grep ":anl:" | wgrib2 ${i_V_file} -i -no_header -append -ieee ${o_dir}/vwnd_${yyyy}${M}${D}${H}_${L}_level.grd
-          wgrib2 -v ${i_Z_file}  | grep "${level} mb" | grep ":anl:" | wgrib2 ${i_Z_file} -i -no_header -append -ieee ${o_dir}/tmp_${yyyy}${M}${D}${H}_${L}_level.grd
-          wgrib2 -v ${i_T_file}  | grep "${level} mb" | grep ":anl:" | wgrib2 ${i_T_file} -i -no_header -append -ieee ${o_dir}/hgt_${yyyy}${M}${D}${H}_${L}_level.grd
+          wgrib2 -v ${i_Z_file}  | grep "${level} mb" | grep ":anl:" | wgrib2 ${i_Z_file} -i -no_header -append -ieee ${o_dir}/hgt_${yyyy}${M}${D}${H}_${L}_level.grd
+          wgrib2 -v ${i_T_file}  | grep "${level} mb" | grep ":anl:" | wgrib2 ${i_T_file} -i -no_header -append -ieee ${o_dir}/tmp_${yyyy}${M}${D}${H}_${L}_level.grd
           wgrib2 -v ${i_Q_file}  | grep "${level} mb" | grep ":anl:" | wgrib2 ${i_Q_file} -i -no_header -append -ieee ${o_dir}/spfh_${yyyy}${M}${D}${H}_${L}_level.grd
         elif [ ${ft} != "anl" ]; then
           wgrib2 -v ${i_U_file}  | grep "${level} mb" | grep ":${ft} hour fcst:" | wgrib2 ${i_U_file} -i -no_header -append -ieee ${o_dir}/uwnd_${yyyy}${M}${D}${H}_${L}_level.grd
           wgrib2 -v ${i_V_file}  | grep "${level} mb" | grep ":${ft} hour fcst:" | wgrib2 ${i_V_file} -i -no_header -append -ieee ${o_dir}/vwnd_${yyyy}${M}${D}${H}_${L}_level.grd
-          wgrib2 -v ${i_Z_file}  | grep "${level} mb" | grep ":${ft} hour fcst:" | wgrib2 ${i_Z_file} -i -no_header -append -ieee ${o_dir}/tmp_${yyyy}${M}${D}${H}_${L}_level.grd
-          wgrib2 -v ${i_T_file}  | grep "${level} mb" | grep ":${ft} hour fcst:" | wgrib2 ${i_T_file} -i -no_header -append -ieee ${o_dir}/hgt_${yyyy}${M}${D}${H}_${L}_level.grd
+          wgrib2 -v ${i_Z_file}  | grep "${level} mb" | grep ":${ft} hour fcst:" | wgrib2 ${i_Z_file} -i -no_header -append -ieee ${o_dir}/hgt_${yyyy}${M}${D}${H}_${L}_level.grd
+          wgrib2 -v ${i_T_file}  | grep "${level} mb" | grep ":${ft} hour fcst:" | wgrib2 ${i_T_file} -i -no_header -append -ieee ${o_dir}/tmp_${yyyy}${M}${D}${H}_${L}_level.grd
           wgrib2 -v ${i_Q_file}  | grep "${level} mb" | grep ":${ft} hour fcst:" | wgrib2 ${i_Q_file} -i -no_header -append -ieee ${o_dir}/spfh_${yyyy}${M}${D}${H}_${L}_level.grd
         fi
         
-        #surface
+        #surface pressure
         if [ ${ft} = "anl" ]; then
           wgrib2 -v ${i_PS_file} | grep ":surface:" | grep ":anl:" | wgrib2 ${i_PS_file} -i -no_header -append -ieee ${o_dir}/ps_${yyyy}${M}${D}${H}_surf_level.grd
         elif [ ${ft} != "anl" ]; then
@@ -86,10 +89,13 @@ if [ ${e_dd} -ge ${dd} ]; then
         > ${o_dir}/${yyyy}${M}${D}${H}_${ft}hr_${mem}mem.grd
 
      rm ${o_dir}/*_${yyyy}${M}${D}${H}_*_level.grd ${o_dir}/*_${yyyy}${M}${D}${H}_${ft}hr.grd
-    
+     sleep 5.0s
+
     done
     dd=`expr ${dd} + 1`
+  
   done
+
 fi
 
 exit

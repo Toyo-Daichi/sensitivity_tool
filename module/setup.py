@@ -10,6 +10,8 @@ class Setup:
       nx, ny, nz, mem = 144, 37, 4, 25
     elif self.dataset is 'EPSW':
       nx, ny, nz, mem = 144, 73, 4, 27
+    elif self.dataset is 'TIGGE_JMA':
+      nx, ny, nz, mem = 288, 145, 8, 27 
     return nx, ny, nz, mem
 
   def set_pressure_levels(self):
@@ -17,6 +19,8 @@ class Setup:
       press_levels = np.array([1000.0, 850.0, 500.0, 300.0])
     elif self.dataset is 'EPSW':
       press_levels = np.array([1000.0, 850.0, 500.0, 300.0])
+    elif self.dataset is 'TIGGE_JMA':
+      press_levels = np.array([1000.0, 925.0, 850.0, 700.0, 500.0, 300.0, 250.0, 200.0])
     return press_levels
 
 """ simple package"""

@@ -7,28 +7,29 @@ Created from 2020.8.3
 import os, sys
 sys.path.append(os.path.join(os.path.dirname(__file__), './module'))
 import numpy as np
-import readgpv
+import readgpv_tigge
 import setup
 import struct
 import subprocess
 
 if __name__ == "__main__":
   """Set basic info. """
-  yyyy, mm, dd, hh, ft = 2018, 7, 3, 12, 72 
+  yyyy, mm, dd, hh, ft = 2018, 7, 4, 12, 00
   date = '{:04}{:02}{:02}{:02}'.format(yyyy,mm,dd,hh)
-  dataset = 'EPSW' # 'WFM' or 'EPSW'
-  set_endian = 'big' if (dataset is 'EPSW') else 'little'
-  var_list = ('UGRD', 'VGRD', 'HGT', 'TMP') #level=surf, HGT, TMP -> PRMSL, APCP
+  center = 'JMA'
+  dataset = 'TIGGE_' + center 
+  set_endian = 'little' 
+  var_list = ('UGRD', 'VGRD', 'HGT', 'TMP', 'SPFH', 'PS') 
   make_var = 0 # 0(make each var output) or 1(only full data)
   
   """Class & data set """
   ST = setup.Setup(dataset)
   nx, ny, nz, mem = ST.set_prm()
-  data_dir = '/work3/daichi/Data/GSM_EnData'
-  indata = data_dir + '/bin/{}{:02}{:02}/'.format(yyyy,mm,dd) + '{}{:02}{:02}{:02}_{:02}hr_{:02}mem.grd'.format(yyyy,mm,dd,hh,ft,mem)
+  data_dir = '/work3/daichi/Data/TIGGE/'
+  indata = data_dir + center + '/{}{:02}{:02}/'.format(yyyy,mm,dd) + '{}{:02}{:02}{:02}_{:02}hr_{:02}mem.grd'.format(yyyy,mm,dd,hh,ft,mem)
 
 
-  RG = readgpv.ReadGPV(dataset,date,ft)
+  RG = readgpv_tigge.ReadGPV(dataset,date,ft)
   full_data = RG.set_gpv(indata,len(var_list),endian=set_endian)
   cfmt = 'f'*(nx*ny*nz)
 
