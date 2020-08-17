@@ -43,7 +43,7 @@ for i in range(m):
 
 ### アンサンブル特異ベクトル感度解析(Ensemble singular vector analysis; EnSVSA)  
 - `anl_EnSVSA_mode_eigen.py`: 固有値問題のアプローチ 
-- `anl_EnSVSA_mode_svds.py`, `anl_EnSVSA_part_make_svd.py`:特異値分解のアプローチ(上記の固有値問題で解けたので図化まで作成していない)
+- `./test/anl_EnSVSA_mode_svds.py`, `./test/anl_EnSVSA_part_make_svd.py`:特異値分解のアプローチ(上記の固有値問題で解けたので図化まで作成していない)
 
 アンサンブル特異ベクトル法では、共分散`(y.T)G(y) = (p.T Y.T)G(Y p) = 1`の条件のもとで検証時刻における検証領域における擾乱`(p.T Z.T) H (Z)`を最大化する`p(i=1:m)`を求める。この問題ではラグランジュ関数からの微分から固有値問題を得る。
 
