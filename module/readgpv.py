@@ -12,7 +12,6 @@ class ReadGPV:
   def __init__(self,dataset,date,ft):
     """使用する各種の設定"""
     ST = setup.Setup(dataset)
-    self.dataset = dataset
     self.nx, self.ny, self.nz, self.mem = ST.set_prm()
     self.surf = 1
     self.press_levels = ST.set_pressure_levels()
@@ -76,18 +75,18 @@ class ReadGPV:
 
     return uwnd_data, vwnd_data, hgt_data, tmp_data, slp_data, rain_data
 
-  def set_gpv(self, gpv_file, elem, endian='default'):
-    return self._open_gpv(gpv_file,mode=endian).reshape(elem, self.nz, self.mem, self.ny, self.nx)
+  def set_gpv(self, gpv_file, elem, *, endian='little'):
+    return self._open_gpv(gpv_file,endian=endian).reshape(elem, self.nz, self.mem, self.ny, self.nx)
 
-  def read_gpv(self, gpv_file, elem, endian='default'):
-    return self._open_gpv(gpv_file,mode=endian).reshape(elem, self.nz, self.ny, self.nx)
+  def read_gpv(self, gpv_file, elem, *, endian='little'):
+    return self._open_gpv(gpv_file,endian=endian).reshape(elem, self.nz, self.ny, self.nx)
 
-  def _open_gpv(self, gpv_file, *, mode='default'):
+  def _open_gpv(self, gpv_file, *, endian='little'):
     print('...... Preparating for {}'.format(gpv_file))
     with open(gpv_file, 'rb') as ifile:
-      if mode == 'default':
+      if endian == 'little':
         data = np.fromfile(ifile, dtype='<f', sep = '')
-      elif mode == 'big':
+      elif endian == 'big':
         data = np.fromfile(ifile, dtype='>f', sep = '')
     return data
 
@@ -96,13 +95,12 @@ class ReadGPV:
     for ix in range(self.nx):
       lon += [ float('{:.2f}'.format(dx*ix)) ]
     for iy in range(self.ny):
-      lat += [ float('{:.2f}'.format(-90.0+dy*iy)) ]
-      #lat += [ float('{:.2f}'.format(90.0-dy*iy)) ]
+      lat += [ float('{:.2f}'.format(90.0-dy*iy)) ]
     X, Y = np.meshgrid(lon, lat)
     return X, Y
 
   def weight_latitude(self, lat:np.ndarray) -> np.ndarray:
-    return np.sqrt(np.cos(np.deg2rad(lat)))
+    return np.sqrt(np.cos(np.deg2rad(np.abs(lat))))
 
 class Energy_NORM:
   def __init__(self,dataset):

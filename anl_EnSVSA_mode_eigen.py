@@ -131,13 +131,13 @@ class Anl_ENSVSA:
 
     #norm draw
     MP.norm_contourf(mapp, x, y, energy_norm, label='svd')
-    MP.contour(mapp, x, y, hgt_data[1], elem='500hPa')
+    MP.contour(mapp, x, y, hgt_data[0], elem='slp')
     MP.title('NORMALIZE TE [ J/kg ] mode = 1-{0:} contribute={1:.1f}%, FT= {2:}hr, INIT = {3:}'.format(mode,contribute,ft,date),fontsize=8)
     plt.show()
     
 if __name__ == "__main__":
   """Set basic info. """
-  yyyy, mm, dd, hh, init, ft = '2018', '07', '04', '12', '00', '72'
+  yyyy, mm, dd, hh, init, ft = '2018', '07', '03', '12', '00', '72'
   date = yyyy+mm+dd+hh
   dataset = 'EPSW' # 'WFM' or 'EPSW'
   target_region = ( 25, 50, 125, 150 ) # lat_min/max, lon_min/max
@@ -219,7 +219,7 @@ if __name__ == "__main__":
   print('..... @ MAKE NORMALIZE ENERGY NORM @')
   print('')
   normal_energy_norm = statics_tool.normalize(energy_norm)
-  DR.draw_driver(normal_energy_norm,np.average(hgt_data,axis=0),ft,date,mode,contribute)
+  DR.draw_driver(normal_energy_norm,np.average(slp_data,axis=0),ft,date,mode,contribute)
   #DR.draw_driver(energy_norm,np.average(hgt_data,axis=0),ft,date,mode,contribute)
 
   print('Normal END')

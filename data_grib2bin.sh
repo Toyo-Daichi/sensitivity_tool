@@ -7,15 +7,15 @@ alias wgrib2 '/usr/bin/wgrib2'
 set datapath = '/work3/daichi/Data/GSM_EnData/'
 
 # set your target info.
-set ft_list = ( anl 24 48 72)
+set ft_list = ( anl )
 
 foreach ft ( ${ft_list} )
 echo ${ft}
 
 # set date
-set s_yy = 2019; set e_yy = 2019
-set s_mm = 10  ; set e_mm = 10
-set s_dd = 11  ; set e_dd = 11
+set s_yy = 2018; set e_yy = 2018
+set s_mm =  7  ; set e_mm =  7
+set s_dd =  3  ; set e_dd =  3
 set s_hh = 12  ; set e_hh = 12
 
 
@@ -109,14 +109,17 @@ while ( ${s_yy} <= ${e_yy} )
 
           else if ( ${ft} != 'anl' ) then
             @ ft_day = ${ft} / 24
-            echo '....................................................'${ft_day}
+            @ mod = ${ft} % 24
 
             if ( ${il} == 1 ) then
               wgrib2 -v ${i_file} | grep "UGRD"  | grep "${level}" | grep ":${ft} hour fcst:" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/uwnd_${s_yy}${m0}${d0}${h0}_${il}.grd
               wgrib2 -v ${i_file} | grep "VGRD"  | grep "${level}" | grep ":${ft} hour fcst:" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/vwnd_${s_yy}${m0}${d0}${h0}_${il}.grd
               wgrib2 -v ${i_file} | grep "PRMSL" | grep ":${ft} hour fcst:" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/hgt_${s_yy}${m0}${d0}${h0}_${il}.grd
-              wgrib2 -v ${i_file} | grep "APCP"  | grep ":0-${ft_day} day acc fcst:"  | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/tmp_${s_yy}${m0}${d0}${h0}_${il}.grd
-              
+              if ( ${mod} == 0 ) then
+                wgrib2 -v ${i_file} | grep "APCP"  | grep ":0-${ft_day} day acc fcst:"  | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/tmp_${s_yy}${m0}${d0}${h0}_${il}.grd
+              else if ( ${mod} != 0 ) then
+                wgrib2 -v ${i_file} | grep "APCP"  | grep ":0-${ft} hour acc fcst:"  | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/tmp_${s_yy}${m0}${d0}${h0}_${il}.grd
+              endif
               sleep 3s
             
             else if ( ${il} != 1 ) then
@@ -126,10 +129,10 @@ while ( ${s_yy} <= ${e_yy} )
               wgrib2 -v ${i_file} | grep "TMP"  | grep "${level} mb" | grep ":${ft} hour fcst:" | wgrib2 ${i_file} -i -no_header -append -ieee ${o_dir}/tmp_${s_yy}${m0}${d0}${h0}_${il}.grd
               sleep 3s
             endif
+
           endif
 
           @ il = ${il} + 1
-          #echo ${il}
         end
 
       else if ( ${accum_day} > 2020032300 ) then
@@ -153,10 +156,10 @@ while ( ${s_yy} <= ${e_yy} )
 
       rm -rf  ${o_dir}/uwnd_*.grd ${o_dir}/vwnd_*.grd ${o_dir}/tmp_*.grd ${o_dir}/hgt_*.grd 
       
-      @ s_hh = ${s_hh} + 6
+      @ s_hh = ${s_hh} + 12 
       end
       
-    set hh = 0
+    set s_hh = 0
     @ s_dd = ${s_dd} + 1
     end
 
@@ -167,6 +170,5 @@ while ( ${s_yy} <= ${e_yy} )
 end
 
 end
-
 
 exit

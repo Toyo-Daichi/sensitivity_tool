@@ -8,7 +8,8 @@ import os, sys
 sys.path.append(os.path.join(os.path.dirname(__file__), './module'))
 import numpy as np
 import matplotlib.pyplot as plt
-from tqdm import tqdm
+import warnings
+warnings.filterwarnings('ignore')
 
 #my_module
 import mapping
@@ -39,28 +40,27 @@ class Anl_SPREAD:
     #vertifcation region
     MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
     
-    MP.norm_contourf(mapp, x, y, np.average(dry_energy_norm, axis=0), label='spread_{}hr'.format(ft))
-    MP.contour(mapp, x, y, hgt_data[0], elem='slp')
+    MP.norm_contourf(mapp, x, y, np.average(dry_energy_norm[1:26:2],axis=0), label='spread_{}hr'.format(ft))
+    MP.contour(mapp, x, y, hgt_data[0], elem='850hPa')
     MP.title('TE spread [ J/kg ] FT={}hr INIT = {}'.format(ft,date))
     plt.show()
 
 if __name__ == "__main__":
   """Set basic info. """
-  yyyy, mm, dd, hh, ft = '2019', '10', '11', '12', '00'
+  yyyy, mm, dd, hh, ft = '2003', '01', '21', '12', '00'
   date = yyyy+mm+dd+hh
-  dataset = 'EPSW' # 'WFM' or 'EPSW'
+  dataset = 'WFM' # 'WFM' or 'EPSW'
   target_region = ( 25, 50, 125, 150 ) # lat_min/max, lon_min/max
 
   """Class & parm set """
   DR = Anl_SPREAD()
   RG = readgpv.ReadGPV(dataset,date,ft)
   EN = readgpv.Energy_NORM(dataset)
-  MP = mapping.Mapping('CNH')
+  MP = mapping.Mapping('WNH')
 
   lon, lat = RG.set_coordinate()
-  print(lat)
   weight_lat = RG.weight_latitude(lat)
-
+  
   """Making pretubation data"""
   indir = '/work3/daichi/Data/GSM_EnData/bin/'
   uwnd_data, vwnd_data, hgt_data, tmp_data, slp_data, rain_data = RG.data_read_ft_driver(indir+date[0:8])
@@ -100,21 +100,21 @@ if __name__ == "__main__":
 
     print('')
     print('..... Check Vertification area Norm SUM {:02} {}'.format(
-      imem, np.sum(dry_energy_norm[imem, lat_min_index:lat_max_index,lon_min_index:lon_max_index])/dims)
+      imem+1, np.sum(dry_energy_norm[imem, lat_min_index:lat_max_index,lon_min_index:lon_max_index])/dims)
     )
     print('..... Check Vertification area physical_term {:02} {}'.format(
-      imem, np.sum(physical_term[imem, lat_min_index:lat_max_index,lon_min_index:lon_max_index])/dims)
+      imem+1, np.sum(physical_term[imem, lat_min_index:lat_max_index,lon_min_index:lon_max_index])/dims)
     )
     print('..... Check Vertification area potential_term {:02} {}'.format(
-      imem, np.sum(potential_term[imem, lat_min_index:lat_max_index,lon_min_index:lon_max_index])/dims)
+      imem+1, np.sum(potential_term[imem, lat_min_index:lat_max_index,lon_min_index:lon_max_index])/dims)
     )
 
   print('')
   print('..... @ MAKE EMSEMBLE MEMBER SPREAD @')
   print('')
 
-  print(slp_data.shape)
-  #DR.main_driver(dry_energy_norm,np.average(hgt_data,axis=0),target_region, ft, date)
-  DR.main_driver(dry_energy_norm,slp_data[0],target_region, ft, date)
+
+  DR.main_driver(dry_energy_norm,np.average(hgt_data,axis=0),target_region, ft, date)
+  #DR.main_driver(dry_energy_norm,slp_data[0],target_region, ft, date)
 
   print('Normal END')

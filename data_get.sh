@@ -2,9 +2,9 @@
 set datapath = '/work3/daichi/Data/GSM_EnData/grib/'
 
 # set date
-set s_yy = 2019; set e_yy = 2019
-set s_mm = 10  ; set e_mm = 10
-set s_dd = 11  ; set e_dd = 11
+set s_yy = 2008; set e_yy = 2008
+set s_mm =  8  ; set e_mm =  8
+set s_dd = 26  ; set e_dd = 30
 set s_hh = 12  ; set e_hh = 12 
 
 while ( ${s_yy} <= ${e_yy} ) 
@@ -37,9 +37,10 @@ while ( ${s_yy} <= ${e_yy} )
 
         endif
 
-        @ s_hh = ${s_hh} + 6
+        @ s_hh = ${s_hh} + 12 
       end
     
+      set s_hh = 0
       @ s_dd = ${s_dd} + 1
       cd ${datapath}
     end

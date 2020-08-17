@@ -64,6 +64,7 @@ class Anl_ENASA:
       )
 
     theta = self._calc_part(region_TE)
+
     return theta
 
   def _calc_part(self, region_TE):
@@ -72,6 +73,13 @@ class Anl_ENASA:
       i_theta = region_TE[imem]/np.sum(region_TE[:])
       theta.append(i_theta)
     return theta
+
+  def _calc_part_plus_pertb(self, region_TE):
+    theta = np.zeros((EN.mem-EN.ctrl))
+    for imem in range(0, EN.mem-EN.ctrl, 2):
+      theta[imem] = region_TE[imem]/np.sum(region_TE[::2])
+    return theta
+
 
   def sensitivity_driver(self, pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_slp, theta):
     """Total Energy NORM を計算する """
@@ -140,8 +148,8 @@ class Anl_ENASA:
     MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
 
     #norm draw
-    MP.norm_contourf(mapp, x, y, energy_norm, label='scope')
-    MP.contour(mapp, x, y, hgt_data[1], elem='500hPa')
+    MP.norm_contourf(mapp, x, y, energy_norm, label='adjoint')
+    MP.contour(mapp, x, y, hgt_data[0], elem='850hPa')
     MP.title('NORMALIZE TE [ J/kg ] Adjoint sensitivity, FT= {}hr, INIT = {}'.format(ft,date))
     plt.show()
 
@@ -150,7 +158,7 @@ if __name__ == "__main__":
   yyyy, mm, dd, hh, init, ft = '2018', '07', '04', '12', '00', '72'
   date = yyyy+mm+dd+hh
   dataset = 'EPSW' # 'WFM' or 'EPSW'
-  target_region = ( 25, 50, 125, 150 ) # lat_min/max, lon_min/max
+  target_region = ( 30, 40, 125, 135 ) # lat_min/max, lon_min/max
 
   """Class & parm set """
   DR = Anl_ENASA()
@@ -204,6 +212,8 @@ if __name__ == "__main__":
   print('..... @ MAKE NORMALIZE ENERGY NORM @')
   print('')
   normal_energy_norm = statics_tool.normalize(energy_norm)
+
+  print(np.min(normal_energy_norm), np.max(normal_energy_norm))
 
   DR.draw_driver(normal_energy_norm,np.average(hgt_data,axis=0),ft,date)
 
