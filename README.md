@@ -107,7 +107,7 @@ pについて微分すると、
 
 <br>
 
-## データ取得
+## データ取得※
 `data_get.sh` : grib形式のデータを取得するコード(※1)
 
 [京都大学生存圏研究所（RISH: Research Institute for Sustainable Humanosphere）](http://database.rish.kyoto-u.ac.jp/arch/jmadata/gpv-original.html)から取得することができる。詳しい格子情報や配信時間等は[気象行支援センター](http://database.rish.kyoto-u.ac.jp/arch/jmadata/gpv-original.html)に記載されている。
@@ -116,7 +116,7 @@ pについて微分すると、
 
 <br>
 
-#### データにおける注意点※
+#### データにおける注意点
 ※1. データ取得サイト利用時は、下記の点の注意が必要。
 >教育研究機関向けにデータを提供しています。企業活動等のためにデータを頻繁に必要とされる方は、気象業務支援センターからデータを直接購入し、データ提供スキーム全体の維持発展にご協力ください。（サイトより引用）
 
