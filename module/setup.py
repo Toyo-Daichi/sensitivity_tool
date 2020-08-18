@@ -6,22 +6,21 @@ class Setup:
     self.dataset = name
 
   def set_prm(self):
+    
     if self.dataset is 'WFM':
       nx, ny, nz, mem = 144, 37, 4, 25
     elif self.dataset is 'EPSW':
       nx, ny, nz, mem = 144, 73, 4, 27
-    elif self.dataset is 'TIGGE_JMA':
+    elif self.dataset == 'TIGGE_JMA':
       nx, ny, nz, mem = 288, 145, 8, 27 
-    elif self.dataset is 'TIGGE_NCEP':
+    elif self.dataset == 'TIGGE_NCEP':
       nx, ny, nz, mem = 288, 145, 8, 17 
-    elif self.dataset is 'TIGGE_ECMWF':
+    elif self.dataset == 'TIGGE_ECMWF':
       nx, ny, nz, mem = 288, 145, 8, 50 
-    elif self.dataset is 'TIGGE_CMC':
+    elif self.dataset == 'TIGGE_CMC':
       nx, ny, nz, mem = 288, 145, 8, 20 
-    elif self.dataset is 'TIGGE_UKMO':
+    elif self.dataset == 'TIGGE_UKMO':
       nx, ny, nz, mem = 288, 145, 8, 17 
-
-      print(nx,ny,nz,mem)
 
     return nx, ny, nz, mem
 

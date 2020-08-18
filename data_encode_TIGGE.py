@@ -28,7 +28,7 @@ if __name__ == "__main__":
   nx, ny, nz, mem = ST.set_prm()
   dims = nx*ny*nz
   data_dir = '/work3/daichi/Data/TIGGE/'
-  indata = data_dir + center + '/{}{:02}{:02}/'.format(yyyy,mm,dd) + '{}{:02}{:02}{:02}_{:02}hr_{:02}mem.grd'.format(yyyy,mm,dd,hh,ft,mem)
+  indata = data_dir + center + '/{}{:02}{:02}{:02}/'.format(yyyy,mm,dd,hh) + '{}{:02}{:02}{:02}_{:02}hr_{:02}mem.grd'.format(yyyy,mm,dd,hh,ft,mem)
 
   RG = readgpv_tigge.ReadGPV(dataset,date,ft)
   data = RG.set_gpv(indata,endian=set_endian)

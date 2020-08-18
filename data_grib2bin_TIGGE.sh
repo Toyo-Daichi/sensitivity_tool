@@ -4,11 +4,12 @@
 # set parm.
 yyyy=2018; e_yyyy=2018
 mm=7     ; e_mm=7
-dd=4     ; e_dd=4
+dd=5     ; e_dd=5
 hh=12    ; e_hh=12
 
-center='UKMO' #'JMA', 'NCEP', 'ECMWF', 'CMC', ('UKMO' ->  not include Q)
-ft_list=( 'anl' '24' '48' '72' )
+center='JMA' #'JMA', 'NCEP', 'ECMWF', 'CMC', ('UKMO' ->  not include Q)
+ft_list=( 'anl' )
+#ft_list=( 'anl' '24' '48' '72' )
 level_list=( '1000' '925' '850' '700' '500' '300' '250' '200' )
 
 indata_path=/work1/mio/tigge_full/data/1.25deg/
@@ -86,7 +87,7 @@ while [ ${dd} -le ${e_dd} ]; do
         ${o_dir}/ps_${yyyy}${M}${D}${H}_${ft}hr.grd   \
       > ${o_dir}/${yyyy}${M}${D}${H}_${ft}hr_${mem}mem.grd
 
-   rm ${o_dir}/*_${yyyy}${M}${D}${H}_*_level.grd ${o_dir}/*_${yyyy}${M}${D}${H}_${ft}hr.grd
+   #rm ${o_dir}/*_${yyyy}${M}${D}${H}_*_level.grd ${o_dir}/*_${yyyy}${M}${D}${H}_${ft}hr.grd
    
    sleep 5.0s
   done
