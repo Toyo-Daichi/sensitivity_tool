@@ -141,7 +141,7 @@ if __name__ == "__main__":
   date = yyyy+mm+dd+hh
   dataset = 'EPSW' # 'WFM' or 'EPSW'
   target_region = ( 25, 50, 125, 150 ) # lat_min/max, lon_min/max
-  mode = 10 
+  mode = 1 
 
   """Class & parm set """
   DR = Anl_ENSVSA()
