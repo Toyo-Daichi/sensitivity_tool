@@ -23,7 +23,7 @@ case ${center} in
   "NCEP" ) mem=17 ;;
   "ECMWF") mem=50 ;;
   "CMC"  ) mem=20 ;;
-  "UKMO" ) mems=17 ;;
+  "UKMO" ) mem=17 ;;
 esac
 
 M=`printf %2.2i ${mm}`

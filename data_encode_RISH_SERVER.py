@@ -7,7 +7,7 @@ Created from 2020.8.3
 import os, sys
 sys.path.append(os.path.join(os.path.dirname(__file__), './module'))
 import numpy as np
-import readgpv
+import readgpv_rish
 import setup
 import struct
 import subprocess
@@ -46,7 +46,7 @@ if __name__ == "__main__":
         ofile.write(grd)
     
     try: 
-      command = ["bash","./module/cat.sh",outdir,'{:04}{:02}{:02}{:02}'.format(yyyy,mm,dd,hh),'{:02}'.format(ft)]
+      command = ["bash","./module/cat.sh",outdir,'{:04}{:02}{:02}{:02}'.format(yyyy,mm,dd,hh),'{:02}'.format(ft),'RISH']
       res = subprocess.call(command)
       print('...... Output data on '+'{}{:02}{:02}{:02}_{:02}hr.grd'.format(yyyy,mm,dd,hh,ft)+' MEM::{:03}'.format(imem+1))
 

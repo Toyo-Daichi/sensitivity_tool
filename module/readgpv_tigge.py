@@ -30,11 +30,11 @@ class ReadGPV:
     tmp_data  = np.zeros((self.mem, self.nz, self.ny, self.nx))
     spfh_data = np.zeros((self.mem, self.nz, self.ny, self.nx))
     ps_data   = np.zeros((self.mem, self.surf, self.ny, self.nx))
-    return uwnd_data, vwnd_data, hgt_data, tmp_data, ps_data
+    return uwnd_data, vwnd_data, hgt_data, tmp_data, spfh_data, ps_data
 
-  **def data_read_init_driver(self, data_path:str):
+  def data_read_init_driver(self, data_path:str):
     """
-    Args:
+    **Args:
       data_path(str): 週間アンサンブルデータのPATH
     Returns:
       data structure: (アンサンブル数, 鉛直層, 緯度, 経度)
@@ -53,9 +53,9 @@ class ReadGPV:
 
     return uwnd_data, vwnd_data, hgt_data, tmp_data, slp_data, rain_data
 
-  **def data_read_ft_driver(self, data_path:str):
+  def data_read_ft_driver(self, data_path:str):
     """
-    Args:
+    **Args:
       data_path(str): 週間アンサンブルデータのPATH
     Returns:
       data structure: (アンサンブル数, 鉛直層, 緯度, 経度)
@@ -74,11 +74,10 @@ class ReadGPV:
 
     return uwnd_data, vwnd_data, hgt_data, tmp_data, slp_data, rain_data
 
-  def set_gpv(self, gpv_file, elem, *, endian='little'):
-    data = self._open_gpv(gpv_file,endian=endian).reshape(elem, self.nz, self.mem, self.ny, self.nx)
-    return data
+  def set_gpv(self, gpv_file, *, endian='little'):
+    return self._open_gpv(gpv_file,endian=endian)
 
-  **def read_gpv(self, gpv_file, elem, *, endian='little'):
+  def read_gpv(self, gpv_file, elem, *, endian='little'):
     return self._open_gpv(gpv_file,endian=endian).reshape(elem, self.nz, self.ny, self.nx)
 
   def _open_gpv(self, gpv_file, *, endian='little'):
