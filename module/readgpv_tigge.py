@@ -29,10 +29,10 @@ class ReadGPV:
     hgt_data  = np.zeros((self.mem, self.nz, self.ny, self.nx))
     tmp_data  = np.zeros((self.mem, self.nz, self.ny, self.nx))
     spfh_data = np.zeros((self.mem, self.nz, self.ny, self.nx))
-    ps_data   = np.zeros((self.mem, self.surf, self.ny, self.nx))
+    ps_data   = np.zeros((self.mem, self.nz, self.ny, self.nx))
     return uwnd_data, vwnd_data, hgt_data, tmp_data, spfh_data, ps_data
 
-  def data_read_init_driver(self, data_path:str):
+  def data_read_driver(self, data_path:str):
     """
     **Args:
       data_path(str): 週間アンサンブルデータのPATH
@@ -40,39 +40,18 @@ class ReadGPV:
       data structure: (アンサンブル数, 鉛直層, 緯度, 経度)
       dara (np.ndarray): 各種要素のデータ
     """
-    uwnd_data, vwnd_data, hgt_data, tmp_data, slp_data, rain_data = self.init_array()
+    uwnd_data, vwnd_data, hgt_data, tmp_data, spfh_data, ps_data = self.init_array()
 
     for imem in range(self.mem):
       full_mem_data = self.read_gpv(data_path+'/{:03}/{}_{}hr.grd'.format(imem+1,self.date,self.init),self.elem_num)
       uwnd_data[imem,:,:,:] = full_mem_data[0,:,:,:]
       vwnd_data[imem,:,:,:] = full_mem_data[1,:,:,:]
-      hgt_data[imem,:,:,:]  = full_mem_data[2,1:,:,:]
-      slp_data[imem,:,:,:]  = full_mem_data[2,0,:,:]*0.01
-      tmp_data[imem,:,:,:]  = full_mem_data[3,1:,:,:]
-      rain_data[imem,:,:,:] = full_mem_data[3,0,:,:]
+      hgt_data[imem,:,:,:]  = full_mem_data[2,:,:,:]
+      tmp_data[imem,:,:,:]  = full_mem_data[3,:,:,:]
+      spfh_data[imem,:,:,:] = full_mem_data[4,:,:,:]
+      ps_data[imem,:,:,:]   = full_mem_data[5,:,:,:]*0.01
 
-    return uwnd_data, vwnd_data, hgt_data, tmp_data, slp_data, rain_data
-
-  def data_read_ft_driver(self, data_path:str):
-    """
-    **Args:
-      data_path(str): 週間アンサンブルデータのPATH
-    Returns:
-      data structure: (アンサンブル数, 鉛直層, 緯度, 経度)
-      dara (np.ndarray): 各種要素のデータ
-    """
-    uwnd_data, vwnd_data, hgt_data, tmp_data, slp_data, rain_data = self.init_array()
-    
-    for imem in range(self.mem):
-      full_mem_data = self.read_gpv(data_path+'/{:03}/{}_{}hr.grd'.format(imem+1,self.date,self.ft),self.elem_num)
-      uwnd_data[imem,:,:,:] = full_mem_data[0,:,:,:]
-      vwnd_data[imem,:,:,:] = full_mem_data[1,:,:,:]
-      hgt_data[imem,:,:,:]  = full_mem_data[2,1:,:,:]
-      slp_data[imem,:,:,:]  = full_mem_data[2,0,:,:]*0.01
-      tmp_data[imem,:,:,:]  = full_mem_data[3,1:,:,:]
-      rain_data[imem,:,:,:] = full_mem_data[3,0,:,:]
-
-    return uwnd_data, vwnd_data, hgt_data, tmp_data, slp_data, rain_data
+    return uwnd_data, vwnd_data, hgt_data, tmp_data, spfh_data, ps_data
 
   def set_gpv(self, gpv_file, elem, *, endian='little'):
     return self._open_gpv(gpv_file,endian=endian).reshape(elem,self.nz,self.mem,self.ny,self.nx)
@@ -106,21 +85,21 @@ class Energy_NORM:
     ST = setup.Setup(dataset)
     self.nx, self.ny, self.nz, self.mem = ST.set_prm()
     self.press_levels = ST.set_pressure_levels()
-    self.ctrl, self.surf=1,1
+    self.ctrl, self.surf = 1, 1
     self.Pr:float=1000.0
     self.Tr:float=270.0
     self.cp:float=1004.0
     self.R:float=287.0
 
   def init_array(self):
-    #**
     pertb_uwnd_data = np.zeros((self.mem-self.ctrl, self.nz, self.ny, self.nx))
     pertb_vwnd_data = np.zeros((self.mem-self.ctrl, self.nz, self.ny, self.nx))
-    pertb_tmp_data  = np.zeros((self.mem-self.ctrl, self.nz-self.surf, self.ny, self.nx))
-    pertb_slp_data  = np.zeros((self.mem-self.ctrl, self.surf, self.ny, self.nx))
-    return pertb_uwnd_data, pertb_vwnd_data, pertb_tmp_data, pertb_slp_data
+    pertb_tmp_data  = np.zeros((self.mem-self.ctrl, self.nz, self.ny, self.nx))
+    pertb_spfh_data = np.zeros((self.mem-self.ctrl, self.nz, self.ny, self.nx))
+    pertb_ps_data   = np.zeros((self.mem-self.ctrl, self.nz, self.ny, self.nx))
+    return pertb_uwnd_data, pertb_vwnd_data, pertb_tmp_data, pertb_spfh_data, pertb_ps_data
 
-  def data_pertb_driver(self,uwnd,vwnd,tmp,slp):
+  def data_pertb_driver(self,uwnd,vwnd,tmp,spfh,ps):
     """コントロールランからの摂動の作成
     **Args:
       ctrl_run(np.ndarray): 摂動を与えていないコントロールランのデータ
@@ -128,22 +107,17 @@ class Energy_NORM:
     Returns:
       pretb_elem_data(np.ndarray): アンサンブルランのデータからコントロールランデータを引いた擾乱のデータ
     """
-    pertb_uwnd_data, pertb_vwnd_data, pertb_tmp_data, pertb_slp_data = self.init_array()
+    pertb_uwnd_data, pertb_vwnd_data, pertb_tmp_data, pertb_spfh_data, pertb_ps_data = self.init_array()
+    
     for imem in range(self.mem-self.ctrl):
       pertb_uwnd_data[imem,:,:,:] = uwnd[imem+1,:,:,:] - uwnd[self.ctrl-1,:,:,:]
       pertb_vwnd_data[imem,:,:,:] = vwnd[imem+1,:,:,:] - vwnd[self.ctrl-1,:,:,:]
-      pertb_tmp_data[imem,:,:,:] = tmp[imem+1,:,:,:] - tmp[self.ctrl-1,:,:,:]
-      pertb_slp_data[imem,:,:,:] = slp[imem+1,:,:,:] - slp[self.ctrl-1,:,:,:]
+      pertb_tmp_data[imem,:,:,:]  = tmp[imem+1,:,:,:]  - tmp[self.ctrl-1,:,:,:]
+      pertb_spfh_data[imem,:,:,:] = spfh[imem+1,:,:,:] - spfh[self.ctrl-1,:,:,:]
+      pertb_ps_data[imem,:,:,:]   = ps[imem+1,:,:,:]   - ps[self.ctrl-1,:,:,:]
 
-    return pertb_uwnd_data, pertb_vwnd_data, pertb_tmp_data, pertb_slp_data
+    return pertb_uwnd_data, pertb_vwnd_data, pertb_tmp_data, pertb_spfh_data, pertb_ps_data
 
-  def weight_average(self, data:np.ndarray, weight_list:np.ndarray):
-    weight_average, sum_of_weight = np.average( 
-      a = data, axis = 0, weights = weight_list, returned = True
-    )
-    #print('..... CALCULATE WEIGHT AVE. SUM OF WEIGHT ', sum_of_weight)
-    return weight_average
-    
   def calc_dry_EN_NORM(self,
     u_prime:np.ndarray, v_prime:np.ndarray, tmp_prime:np.ndarray, slp_prime:np.ndarray 
   ):

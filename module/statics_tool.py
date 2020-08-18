@@ -41,3 +41,11 @@ def normalize(v, axis=-1, order=2):
   l2 = np.linalg.norm(v, ord = order, axis=axis, keepdims=True)
   l2[l2==0] = 1
   return v/l2
+
+
+def weight_average(self, data:np.ndarray, weight_list:np.ndarray):
+  weight_average, sum_of_weight = np.average( 
+    a = data, axis = 0, weights = weight_list, returned = True
+  )
+  #print('..... CALCULATE WEIGHT AVE. SUM OF WEIGHT ', sum_of_weight)
+  return weight_average
