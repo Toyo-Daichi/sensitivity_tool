@@ -35,14 +35,14 @@ if __name__ == "__main__":
   cfmt = 'f'*(dims)
 
   for imem in range(mem):
-    outdir = data_dir+'/bin/{}{:02}{:02}/{:03}/'.format(yyyy,mm,dd,imem+1)
+    outdir = data_dir+center+'/{}{:02}{:02}{:02}/{:03}/'.format(yyyy,mm,dd,hh,imem+1)
     os.makedirs(outdir,exist_ok=True)
 
     for ivar, name in enumerate(var_list):
       with open(outdir+name+'.grd','wb') as ofile:
         _data =np.ravel(data[ivar,:,imem,:,:])
-      grd = struct.pack(cfmt,*_data)
-      ofile.write(grd)
+        grd = struct.pack(cfmt,*_data)
+        ofile.write(grd)
     
     try: 
       command = ["bash","./module/cat.sh",outdir,'{:04}{:02}{:02}{:02}'.format(yyyy,mm,dd,hh),'{:02}'.format(ft),'TIGGE']
@@ -59,5 +59,6 @@ if __name__ == "__main__":
   if (make_var == 1):
     command = ["rm", indata]
     res = subprocess.call(command)
-  
+
+  print('*** Warinig :: PS data have 3 dimention, but same data.')
   print('Normal END')
