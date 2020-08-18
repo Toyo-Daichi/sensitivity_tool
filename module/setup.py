@@ -20,6 +20,9 @@ class Setup:
       nx, ny, nz, mem = 288, 145, 8, 20 
     elif self.dataset is 'TIGGE_UKMO':
       nx, ny, nz, mem = 288, 145, 8, 17 
+
+      print(nx,ny,nz,mem)
+
     return nx, ny, nz, mem
 
   def set_pressure_levels(self):

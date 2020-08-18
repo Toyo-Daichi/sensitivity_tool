@@ -7,7 +7,7 @@ mm=7     ; e_mm=7
 dd=4     ; e_dd=4
 hh=12    ; e_hh=12
 
-center='JMA' #'JMA', 'NCEP', 'ECMWF', 'CMC', 'UKMO' 
+center='UKMO' #'JMA', 'NCEP', 'ECMWF', 'CMC', ('UKMO' ->  not include Q)
 ft_list=( 'anl' '24' '48' '72' )
 level_list=( '1000' '925' '850' '700' '500' '300' '250' '200' )
 
@@ -20,17 +20,17 @@ outdata_path=/work3/daichi/Data/TIGGE/${center}/
 #ensemble size
 case ${center} in
   "JMA"  ) mem=27 ;;
-  "NCEP" ) mem=17 ;;
-  "ECMWF") mem=50 ;;
-  "CMC"  ) mem=20 ;;
-  "UKMO" ) mem=17 ;;
+  "NCEP" ) mem=21 ;;
+  "ECMWF") mem=51 ;;
+  "CMC"  ) mem=21 ;;
+  "UKMO" ) mem=18 ;;
 esac
 
 M=`printf %2.2i ${mm}`
 while [ ${dd} -le ${e_dd} ]; do
   D=`printf %2.2i ${dd}`
   H=`printf %2.2i ${hh}`
-  echo '@ READING DAY ' ${yyyy}${M}${D}${H} ' @'
+  echo '@ READING DAY ' ${yyyy}${M}${D}${H} '@'
   
   o_dir=${outdata_path}/${yyyy}${M}${D}${H}/
   mkdir -p ${o_dir}
@@ -68,6 +68,7 @@ while [ ${dd} -le ${e_dd} ]; do
       fi
       i_level=`expr ${i_level} + 1`
     done
+
     #combine
     if [ ${ft} = "anl" ]; then ft='00' ;fi
     cat ${o_dir}/uwnd_${yyyy}${M}${D}${H}_*_level.grd > ${o_dir}/uwnd_${yyyy}${M}${D}${H}_${ft}hr.grd

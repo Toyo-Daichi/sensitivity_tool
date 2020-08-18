@@ -112,16 +112,17 @@ class Energy_NORM:
     self.cp:float=1004.0
     self.R:float=287.0
 
-  **def init_array(self):
+  def init_array(self):
+    #**
     pertb_uwnd_data = np.zeros((self.mem-self.ctrl, self.nz, self.ny, self.nx))
     pertb_vwnd_data = np.zeros((self.mem-self.ctrl, self.nz, self.ny, self.nx))
     pertb_tmp_data  = np.zeros((self.mem-self.ctrl, self.nz-self.surf, self.ny, self.nx))
     pertb_slp_data  = np.zeros((self.mem-self.ctrl, self.surf, self.ny, self.nx))
     return pertb_uwnd_data, pertb_vwnd_data, pertb_tmp_data, pertb_slp_data
 
-  **def data_pertb_driver(self,uwnd,vwnd,tmp,slp):
+  def data_pertb_driver(self,uwnd,vwnd,tmp,slp):
     """コントロールランからの摂動の作成
-    Args:
+    **Args:
       ctrl_run(np.ndarray): 摂動を与えていないコントロールランのデータ
       ensm_run(np.ndarray): 各アンサンブルランのデータ
     Returns:
@@ -143,11 +144,11 @@ class Energy_NORM:
     #print('..... CALCULATE WEIGHT AVE. SUM OF WEIGHT ', sum_of_weight)
     return weight_average
     
-  **def calc_dry_EN_NORM(self,
+  def calc_dry_EN_NORM(self,
     u_prime:np.ndarray, v_prime:np.ndarray, tmp_prime:np.ndarray, slp_prime:np.ndarray 
   ):
     """乾燥エネルギーノルムの計算
-    Args:
+    **Args:
       u_prime   (np.ndarray): 東西風のコントロールランからの予測時間における摂動
       v_prime   (np.ndarray): 南北風のコントロールランからの予測時間における摂動
       tmp_prime (np.ndarray): 気温のコントロールランからの予測時間における摂動
