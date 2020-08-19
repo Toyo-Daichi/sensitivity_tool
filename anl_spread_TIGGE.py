@@ -47,7 +47,7 @@ class Anl_SPREAD:
 
 if __name__ == "__main__":
   """Set basic info. """
-  yyyy, mm, dd, hh, ft = '2003', '01', '21', '12', '00'
+  yyyy, mm, dd, hh, ft = '2018', '07', '04', '12', '00'
   date = yyyy+mm+dd+hh
   center = 'JMA'
   dataset = 'TIGGE_' + center 
@@ -55,7 +55,7 @@ if __name__ == "__main__":
 
   """Class & parm set """
   DR = Anl_SPREAD()
-  RG = readgpv_tigge.readgpv_tigge(dataset,date,ft)
+  RG = readgpv_tigge.ReadGPV(dataset,date,ft)
   EN = readgpv_tigge.Energy_NORM(dataset)
   MP = mapping.Mapping('CNH')
 
@@ -63,8 +63,8 @@ if __name__ == "__main__":
   weight_lat = RG.weight_latitude(lat)
   
   """Making pretubation data"""
-  indir = '/work3/daichi/Data/GSM_EnData/bin/'
-  uwnd_data, vwnd_data, hgt_data, tmp_data, spfh_data, ps_data = RG.data_read_driver(indir+date[0:8])
+  indir = '/work3/daichi/Data/TIGGE/' + center + '/'
+  uwnd_data, vwnd_data, hgt_data, tmp_data, spfh_data, ps_data = RG.data_read_driver(indir+date)
   pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_spfh, pertb_ps = EN.data_pertb_driver(uwnd_data,vwnd_data,tmp_data,spfh_data,ps_data)   
  
   for imem in range(EN.mem-EN.ctrl):
@@ -74,6 +74,10 @@ if __name__ == "__main__":
       pertb_tmp[imem,i_level,:,:]  = pertb_tmp[imem,i_level,:,:]*weight_lat
       pertb_spfh[imem,i_level,:,:] = pertb_spfh[imem,i_level,:,:]*weight_lat
       pertb_ps[imem,i_level,:,:]   = pertb_ps[imem,i_level,:,:]*weight_lat
+
+
+  print(pertb_uwnd[:,:,:,:])
+
 
   sys.exit()
   

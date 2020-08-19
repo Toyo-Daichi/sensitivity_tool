@@ -113,7 +113,10 @@ class Mapping:
   def diff_contourf(self, basemap, x, y, data, *, elem='default'):
     if elem == 'default':
       levels = np.arange(-7.0, 7.0, 0.5) 
-      label = '[none]'
+      label = '[ none ]'
+    elif elem == 'normalize':
+      levels = np.arange(-1.0, 1.0, 0.05)
+      label = '[ none ]'
     elif elem == 'rain':
       levels = np.arange(-15.0, 16.0, 1.0)
       label = '[mm]'
