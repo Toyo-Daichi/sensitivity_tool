@@ -69,12 +69,12 @@ class Anl_SPREAD:
     MP.title('{} SPAGHETTI DIAGRAM level={}hPa FT={}hr INIT = {}'.format(elem,level,ft,date))
     plt.show()
 
-
-  def pertubation_driver(self, pertb_data, target_region, elem, ft, date):
+  def pertubation_driver(self, pertb_data, elem, target_region, level_layer, ft, date):
     fig, ax = plt.subplots()
     mapp = MP.base(projection_mode='lcc')
     lon, lat = RG.set_coordinate() 
     x, y = MP.coord_change(mapp, lon, lat)
+    level = RG.press_levels[level_layer]
 
     lat_min_index, lat_max_index, lon_min_index, lon_max_index = \
       EN.verification_region(lon,lat,
@@ -122,11 +122,11 @@ if __name__ == "__main__":
   level_layer=0
   DR.spaghetti_diagram_driver(hgt_data,RG.elem[2],target_region,level_layer,ft,date)
 
+  # Draw pertubation
   for _ in range(EN.mem):
-    DR.each_pertb_driver(pertb_uwnd,target_region,ft,date)
+    DR.each_pertb_driver(pertb_uwnd,RG.elem[0],target_region,level_layer,ft,date)
 
   print('Normal END')
-  sys.exit()
 
   """Calc. dry Energy NORM"""
   dry_energy_norm = np.zeros((EN.mem-EN.ctrl,EN.ny,EN.nx))
