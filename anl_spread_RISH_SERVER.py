@@ -16,7 +16,7 @@ import mapping
 import readgpv_rish
 
 class Anl_SPREAD:
-  """Ensemble spread anaysis
+  """Ensemble spread anaysis(for RISH)
     検証時刻でのトータルエネルギーノルムを作成。
     詳細は, README.md or Enomoto et al. (2015)に記載されている.
   """
