@@ -28,7 +28,7 @@ if __name__ == "__main__":
   indata = data_dir + '/bin/{}{:02}{:02}/'.format(yyyy,mm,dd) + '{}{:02}{:02}{:02}_{:02}hr_{:02}mem.grd'.format(yyyy,mm,dd,hh,ft,mem)
 
 
-  RG = readgpv.ReadGPV(dataset,date,ft)
+  RG = readgpv_rish.ReadGPV(dataset,date,ft)
   full_data = RG.set_gpv(indata,len(var_list),endian=set_endian)
   cfmt = 'f'*(nx*ny*nz)
 

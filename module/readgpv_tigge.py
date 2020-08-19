@@ -32,9 +32,9 @@ class ReadGPV:
     ps_data   = np.zeros((self.mem, self.nz, self.ny, self.nx))
     return uwnd_data, vwnd_data, hgt_data, tmp_data, spfh_data, ps_data
 
-  def data_read_driver(self, data_path:str):
+  def data_read_driver(self, data_path:str, *, endian='little'):
     """
-    **Args:
+    Args:
       data_path(str): 週間アンサンブルデータのPATH
     Returns:
       data structure: (アンサンブル数, 鉛直層, 緯度, 経度)
@@ -43,7 +43,7 @@ class ReadGPV:
     uwnd_data, vwnd_data, hgt_data, tmp_data, spfh_data, ps_data = self.init_array()
 
     for imem in range(self.mem):
-      full_mem_data = self.read_gpv(data_path+'/{:03}/{}_{}hr.grd'.format(imem+1,self.date,self.init),self.elem_num)
+      full_mem_data = self.read_gpv(data_path+'/{:03}/{}_{}hr.grd'.format(imem+1,self.date,self.init),self.elem_num,endian=endian)
       uwnd_data[imem,:,:,:] = full_mem_data[0,:,:,:]
       vwnd_data[imem,:,:,:] = full_mem_data[1,:,:,:]
       hgt_data[imem,:,:,:]  = full_mem_data[2,:,:,:]

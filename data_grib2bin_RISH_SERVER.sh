@@ -15,7 +15,7 @@ echo ${ft}
 # set date
 set s_yy = 2018; set e_yy = 2018
 set s_mm =  7  ; set e_mm =  7
-set s_dd =  3  ; set e_dd =  3
+set s_dd =  4  ; set e_dd =  4
 set s_hh = 12  ; set e_hh = 12
 
 

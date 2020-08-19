@@ -45,9 +45,9 @@ class Anl_SPREAD:
     MP.title('TE spread [ J/kg ] FT={}hr INIT = {}'.format(ft,date))
     plt.show()
 
-    def spaghetti_diagram_driver(self, data, elem, target_region, level_layer, ft, date):
+  def spaghetti_diagram_driver(self, data, elem, target_region, level_layer, ft, date):
     fig, ax = plt.subplots()
-    mapp = MP.base(projection_mode='lcc')
+    mapp = MP.base(projection_mode='cyl')
     lon, lat = RG.set_coordinate() 
     x, y = MP.coord_change(mapp, lon, lat)
     level = RG.press_levels[level_layer]
@@ -60,7 +60,7 @@ class Anl_SPREAD:
 
     #vertifcation region
     MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
-    
+
     for _ in range(1,EN.mem-1):
       MP.contour(mapp, x, y, data[_][level_layer], elem='850hPa',colors='blue')
 
@@ -71,7 +71,7 @@ class Anl_SPREAD:
 
   def pertubation_driver(self, pertb_data, elem, target_region, level_layer, ft, date):
     fig, ax = plt.subplots()
-    mapp = MP.base(projection_mode='lcc')
+    mapp = MP.base(projection_mode='cyl')
     lon, lat = RG.set_coordinate() 
     x, y = MP.coord_change(mapp, lon, lat)
     level = RG.press_levels[level_layer]
@@ -93,7 +93,7 @@ if __name__ == "__main__":
   """Set basic info. """
   yyyy, mm, dd, hh, ft = '2018', '07', '04', '12', '00'
   date = yyyy+mm+dd+hh
-  center = 'JMA'
+  center = 'ECMWF'
   dataset = 'TIGGE_' + center 
   target_region = ( 25, 50, 125, 150 ) # lat_min/max, lon_min/max
 
@@ -101,14 +101,14 @@ if __name__ == "__main__":
   DR = Anl_SPREAD()
   RG = readgpv_tigge.ReadGPV(dataset,date,ft)
   EN = readgpv_tigge.Energy_NORM(dataset)
-  MP = mapping.Mapping('WNH')
+  MP = mapping.Mapping('ALL')
 
   lon, lat = RG.set_coordinate()
   weight_lat = RG.weight_latitude(lat)
   
   """Making pretubation data"""
   indir = '/work3/daichi/Data/TIGGE/' + center + '/'
-  uwnd_data, vwnd_data, hgt_data, tmp_data, spfh_data, ps_data = RG.data_read_driver(indir+date)
+  uwnd_data, vwnd_data, hgt_data, tmp_data, spfh_data, ps_data = RG.data_read_driver(indir+date,endian='little')
   pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_spfh, pertb_ps = EN.data_pertb_driver(uwnd_data,vwnd_data,tmp_data,spfh_data,ps_data)   
  
   for imem in range(EN.mem-EN.ctrl):
@@ -120,12 +120,12 @@ if __name__ == "__main__":
       pertb_ps[imem,i_level,:,:]   = pertb_ps[imem,i_level,:,:]*weight_lat
 
   # Draw spaghetti
-  level_layer=0
+  level_layer=2
   DR.spaghetti_diagram_driver(hgt_data,RG.elem[2],target_region,level_layer,ft,date)
 
   # Draw pertubation
   for _ in range(EN.mem):
-    DR.each_pertb_driver(pertb_uwnd,RG.elem[0],target_region,level_layer,ft,date)
+    DR.pertubation_driver(pertb_uwnd,RG.elem[0],target_region,level_layer,ft,date)
 
   print('Normal END')
 

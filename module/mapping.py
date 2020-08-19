@@ -47,26 +47,42 @@ class Mapping:
       self.lat_min, self.lat_max = 10, 60 
       self.lat_0, self.lon_0 = 35, 135
 
+    elif area == 'ALL':
+      self.area = area
+      self.lat_0, self.lon_0 = 0, 180
+
   def base(self, *, projection_mode='lcc'):
     
-    mapping = Basemap( 
-      projection=projection_mode,
-      resolution="i", 
-      lat_0=self.lat_0, lon_0=self.lon_0, fix_aspect=(1,1),
-      llcrnrlat=self.lat_min, urcrnrlat=self.lat_max, 
-      llcrnrlon=self.lon_min, urcrnrlon=self.lon_max
-    )
+    if projection_mode is 'lcc':
+      mapping = Basemap( 
+        projection=projection_mode,
+        resolution="i", 
+        lat_0=self.lat_0, lon_0=self.lon_0, fix_aspect=(1,1),
+        llcrnrlat=self.lat_min, urcrnrlat=self.lat_max, 
+        llcrnrlon=self.lon_min, urcrnrlon=self.lon_max
+      )
+
+    elif projection_mode is 'cyl':
+      mapping = Basemap( 
+        projection=projection_mode,
+        resolution="l", 
+        lat_0=self.lat_0, lon_0=self.lon_0,
+       )
     
     mapping.drawcoastlines(color='black', linewidth=0.5)
-    
+
     if 'NH' in self.area:
       mapping.drawmeridians(np.arange(0, 360, 15),  labels=[False, False, False, True], fontsize='small', color='gray', linewidth=0.5)
       mapping.drawparallels(np.arange(-90, 90, 15), labels=[True, False, False, True], fontsize='small', color='gray', linewidth=0.5)
 
-    elif 'NH' not in self.area:
+    elif 'JPN' in self.area:
       mapping.drawmeridians(np.arange(0, 360, 5),  labels=[False, True, False, True], fontsize='small', color='gray', linewidth=0.5)
       mapping.drawparallels(np.arange(-90, 90, 5), labels=[True, False, False, True], fontsize='small', color='gray', linewidth=0.5)
-        
+
+    elif self.area == 'ALL':
+      mapping.drawmeridians(np.arange(0, 360, 40),  labels=[False, True, False, True], fontsize='small', color='gray', linewidth=0.5)
+      mapping.drawparallels(np.arange(-90, 90, 25), labels=[True, False, False, True], fontsize='small', color='gray', linewidth=0.5)
+      
     return mapping
 
   def coord_change(self, basemap, x, y):
