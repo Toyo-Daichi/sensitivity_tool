@@ -13,7 +13,7 @@ warnings.filterwarnings('ignore')
 
 #my_module
 import mapping
-import readgpv
+import readgpv_rish
 import statics_tool
 
 class Anl_ENSVSA:
@@ -137,16 +137,16 @@ class Anl_ENSVSA:
     
 if __name__ == "__main__":
   """Set basic info. """
-  yyyy, mm, dd, hh, init, ft = '2018', '07', '03', '12', '00', '72'
+  yyyy, mm, dd, hh, init, ft = '2018', '07', '04', '12', '00', '72'
   date = yyyy+mm+dd+hh
   dataset = 'EPSW' # 'WFM' or 'EPSW'
   target_region = ( 25, 50, 125, 150 ) # lat_min/max, lon_min/max
-  mode = 10 
+  mode = 10
 
   """Class & parm set """
   DR = Anl_ENSVSA()
-  RG = readgpv.ReadGPV(dataset,date,ft)
-  EN = readgpv.Energy_NORM(dataset)
+  RG = readgpv_rish.ReadGPV(dataset,date,ft)
+  EN = readgpv_rish.Energy_NORM(dataset)
   MP = mapping.Mapping('CNH')
   
   lon, lat = RG.set_coordinate()
@@ -218,7 +218,8 @@ if __name__ == "__main__":
   #normalize
   print('..... @ MAKE NORMALIZE ENERGY NORM @')
   print('')
-  normal_energy_norm = statics_tool.normalize(energy_norm)
+  #normal_energy_norm = statics_tool.normalize(energy_norm)
+  normal_energy_norm = statics_tool.min_max(energy_norm)
   DR.draw_driver(normal_energy_norm,np.average(slp_data,axis=0),ft,date,mode,contribute)
   #DR.draw_driver(energy_norm,np.average(hgt_data,axis=0),ft,date,mode,contribute)
 

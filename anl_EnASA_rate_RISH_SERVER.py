@@ -13,7 +13,7 @@ warnings.filterwarnings('ignore')
 
 #my_module
 import mapping
-import readgpv
+import readgpv_rish
 import statics_tool
 
 class Anl_ENASA:
@@ -133,7 +133,7 @@ class Anl_ENASA:
   def draw_driver(self, energy_norm, hgt_data, ft, date):
     """Draw sensitivity area @dry enegy norm"""
     fig, ax = plt.subplots()
-    mapp = MP.base(projection_mode='lcc')
+    mapp = MP.base(projection_mode='cyl')
     lon, lat = RG.set_coordinate() 
     x, y = MP.coord_change(mapp, lon, lat)
 
@@ -148,7 +148,7 @@ class Anl_ENASA:
     MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
 
     #norm draw
-    MP.norm_contourf(mapp, x, y, energy_norm, label='adjoint')
+    MP.norm_contourf(mapp, x, y, energy_norm, label='scope')
     MP.contour(mapp, x, y, hgt_data[0], elem='850hPa')
     MP.title('NORMALIZE TE [ J/kg ] Adjoint sensitivity, FT= {}hr, INIT = {}'.format(ft,date))
     plt.show()
@@ -158,13 +158,13 @@ if __name__ == "__main__":
   yyyy, mm, dd, hh, init, ft = '2018', '07', '04', '12', '00', '72'
   date = yyyy+mm+dd+hh
   dataset = 'EPSW' # 'WFM' or 'EPSW'
-  target_region = ( 30, 40, 125, 135 ) # lat_min/max, lon_min/max
+  target_region = ( 20, 50, 120, 150 ) # lat_min/max, lon_min/max
 
   """Class & parm set """
   DR = Anl_ENASA()
-  RG = readgpv.ReadGPV(dataset,date,ft)
-  EN = readgpv.Energy_NORM(dataset)
-  MP = mapping.Mapping('CNH')
+  RG = readgpv_rish.ReadGPV(dataset,date,ft)
+  EN = readgpv_rish.Energy_NORM(dataset)
+  MP = mapping.Mapping('ALL')
 
   lon, lat = RG.set_coordinate()
   weight_lat = RG.weight_latitude(lat)
@@ -211,7 +211,8 @@ if __name__ == "__main__":
   #normalize
   print('..... @ MAKE NORMALIZE ENERGY NORM @')
   print('')
-  normal_energy_norm = statics_tool.normalize(energy_norm)
+  #normal_energy_norm = statics_tool.normalize(energy_norm)
+  normal_energy_norm = statics_tool.min_max(energy_norm)
 
   print(np.min(normal_energy_norm), np.max(normal_energy_norm))
 

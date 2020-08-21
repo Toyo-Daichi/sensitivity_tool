@@ -7,7 +7,7 @@ alias wgrib2 '/usr/bin/wgrib2'
 set datapath = '/work3/daichi/Data/GSM_EnData/'
 
 # set your target info.
-set ft_list = ( anl )
+set ft_list = ( anl 72 )
 
 foreach ft ( ${ft_list} )
 echo ${ft}

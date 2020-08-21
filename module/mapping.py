@@ -131,7 +131,10 @@ class Mapping:
       levels = np.arange(-7.0, 7.0, 0.5) 
       label = '[ none ]'
     elif elem == 'normalize':
-      levels = np.arange(-1.0, 1.0, 0.05)
+      levels = np.arange(-1.0, 1.05, 0.05)
+      label = '[ none ]'
+    elif elem == 'small':
+      levels = np.arange(-0.2, 0.21, 0.01)
       label = '[ none ]'
     elif elem == 'rain':
       levels = np.arange(-15.0, 16.0, 1.0)
@@ -159,8 +162,8 @@ class Mapping:
       #levels = [0.075, 0.100, 0.125, 0.150, 0.175, 0.200, 0.250]
 
     elif label == 'adjoint':
-      levels = [0.01, 0.025, 0.05, 0.1, 0.2, 0.5, 1.0]
-      #levels = [0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50]
+      #levels = [0.01, 0.025, 0.05, 0.1, 0.2, 0.5, 1.0]
+      levels = [0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50]
     
     elif label == 'svd':
       #normalize
@@ -169,8 +172,8 @@ class Mapping:
       #levels = [7.5, 10.0, 15.0, 30.0, 50.0, 70.0, 100.0]
 
     elif label == 'spread_00hr' or 'spread_12hr':
-      #levels = [0.1, 0.25, 1.0, 1.5, 2.0, 3.0, 5.0]
-      levels = [5.0, 7.5, 10.0, 12.5, 15.0, 20.0, 30.0]
+      levels = [0.25, 0.5, 1.0, 1.5, 2.0, 3.0, 5.0]
+      #levels = [5.0, 7.5, 10.0, 12.5, 15.0, 20.0, 30.0]
     
     elif label == 'spread_48hr' or 'spread_72hr':
       levels = [7.5, 10.0, 15.0, 30.0, 50.0, 70.0, 100.0]

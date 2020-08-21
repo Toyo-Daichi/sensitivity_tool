@@ -49,7 +49,7 @@ class Anl_SPREAD:
     fig, ax = plt.subplots()
     mapp = MP.base(projection_mode='lcc')
     lon, lat = RG.set_coordinate() 
-    x, y = MP.coord_change(mapp, lon, lat)
+    x, y = MP.coord_change(mapp, lon[0:EN.ny,:], lat[0:EN.ny,:])
     level = RG.press_levels[level_layer]
 
     lat_min_index, lat_max_index, lon_min_index, lon_max_index = \
@@ -62,9 +62,9 @@ class Anl_SPREAD:
     MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
     
     for _ in range(1,EN.mem-1):
-      MP.contour(mapp, x, y, data[_][level_layer], elem='850hPa',colors='blue')
+      MP.contour(mapp, x, y, data[_, level_layer, 0:EN.ny, :], elem='850hPa',colors='blue')
 
-    MP.contour(mapp, x, y, data[0][level_layer], elem='850hPa', linewidths=2.0)
+    MP.contour(mapp, x, y, data[0, level_layer, 0:EN.ny, :], elem='850hPa', linewidths=2.0)
 
     MP.title('{} SPAGHETTI DIAGRAM level={}hPa FT={}hr INIT = {}'.format(elem,level,ft,date))
     plt.show()
@@ -73,8 +73,10 @@ class Anl_SPREAD:
     fig, ax = plt.subplots()
     mapp = MP.base(projection_mode='lcc')
     lon, lat = RG.set_coordinate() 
-    x, y = MP.coord_change(mapp, lon, lat)
+    lat_size=37
+    x, y = MP.coord_change(mapp, lon[0:lat_size,:], lat[0:lat_size,:])
     level = RG.press_levels[level_layer]
+
 
     lat_min_index, lat_max_index, lon_min_index, lon_max_index = \
       EN.verification_region(lon,lat,
@@ -85,9 +87,10 @@ class Anl_SPREAD:
     #vertifcation region
     MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
     
-    MP.diff_contourf(mapp, x, y, pertb_data[_][_], elem='normalize')
+    MP.norm_contourf(mapp, x, y, pertb_data[_, level_layer, 0:lat_size, :]**2, label='spread_00hr')
     MP.title('{} PERTUBATION level={}hPa, FT={}hr INIT = {}'.format(elem,level,ft,date))
     plt.show()
+    plt.close("all")
 
 if __name__ == "__main__":
   """Set basic info. """
@@ -100,7 +103,7 @@ if __name__ == "__main__":
   DR = Anl_SPREAD()
   RG = readgpv_rish.ReadGPV(dataset,date,ft)
   EN = readgpv_rish.Energy_NORM(dataset)
-  MP = mapping.Mapping('WNH')
+  MP = mapping.Mapping('CNH')
 
   lon, lat = RG.set_coordinate()
   weight_lat = RG.weight_latitude(lat)
@@ -119,14 +122,14 @@ if __name__ == "__main__":
     pertb_slp[imem,:,:] = pertb_slp[imem,:,:]*weight_lat
 
   # Draw spaghetti
-  level_layer=0
-  DR.spaghetti_diagram_driver(hgt_data,RG.elem[2],target_region,level_layer,ft,date)
+  #level_layer=2
+  #DR.spaghetti_diagram_driver(hgt_data,RG.elem[2],target_region,level_layer,ft,date)
 
   # Draw pertubation
-  for _ in range(EN.mem):
-    DR.pertubation_driver(pertb_uwnd,RG.elem[0],target_region,level_layer,ft,date)
+  #for _ in range(EN.mem):
+  #  DR.pertubation_driver(pertb_uwnd,RG.elem[1],target_region,level_layer,ft,date)
 
-  print('Normal END')
+  #print('Normal END')
 
   """Calc. dry Energy NORM"""
   dry_energy_norm = np.zeros((EN.mem-EN.ctrl,EN.ny,EN.nx))
