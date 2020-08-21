@@ -170,7 +170,7 @@ class Energy_NORM:
     #Potential
     tmp_term = (self.cp/self.Tr)*((tmp_prime)**2)
     vint_tmp_term = self._vint(tmp_term,self.press_levels[1:])/(2*self.Pr)
-    slp_term = (self.R*self.Tr/self.Pr)*(slp_prime**2/self.Pr)*0.5
+    slp_term = (self.R*self.Tr/self.Pr)*((slp_prime**2)/self.Pr)*0.5
     vint_potential_term = vint_tmp_term + slp_term
 
     #SUM OF TERM
