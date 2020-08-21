@@ -45,7 +45,7 @@ if __name__ == "__main__":
 
   # Draw spaghetti
   level_layer=2
-  DR.spaghetti_diagram_driver(hgt_data,RG.elem[2],target_region,level_layer,ft,date)
+  MP.spaghetti_diagram_driver(hgt_data,RG.elem[2],target_region,level_layer,ft,date)
 
   # Draw pertubation
   for _ in range(EN.mem):

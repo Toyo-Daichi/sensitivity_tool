@@ -21,18 +21,18 @@ import readgpv_tigge
 
 class Mapping_NORM:
   def __init__(self, dataset, map_prj):
-    self.self.MP = mapping.Mapping(map_prj)
+    self.MP = mapping.Mapping(map_prj)
     if dataset == 'WFM' or 'EPSW':
       self.RG = readgpv_rish.ReadGPV(dataset,'_','_')
-      self.self.EN = readgpv_rish.Energy_NORM(dataset)
+      self.EN = readgpv_rish.Energy_NORM(dataset)
     elif 'TIGEE' in dataset:
       self.RG = readgpv_tigge.ReadGPV(dataset,'_','_')
-      self.self.EN = readgpv_tigge.Energy_NORM(dataset)
+      self.EN = readgpv_tigge.Energy_NORM(dataset)
 
   def spaghetti_diagram_driver(self, data, elem, target_region, level_layer, ft, date):
     fig, ax = plt.subplots()
     mapp = self.MP.base(projection_mode='lcc')
-    lon, lat = RG.set_coordinate() 
+    lon, lat = self.RG.set_coordinate() 
     x, y = self.MP.coord_change(mapp, lon[0:self.EN.ny,:], lat[0:self.EN.ny,:])
     level = self.RG.press_levels[level_layer]
 
@@ -53,7 +53,7 @@ class Mapping_NORM:
     self.MP.title('{} SPAGHETTI DIAGRAM level={}hPa FT={}hr INIT = {}'.format(elem,level,ft,date))
     plt.show()
 
-    def pertubation_driver(self, pertb_data, elem, target_region, level_layer, ft, date):
+  def pertubation_driver(self, pertb_data, elem, target_region, level_layer, ft, date):
     fig, ax = plt.subplots()
     mapp = self.MP.base(projection_mode='lcc')
     lon, lat = RG.set_coordinate() 
@@ -76,7 +76,7 @@ class Mapping_NORM:
     plt.show()
     plt.close("all")
 
-    def main_driver(self, dry_energy_norm, hgt_data, target_region, ft, date):
+  def main_driver(self, dry_energy_norm, hgt_data, target_region, ft, date):
     """Draw sensitivity area @dry enegy norm"""
     fig, ax = plt.subplots()
     mapp = self.MP.base(projection_mode='lcc')
