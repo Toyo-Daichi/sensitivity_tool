@@ -24,12 +24,16 @@ class Mapping_NORM:
       self.RG = readgpv_tigge.ReadGPV(dataset,'_','_')
       self.EN = readgpv_tigge.Energy_NORM(dataset)
 
-  def spaghetti_diagram_driver(self, data, elem, target_region, level_layer, ft, date):
+  def spaghetti_diagram_driver(self, 
+    data, elem, target_region, level_layer, ft, date, 
+    *, prj='lcc', center='JMA'
+    ):
+    
     fig, ax = plt.subplots()
-    mapp = self.MP.base(projection_mode='lcc')
+    mapp = self.MP.base(projection_mode=prj)
     lon, lat = self.RG.set_coordinate() 
     x, y = self.MP.coord_change(mapp, lon[0:self.EN.ny,:], lat[0:self.EN.ny,:])
-    level = self.RG.level[level_layer]
+    level = self.RG.press_levels[level_layer]
 
     lat_min_index, lat_max_index, lon_min_index, lon_max_index = \
       self.EN.verification_region(lon,lat,
@@ -41,14 +45,17 @@ class Mapping_NORM:
     self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
     
     for _ in range(1,self.EN.mem-1):
-      self.MP.contour(mapp, x, y, data[_, level_layer, 0:self.EN.ny, :], elem='850hPa',colors='blue')
+      self.MP.contour(mapp, x, y, data[_, level_layer, 0:self.EN.ny, :], elem='500hPa',colors='blue')
 
-    self.MP.contour(mapp, x, y, data[0, level_layer, 0:self.EN.ny, :], elem='850hPa', linewidths=2.0)
+    self.MP.contour(mapp, x, y, data[0, level_layer, 0:self.EN.ny, :], elem='500hPa', linewidths=2.0)
 
-    self.MP.title('{} SPAGHETTI DIAGRAM level={}hPa FT={}hr INIT = {}'.format(elem,level,ft,date))
+    self.MP.title('{} SPAGHETTI DIAGRAM level={}hPa FT={}hr INIT={} CENTER={}'.format(elem,level,ft,date,center),fontsize=8)
     plt.show()
 
-  def pertubation_driver(self, pertb_data, elem, target_region, level_layer, ft, date, prj, imem, *, center='JMA'):
+  def pertubation_driver(self,
+    pertb_data, elem, target_region, level_layer, ft, date, imem, 
+    *, prj='lcc', center='JMA'
+    ):
     """
     コントロールランからの差(摂動)を作成
     """
@@ -70,7 +77,7 @@ class Mapping_NORM:
 
     #pertubation
     self.MP.diff_contourf(mapp, x, y, pertb_data[level_layer, 0:lat_size, :], elem='normalize')
-    self.MP.title('{} PERTUBATION level={}hPa, FT={}hr INIT = {}'.format(elem,level,ft,date))
+    self.MP.title('{} PERTUBATION level={}hPa, FT={}hr INIT={} CENTER={}'.format(elem,level,ft,date,center))
     self.MP.saving('{}_pertubation_{:03}'.format(center,imem+1),'./work/')
     plt.close("all")
 

@@ -32,11 +32,11 @@ if __name__ == "__main__":
   """Class & parm set """
   RG = readgpv_tigge.ReadGPV(dataset,date,ft)
   EN = readgpv_tigge.Energy_NORM(dataset)
-  MP = mapping_draw_NORM.Mapping(map_prj)
+  MP = mapping_draw_NORM.Mapping_NORM(dataset,map_prj)
 
   """Making pretubation data"""
   indir = '/work3/daichi/Data/TIGGE/' + center + '/'
-  uwnd_data, vwnd_data, hgt_data, tmp_data, spfh_data, ps_data = RG.data_read_driver(indir+date,endian='little')
+  uwnd_data, vwnd_data, hgt_data, tmp_data, spfh_data, ps_data = RG.data_read_driver(indir+date)
   pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_spfh, pertb_ps = EN.data_pertb_driver(uwnd_data,vwnd_data,tmp_data,spfh_data,ps_data)   
   lon, lat = RG.set_coordinate()
   weight_lat = RG.weight_latitude(lat)
@@ -49,13 +49,12 @@ if __name__ == "__main__":
       pertb_spfh[imem,i_level,:,:] = pertb_spfh[imem,i_level,:,:]*weight_lat
       pertb_ps[imem,i_level,:,:]   = pertb_ps[imem,i_level,:,:]*weight_lat
 
-  # Draw spaghetti
-  level_layer = 0r
-  MP.spaghetti_diagram_driver(hgt_data,RG.elem[2],target_region,level_layer,ft,date)
+  """ Draw function SPREAD """
+  level_layer = 0
+  #MP.spaghetti_diagram_driver(hgt_data,RG.elem[2],target_region,level_layer,ft,date,prj=set_prj,center=center)
 
-  # Draw pertubation
-  for _ in range(EN.mem):
-    MP.pertubation_driver(pertb_uwnd,RG.elem[0],target_region,level_layer,ft,date)
+  for imem in range(EN.mem-EN.ctrl):
+    MP.pertubation_driver(pertb_uwnd[imem],RG.elem[0],target_region,level_layer,ft,date,imem,prj=set_prj,center=center)
 
   print('Normal END')
   sys.exit()

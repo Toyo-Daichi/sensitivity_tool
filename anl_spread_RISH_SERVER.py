@@ -48,8 +48,8 @@ if __name__ == "__main__":
   """ Draw function SPREAD """
   level_layer = 0
   #MP.spaghetti_diagram_driver(hgt_data,RG.elem[2],target_region,level_layer,ft,date)
-  for _ in range(EN.mem-EN.ctrl):
-    MP.pertubation_driver(pertb_uwnd[_],RG.elem[0],target_region,level_layer,ft,date,set_prj,_)
+  for imem in range(EN.mem-EN.ctrl):
+    MP.pertubation_driver(pertb_uwnd[imem],RG.elem[0],target_region,level_layer,ft,date,imem,prj=set_prj)
 
   sys.exit()
 

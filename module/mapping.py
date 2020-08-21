@@ -201,7 +201,7 @@ class Mapping:
       clevs = np.arange(970.0, 1020.0, 2.5) 
 
     contour = basemap.contour(x, y, data, clevs, colors=colors, linestyles=linestyles, linewidths=linewidths)
-    contour.clabel(fmt='%1.1f', fontsize=8)
+    #contour.clabel(fmt='%1.1f', fontsize=8)
   
   def vector(self, basemap, x, y, u, v, *, skip=10, scale=1.0e-4):
     arr_skip = (slice(None,None,skip),slice(None,None,skip))
