@@ -67,7 +67,7 @@ class ReadGPV:
         data = np.fromfile(ifile, dtype='>f', sep = '')
     return data
 
-  def set_coordinate(self, dx=2.5, dy=2.5):
+  def set_coordinate(self, dx=1.25, dy=1.25):
     lon, lat = [], []
     for ix in range(self.nx):
       lon += [ float('{:.2f}'.format(dx*ix)) ]
@@ -139,16 +139,22 @@ class Energy_NORM:
 
     #Physics
     physical_term = (u_prime)**2+(v_prime)**2
-    vint_physical_term = self._vint(physical_term,self.press_levels)/(2*self.Pr)
-    
+    #matsueda et al. (2014)
+    vint_physical_term = self._vint(physical_term,self.press_levels)*0.5
+    #enomoto et al. (2015)
+    #vint_physical_term = self._vint(physical_term,self.press_levels)/(2*self.Pr)
+
     #Potential
     tmp_term = (self.cp/self.Tr)*((tmp_prime)**2)
-    vint_tmp_term = self._vint(tmp_term,self.press_levels[:])/(2*self.Pr)
+    #matsueda et al. (2014)
+    vint_tmp_term = self._vint(tmp_term,self.press_levels[:])*0.5
+    #enomoto et al. (2015)
+    #vint_tmp_term = self._vint(tmp_term,self.press_levels[:])/(2*self.Pr)
 
     ps_term = (self.R*self.Tr/self.Pr)*(ps_prime**2/self.Pr)*0.5
-    vint_potential_term = vint_tmp_term + ps_term
 
     #SUM OF TERM
+    vint_potential_term = vint_tmp_term + ps_term
     dry_energy_norm = vint_physical_term + vint_potential_term
 
     return dry_energy_norm, vint_physical_term, vint_potential_term

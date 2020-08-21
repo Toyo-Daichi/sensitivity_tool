@@ -123,7 +123,7 @@ class Mapping_NORM:
 
     # UWND
     for index, level in enumerate(press_levels):
-      ax = fig.add_subplot(row,column,1+4*index)
+      ax = fig.add_subplot(row,column, (1+3*len(press_levels))-4*index)
       mapp = self.MP.base(projection_mode=prj)
       x, y = self.MP.coord_change(mapp, lon, lat)
 
@@ -134,7 +134,7 @@ class Mapping_NORM:
 
     # VWND
     for index, level in enumerate(press_levels):
-      ax = fig.add_subplot(row,column,1+2*index)
+      ax = fig.add_subplot(row,column,(2+3*len(press_levels))-4*index)
       mapp = self.MP.base(projection_mode=prj)
       x, y = self.MP.coord_change(mapp, lon, lat)
 
@@ -145,14 +145,14 @@ class Mapping_NORM:
 
     #TMP
     for index, level in enumerate(press_levels[1:]):
-      ax = fig.add_subplot(row,column,3)
+      ax = fig.add_subplot(row,column, (3+3*len(press_levels)-4*index-4))
       mapp = self.MP.base(projection_mode=prj)
       x, y = self.MP.coord_change(mapp, lon, lat)
 
       self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
       self.MP.norm_contourf(mapp, x, y, (pertb_tmp[index]**2)*(1004/270) ,label=label_cfmt)
       self.MP.title('TMP [ J/kg ] {}hPa '.format(level))
-      print('..... FINISH TMP level {}hPa'.format(level))
+      print('..... FINISH TMP  level {}hPa'.format(level))
 
     #SLP
     ax = fig.add_subplot(row,column,16)

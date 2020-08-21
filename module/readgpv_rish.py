@@ -108,7 +108,7 @@ class Energy_NORM:
     self.nx, self.ny, self.nz, self.mem = ST.set_prm()
     self.press_levels = ST.set_pressure_levels()
     self.ctrl, self.surf=1,1
-    self.Pr:float=700.0
+    self.Pr:float=1.0
     self.Tr:float=270.0
     self.cp:float=1004.0
     self.R:float=287.0

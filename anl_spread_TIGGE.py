@@ -71,9 +71,9 @@ if __name__ == "__main__":
   lon_grd = lon_max_index-lon_min_index +1
   dims = lat_grd*lon_grd
 
-  for imem in range(EN.mem-EN.ctrl):
+  for imem in range(0,EN.mem-EN.ctrl,2):
     dry_energy_norm[imem], physical_term[imem], potential_term[imem] =\
-    EN.calc_dry_EN_NORM(pertb_uwnd[imem],pertb_vwnd[imem],pertb_tmp[imem],pertb_ps[imem])
+    EN.calc_dry_EN_NORM(pertb_uwnd[imem],pertb_vwnd[imem],pertb_tmp[imem],pertb_ps[imem,0])
 
     print('')
     print('..... Check Vertification area Norm SUM {:02} {}'.format(
@@ -91,6 +91,6 @@ if __name__ == "__main__":
   print('')
 
 
-  MP.main_driver(dry_energy_norm,np.average(hgt_data,axis=0),target_region, ft, date)
+  MP.main_norm_driver(dry_energy_norm,np.average(hgt_data,axis=0),target_region, ft, date)
 
   print('Normal END')

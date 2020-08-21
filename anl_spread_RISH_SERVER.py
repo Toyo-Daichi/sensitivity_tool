@@ -46,10 +46,10 @@ if __name__ == "__main__":
     pertb_slp[imem,:,:] = pertb_slp[imem,:,:]*weight_lat
 
   """ Draw function SPREAD """
-  level_layer = 0
+  #level_layer = 0
   #MP.spaghetti_diagram_driver(hgt_data,RG.elem[2],target_region,level_layer,ft,date)
-  for imem in range(EN.mem-EN.ctrl):
-    MP.pertubation_driver(pertb_uwnd[imem],RG.elem[0],target_region,level_layer,ft,date,imem,prj=set_prj)
+  #for imem in range(EN.mem-EN.ctrl):
+  #  MP.pertubation_driver(pertb_uwnd[imem],RG.elem[0],target_region,level_layer,ft,date,imem,prj=set_prj)
 
   """Calc. dry Energy NORM"""
   dry_energy_norm = np.zeros((EN.mem-EN.ctrl,EN.ny,EN.nx))
@@ -85,8 +85,10 @@ if __name__ == "__main__":
   print('..... @ MAKE EMSEMBLE MEMBER SPREAD @')
   print('')
 
+
   """ Draw function NORM """
   MP.main_norm_driver(dry_energy_norm,np.average(hgt_data,axis=0),target_region, ft, date)
-  MP.each_elem_norm_dry_rish_driver(np.average(pertb_uwnd,axis=0),np.average(pertb_vwnd,axis=0),np.average(pertb_tmp,axis=0),np.average(pertb_slp,axis=0),EN.press_levels,target_region,ft,date)
+  #MP.each_elem_norm_dry_rish_driver(np.average(pertb_uwnd[::2],axis=0),np.average(pertb_vwnd[::2],axis=0),np.average(pertb_tmp[::2],axis=0),np.average(pertb_slp[::2],axis=0),EN.press_levels,target_region,ft,date)
+  MP.each_elem_norm_dry_rish_driver(pertb_uwnd[0],pertb_vwnd[0],pertb_tmp[0],pertb_slp[0],EN.press_levels,target_region,ft,date)
 
   print('Normal END')
