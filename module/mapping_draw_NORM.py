@@ -48,7 +48,7 @@ class Mapping_NORM:
     self.MP.title('{} SPAGHETTI DIAGRAM level={}hPa FT={}hr INIT = {}'.format(elem,level,ft,date))
     plt.show()
 
-  def pertubation_driver(self, pertb_data, elem, target_region, level_layer, ft, date, prj, imem):
+  def pertubation_driver(self, pertb_data, elem, target_region, level_layer, ft, date, prj, imem, *, center='JMA'):
     """
     コントロールランからの差(摂動)を作成
     """
@@ -67,10 +67,11 @@ class Mapping_NORM:
 
     #vertifcation region
     self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
-    
+
+    #pertubation
     self.MP.diff_contourf(mapp, x, y, pertb_data[level_layer, 0:lat_size, :], elem='normalize')
     self.MP.title('{} PERTUBATION level={}hPa, FT={}hr INIT = {}'.format(elem,level,ft,date))
-    self.MP.saving('pertubation_{:03}'.format(imem+1),'./work/')
+    self.MP.saving('{}_pertubation_{:03}'.format(center,imem+1),'./work/')
     plt.close("all")
 
   def main_norm_driver(self, dry_energy_norm, hgt_data, target_region, ft, date):
@@ -152,8 +153,8 @@ class Mapping_NORM:
 
     self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
     self.MP.norm_contourf(mapp, x, y, ((pertb_slp[0]**2)/700)*(287*270) ,label=label_cfmt)
-    self.MP.title('SLP [ J/kg ] {}hPa '.format(level))
-    print('..... FINISH SLP level {}hPa'.format(level))
+    self.MP.title('SLP [ J/kg ] ')
+    print('..... FINISH SLP ')
 
     #fig.title(' Ensemble based Sensitivity Analysis (JMA) Valid time: {}, Target region: JPN'.format(date))
     plt.show()
