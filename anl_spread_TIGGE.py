@@ -24,7 +24,7 @@ if __name__ == "__main__":
   """Set basic info. """
   yyyy, mm, dd, hh, ft = '2018', '07', '04', '12', '00'
   date = yyyy+mm+dd+hh
-  center = 'ECMWF'
+  center = 'NCEP'
   dataset = 'TIGGE_' + center
   map_prj, set_prj = 'CNH', 'lcc'
   target_region = ( 25, 50, 125, 150 ) # lat_min/max, lon_min/max

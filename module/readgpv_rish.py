@@ -108,7 +108,7 @@ class Energy_NORM:
     self.nx, self.ny, self.nz, self.mem = ST.set_prm()
     self.press_levels = ST.set_pressure_levels()
     self.ctrl, self.surf=1,1
-    self.Pr:float=1.0
+    self.Pr:float=1000.0
     self.Tr:float=270.0
     self.cp:float=1004.0
     self.R:float=287.0
@@ -146,7 +146,7 @@ class Energy_NORM:
     
   def calc_dry_EN_NORM(self,
     u_prime:np.ndarray, v_prime:np.ndarray, tmp_prime:np.ndarray, slp_prime:np.ndarray 
-  ):
+    ):
     """乾燥エネルギーノルムの計算
     Args:
       u_prime   (np.ndarray): 東西風のコントロールランからの予測時間における摂動
@@ -165,27 +165,31 @@ class Energy_NORM:
 
     #Physics
     physical_term = (u_prime)**2+(v_prime)**2
-    vint_physical_term = self._vint(physical_term,self.press_levels)/(2*self.Pr)
-    
+    #matsueda et al. (2014)
+    vint_physical_term = self._vint(physical_term,self.press_levels)*0.5
+    #enomoto et al. (2015)
+    #vint_physical_term = self._vint(physical_term,self.press_levels)/(2*self.Pr)
+
     #Potential
     tmp_term = (self.cp/self.Tr)*((tmp_prime)**2)
-    vint_tmp_term = self._vint(tmp_term,self.press_levels[1:])/(2*self.Pr)
-    slp_term = (self.R*self.Tr/self.Pr)*((slp_prime**2)/self.Pr)*0.5
-    vint_potential_term = vint_tmp_term + slp_term
+    #matsueda et al. (2014)
+    vint_tmp_term = self._vint(tmp_term,self.press_levels[:])*0.5
+    #enomoto et al. (2015)
+    #vint_tmp_term = self._vint(tmp_term,self.press_levels[:])/(2*self.Pr)
+
+    ps_term = (self.R*self.Tr/self.Pr)*(ps_prime**2/self.Pr)*0.5
 
     #SUM OF TERM
+    vint_potential_term = vint_tmp_term + ps_term
     dry_energy_norm = vint_physical_term + vint_potential_term
 
     return dry_energy_norm, vint_physical_term, vint_potential_term
-
-  def calc_humid_EN_NORM(self):
-    pass
 
   def verification_region(self, 
     lon, lat, *,
     area_lat_min:float =50.0, area_lat_max:float =20.0,
     area_lon_min:float =120.0, area_lon_max:float =150.0
-  ):
+    ):
     """検証領域のインデックス番号を返す
     Args:
       lon, lat (np.ndarray): 経度, 緯度のnp.ndarray

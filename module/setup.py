@@ -6,7 +6,6 @@ class Setup:
     self.dataset = name
 
   def set_prm(self):
-    
     if self.dataset is 'WFM':
       nx, ny, nz, mem = 144, 37, 4, 25
     elif self.dataset is 'EPSW':
