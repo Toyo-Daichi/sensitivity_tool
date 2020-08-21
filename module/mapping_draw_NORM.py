@@ -9,14 +9,10 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.cm as cm
-from mpl_toolkits.basemap import Basemap
-import seaborn as sns
 
 #my module
 import mapping
-import readgpv_rish
-import readgpv_tigge
+import readgpv_rish, readgpv_tigge
 
 class Mapping_NORM:
   def __init__(self, dataset, map_prj):
@@ -33,7 +29,7 @@ class Mapping_NORM:
     mapp = self.MP.base(projection_mode='lcc')
     lon, lat = self.RG.set_coordinate() 
     x, y = self.MP.coord_change(mapp, lon[0:self.EN.ny,:], lat[0:self.EN.ny,:])
-    level = self.RG.press_levels[level_layer]
+    level = self.RG.level[level_layer]
 
     lat_min_index, lat_max_index, lon_min_index, lon_max_index = \
       self.EN.verification_region(lon,lat,
@@ -58,7 +54,7 @@ class Mapping_NORM:
     lon, lat = self.RG.set_coordinate() 
     lat_size=37
     x, y = self.MP.coord_change(mapp, lon[0:lat_size,:], lat[0:lat_size,:])
-    level = self.RG.press_levels[level_layer]
+    level = self.RG.level[level_layer]
 
 
     lat_min_index, lat_max_index, lon_min_index, lon_max_index = \
@@ -91,18 +87,20 @@ class Mapping_NORM:
     #vertifcation region
     self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
     
-    self.MP.norm_contourf(mapp, x, y, np.average(dry_energy_norm[1:26:2],axis=0), label='spread_{}hr'.format(ft))
+    self.MP.norm_contourf(mapp, x, y, np.average(dry_energy_norm[1:26:2],axis=0), label=label_cfmt)
     self.MP.contour(mapp, x, y, hgt_data[0], elem='850hPa')
-    self.MP.title('TE spread [ J/kg ] FT={}hr INIT = {}'.format(ft,date))
+    self.MP.title('TE spread [ J/kg ] {}hPa '.format(level))
     plt.show()
 
   def each_elem_norm_dry_rish_driver(self, 
-    pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_slp,
-    target_region, ft, date
+    pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_slp, # pertbuation data
+    level, target_region, ft, date 
     ):
 
     size_x, size_y = 16, 18
     row, column = 4, 4
+    label_cfmt = 'spread_{}hr'.format(ft)
+
     fig = plt.figure(figsize = (size_x, size_y))
     lon, lat = self.RG.set_coordinate() 
     lat_min_index, lat_max_index, lon_min_index, lon_max_index = \
@@ -112,92 +110,47 @@ class Mapping_NORM:
       )
 
     # UWND
-    ax = fig.add_subplot(4,4,1)
+    for index, level in enumerate(level):
+      ax = fig.add_subplot(row,column,1+4*index)
+      mapp = self.MP.base(projection_mode='lcc')
+      x, y = self.MP.coord_change(mapp, lon, lat)
+
+      self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
+      self.MP.norm_contourf(mapp, x, y, pertb_uwnd[index]**2 ,label=label_cfmt, cbar)
+      self.MP.title('UWND [ J/kg ] {}hPa '.format(level))
+      print('..... FINISH UWND level {}hPa'.format(level))
+
+    # VWND
+    for index, level in enumerate(level):
+      ax = fig.add_subplot(row,column,1+2*index)
+      mapp = self.MP.base(projection_mode='lcc')
+      x, y = self.MP.coord_change(mapp, lon, lat)
+
+      self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
+      self.MP.norm_contourf(mapp, x, y, pertb_vwnd[index]**2 ,label=label_cfmt, cbar)
+      self.MP.title('VWND [ J/kg ] {}hPa '.format(level))
+      print('..... FINISH VWND level {}hPa'.format(level))
+
+    #TMP
+    for index, level in enumerate(level[1:]):
+      ax = fig.add_subplot(row,column,3)
+      mapp = self.MP.base(projection_mode='lcc')
+      x, y = self.MP.coord_change(mapp, lon, lat)
+
+      self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
+      self.MP.norm_contourf(mapp, x, y, (pertb_tmp[index]**2)*(1004/270) ,label=label_cfmt)
+      self.MP.title('TMP [ J/kg ] {}hPa '.format(level))
+      print('..... FINISH TMP level {}hPa'.format(level))
+
+    #SLP
+    ax = fig.add_subplot(row,column,16)
     mapp = self.MP.base(projection_mode='lcc')
     x, y = self.MP.coord_change(mapp, lon, lat)
 
     self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
-    self.MP.norm_contourf(mapp, x, y, pertb_uwnd[3]**2 ,label='spread_{}hr'.format(ft))
-    self.MP.title('UWND [ J/kg ] FT={}hr INIT = {}'.format(ft,date))
+    self.MP.norm_contourf(mapp, x, y, ((pertb_slp[0]**2)/700)*(287*270) ,label=label_cfmt)
+    self.MP.title('SLP [ J/kg ] {}hPa '.format(level))
+    print('..... FINISH SLP level {}hPa'.format(level))
 
-    ax = fig.add_subplot(4,4,5)
-    mapp = self.MP.base(projection_mode='lcc')
-
-    self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
-    self.MP.norm_contourf(mapp, x, y, pertb_uwnd[2]**2 ,label='spread_{}hr'.format(ft))
-    self.MP.title('UWND [ J/kg ] FT={}hr INIT = {}'.format(ft,date))
-
-    ax = fig.add_subplot(4,4,9)
-    mapp = self.MP.base(projection_mode='lcc')
-
-    self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
-    self.MP.norm_contourf(mapp, x, y, pertb_uwnd[1]**2 ,label='spread_{}hr'.format(ft))
-    self.MP.title('UWND [ J/kg ] FT={}hr INIT = {}'.format(ft,date))
-
-    ax = fig.add_subplot(4,4,13)
-    mapp = self.MP.base(projection_mode='lcc')
-
-    self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
-    self.MP.norm_contourf(mapp, x, y, pertb_uwnd[3]**2 ,label='spread_{}hr'.format(ft))
-    self.MP.title('UWND [ J/kg ] FT={}hr INIT = {}'.format(ft,date))
-
-    # VWND
-    ax = fig.add_subplot(4,4,2)
-    mapp = self.MP.base(projection_mode='lcc')
-
-    self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
-    self.MP.norm_contourf(mapp, x, y, pertb_vwnd[3]**2 ,label='spread_{}hr'.format(ft))
-    self.MP.title('VWND [ J/kg ] FT={}hr INIT = {}'.format(ft,date))
-
-    ax = fig.add_subplot(4,4,6)
-    mapp = self.MP.base(projection_mode='lcc')
-
-    self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
-    self.MP.norm_contourf(mapp, x, y, pertb_vwnd[2]**2 ,label='spread_{}hr'.format(ft))
-    self.MP.title('VWND [ J/kg ] FT={}hr INIT = {}'.format(ft,date))
-
-    ax = fig.add_subplot(4,4,10)
-    mapp = self.MP.base(projection_mode='lcc')
-
-    self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
-    self.MP.norm_contourf(mapp, x, y, pertb_vwnd[1]**2 ,label='spread_{}hr'.format(ft))
-    self.MP.title('VWND [ J/kg ] FT={}hr INIT = {}'.format(ft,date))
-
-    ax = fig.add_subplot(4,4,14)
-    mapp = self.MP.base(projection_mode='lcc')
-
-    self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
-    self.MP.norm_contourf(mapp, x, y, pertb_tmp[2]**2 ,label='spread_{}hr'.format(ft))
-    self.MP.title('VWND [ J/kg ] FT={}hr INIT = {}'.format(ft,date))
-
-    #TMP
-    ax = fig.add_subplot(4,4,3)
-    mapp = self.MP.base(projection_mode='lcc')
-
-    self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
-    self.MP.norm_contourf(mapp, x, y, (pertb_tmp[2]**2)*(1004/270) ,label='spread_{}hr'.format(ft))
-    self.MP.title('TMP [ J/kg ] FT={}hr INIT = {}'.format(ft,date))
-
-    ax = fig.add_subplot(4,4,7)
-    mapp = self.MP.base(projection_mode='lcc')
-
-    self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
-    self.MP.norm_contourf(mapp, x, y, (pertb_tmp[1]**2)*(1004/270) ,label='spread_{}hr'.format(ft))
-    self.MP.title('TMP [ J/kg ] FT={}hr INIT = {}'.format(ft,date))
-
-    ax = fig.add_subplot(4,4,11)
-    mapp = self.MP.base(projection_mode='lcc')
-
-    self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
-    self.MP.norm_contourf(mapp, x, y, (pertb_tmp[0]**2)*(1004/270) ,label='spread_{}hr'.format(ft))
-    self.MP.title('TMP [ J/kg ] FT={}hr INIT = {}'.format(ft,date))
-
-    #SLP
-    ax = fig.add_subplot(4,4,16)
-    mapp = self.MP.base(projection_mode='lcc')
-
-    self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
-    self.MP.norm_contourf(mapp, x, y, (pertb_slp[0]**2/700)*(287*270) ,label='spread_{}hr'.format(ft))
-    self.MP.title('SLP [ J/kg ] FT={}hr INIT = {}'.format(ft,date))
-
+    fig.title(' Ensemble based Sensitivity Analysis (JMA) Valid time: {}, Target region: JPN'.format(date))
     plt.show()

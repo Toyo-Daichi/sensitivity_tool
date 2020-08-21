@@ -5,6 +5,8 @@ Created from 2020.8.4
 """
 
 import os, sys
+
+from numpy.lib.function_base import average
 sys.path.append(os.path.join(os.path.dirname(__file__), './module'))
 import numpy as np
 import matplotlib.pyplot as plt
@@ -85,6 +87,6 @@ if __name__ == "__main__":
 
   # Draw Energy norm
   MP.main_norm_driver(dry_energy_norm,np.average(hgt_data,axis=0),target_region, ft, date)
-  MP.each_elem_norm_dry_rish_driver(pertb_uwnd[0],pertb_vwnd[0],pertb_tmp[0],pertb_slp[0],target_region,ft,date)
+  MP.each_elem_norm_dry_rish_driver(np.average(pertb_uwnd,axis=0) np.average(pertb_vwnd,axis=0),np.average(pertb_tmp,axis=0),np.average(pertb_slp[0],axis=0),target_region,ft,date)
 
   print('Normal END')

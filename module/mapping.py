@@ -72,15 +72,15 @@ class Mapping:
 
     if 'NH' in self.area:
       mapping.drawmeridians(np.arange(0, 360, 15),  labels=[False, False, False, True], fontsize='small', color='gray', linewidth=0.5)
-      mapping.drawparallels(np.arange(-90, 90, 15), labels=[True, False, False, True], fontsize='small', color='gray', linewidth=0.5)
+      mapping.drawparallels(np.arange(-90, 90, 15), labels=[True, False, False, False], fontsize='small', color='gray', linewidth=0.5)
 
     elif 'JPN' in self.area:
-      mapping.drawmeridians(np.arange(0, 360, 5),  labels=[False, True, False, True], fontsize='small', color='gray', linewidth=0.5)
-      mapping.drawparallels(np.arange(-90, 90, 5), labels=[True, False, False, True], fontsize='small', color='gray', linewidth=0.5)
+      mapping.drawmeridians(np.arange(0, 360, 5),  labels=[False, False, False, True], fontsize='small', color='gray', linewidth=0.5)
+      mapping.drawparallels(np.arange(-90, 90, 5), labels=[True, False, False, False], fontsize='small', color='gray', linewidth=0.5)
 
     elif self.area == 'ALL':
-      mapping.drawmeridians(np.arange(0, 360, 40),  labels=[False, True, False, True], fontsize='small', color='gray', linewidth=0.5)
-      mapping.drawparallels(np.arange(-90, 90, 25), labels=[True, False, False, True], fontsize='small', color='gray', linewidth=0.5)
+      mapping.drawmeridians(np.arange(0, 360, 40),  labels=[False, False, False, True], fontsize='small', color='gray', linewidth=0.5)
+      mapping.drawparallels(np.arange(-90, 90, 25), labels=[False, False, False, True], fontsize='small', color='gray', linewidth=0.5)
       
     return mapping
 
@@ -150,7 +150,7 @@ class Mapping:
     cbar = basemap.colorbar(cmap, 'right', size='2.5%')
     cbar.set_label(label, size=8)
 
-  def norm_contourf(self, basemap, x, y, data, *, label='normal'):
+  def norm_contourf(self, basemap, x, y, data, *, label='normal', cbar_on=0):
     #normalize
     if label == 'normal':
       levels = [0.025, 0.05, 0.1, 0.2, 0.5, 0.75, 1.0]
@@ -179,8 +179,12 @@ class Mapping:
     
     colors = ['#FFFFFF', '#00FFFF', '#000080', '#228B22', '#FFFF00', '#FF8000', '#FF0000', '#FF00FF']
     cmap = plt.contourf(x, y, data, levels, colors=colors, extend='both')
-    cbar = basemap.colorbar(cmap, 'right', size='2.5%')
-    cbar.set_label('[ J/kg ]', size=8)
+    
+    if cbar_on == 0:
+      cbar = basemap.colorbar(cmap, 'right', size='2.5%')
+      cbar.set_label('[ J/kg ]', size=8)
+    elif cbar_on == 1:
+      return cmap
 
   def contour(self, basemap, x, y, data, *, elem='default', colors="black", linestyles='-', linewidths=0.5):
     if elem == 'default':
