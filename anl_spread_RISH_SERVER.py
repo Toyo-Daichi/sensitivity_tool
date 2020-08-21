@@ -20,21 +20,21 @@ if __name__ == "__main__":
   yyyy, mm, dd, hh, ft = '2018', '07', '04', '12', '00'
   date = yyyy+mm+dd+hh
   dataset = 'EPSW' # 'WFM' or 'EPSW'
+  map_prj = 'CNH' 
   target_region = ( 25, 50, 125, 150 ) # lat_min/max, lon_min/max
 
   """Class & parm set """
   RG = readgpv_rish.ReadGPV(dataset,date,ft)
   EN = readgpv_rish.Energy_NORM(dataset)
-  MP = mapping_draw_NORM.Mapping_NORM(dataset, 'CNH')
-
-  lon, lat = RG.set_coordinate()
-  weight_lat = RG.weight_latitude(lat)
+  MP = mapping_draw_NORM.Mapping_NORM(dataset, map_prj)
 
   """Making pretubation data"""
   indir = '/work3/daichi/Data/GSM_EnData/bin/'
   uwnd_data, vwnd_data, hgt_data, tmp_data, slp_data, rain_data = RG.data_read_ft_driver(indir+date[0:8])
   pertb_uwnd,pertb_vwnd,pertb_tmp,pertb_slp = EN.data_pertb_driver(uwnd_data,vwnd_data,tmp_data,slp_data)   
- 
+  lon, lat = RG.set_coordinate()
+  weight_lat = RG.weight_latitude(lat)
+
   for imem in range(EN.mem-EN.ctrl):
     for i_level in range(EN.nz):
       pertb_uwnd[imem,i_level,:,:] = pertb_uwnd[imem,i_level,:,:]*weight_lat
@@ -43,15 +43,11 @@ if __name__ == "__main__":
       pertb_tmp[imem,i_level,:,:] = pertb_tmp[imem,i_level,:,:]*weight_lat
     pertb_slp[imem,:,:] = pertb_slp[imem,:,:]*weight_lat
 
-  # Draw spaghetti
-  level_layer=2
-  MP.spaghetti_diagram_driver(hgt_data,RG.elem[2],target_region,level_layer,ft,date)
-
-  # Draw pertubation
-  for _ in range(EN.mem):
-    DR.pertubation_driver(pertb_uwnd,RG.elem[1],target_region,level_layer,ft,date)
-
-  print('Normal END')
+  # Draw function
+  #level_layer=2
+  #MP.spaghetti_diagram_driver(hgt_data,RG.elem[2],target_region,level_layer,ft,date)
+  #for _ in range(EN.mem):
+  #  MP.pertubation_driver(pertb_uwnd,RG.elem[1],target_region,level_layer,ft,date)
 
   """Calc. dry Energy NORM"""
   dry_energy_norm = np.zeros((EN.mem-EN.ctrl,EN.ny,EN.nx))
@@ -88,7 +84,7 @@ if __name__ == "__main__":
   print('')
 
   # Draw Energy norm
-  DR.main_driver(dry_energy_norm,np.average(hgt_data,axis=0),target_region, ft, date)
-  #DR.main_driver(dry_energy_norm,slp_data[0],target_region, ft, date)
+  MP.main_driver(dry_energy_norm,np.average(hgt_data,axis=0),target_region, ft, date)
+  MP.each_elem_norm_dry_rish_driver(pertb_uwnd,pertb_vwnd,pertb_tmp,pertb_slp,target_region,ft,date)
 
   print('Normal END')
