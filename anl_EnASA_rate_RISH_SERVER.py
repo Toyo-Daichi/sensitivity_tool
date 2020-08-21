@@ -8,10 +8,12 @@ import os, sys
 sys.path.append(os.path.join(os.path.dirname(__file__), './module'))
 import numpy as np
 import matplotlib.pyplot as plt
+import warnings
+warnings.filterwarnings('ignore')
 
 #my_module
 import mapping
-import readgpv
+import readgpv_rish
 import statics_tool
 
 class Anl_ENASA:
@@ -46,7 +48,7 @@ class Anl_ENASA:
 
     for imem in range(EN.mem-EN.ctrl):
       dry_energy_norm[imem], physical_term[imem], potential_term[imem] =\
-        EN.calc_dry_EN_NORM_adjoint(pertb_uwnd[imem],pertb_vwnd[imem],pertb_tmp[imem],pertb_slp[imem])
+        EN.calc_dry_EN_NORM(pertb_uwnd[imem],pertb_vwnd[imem],pertb_tmp[imem],pertb_slp[imem])
 
       region_TE[imem] = np.sum(dry_energy_norm[imem,lat_min_index:lat_max_index,lon_min_index:lon_max_index])/dims
       
@@ -62,6 +64,7 @@ class Anl_ENASA:
       )
 
     theta = self._calc_part(region_TE)
+
     return theta
 
   def _calc_part(self, region_TE):
@@ -70,6 +73,13 @@ class Anl_ENASA:
       i_theta = region_TE[imem]/np.sum(region_TE[:])
       theta.append(i_theta)
     return theta
+
+  def _calc_part_plus_pertb(self, region_TE):
+    theta = np.zeros((EN.mem-EN.ctrl))
+    for imem in range(0, EN.mem-EN.ctrl, 2):
+      theta[imem] = region_TE[imem]/np.sum(region_TE[::2])
+    return theta
+
 
   def sensitivity_driver(self, pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_slp, theta):
     """Total Energy NORM を計算する """
@@ -100,7 +110,7 @@ class Anl_ENASA:
     lon_grd = lon_max_index-lon_min_index +1
     dims = lat_grd*lon_grd
 
-    dry_energy_norm, physical_term, potential_term = EN.calc_dry_EN_NORM_adjoint(
+    dry_energy_norm, physical_term, potential_term = EN.calc_dry_EN_NORM(
       ave_pertb_uwnd, ave_pertb_vwnd, ave_pertb_tmp, ave_pertb_slp
       )
 
@@ -123,7 +133,7 @@ class Anl_ENASA:
   def draw_driver(self, energy_norm, hgt_data, ft, date):
     """Draw sensitivity area @dry enegy norm"""
     fig, ax = plt.subplots()
-    mapp = MP.base(projection_mode='lcc')
+    mapp = MP.base(projection_mode='cyl')
     lon, lat = RG.set_coordinate() 
     x, y = MP.coord_change(mapp, lon, lat)
 
@@ -139,22 +149,22 @@ class Anl_ENASA:
 
     #norm draw
     MP.norm_contourf(mapp, x, y, energy_norm, label='scope')
-    MP.contour(mapp, x, y, hgt_data[1], elem='500hPa')
+    MP.contour(mapp, x, y, hgt_data[0], elem='850hPa')
     MP.title('NORMALIZE TE [ J/kg ] Adjoint sensitivity, FT= {}hr, INIT = {}'.format(ft,date))
     plt.show()
 
 if __name__ == "__main__":
   """Set basic info. """
-  yyyy, mm, dd, hh, init, ft = '2003', '08', '05', '12', '00', '72'
+  yyyy, mm, dd, hh, init, ft = '2018', '07', '04', '12', '00', '72'
   date = yyyy+mm+dd+hh
-  dataset = 'WFM' # 'WFM' or 'EPSW'
-  target_region = ( 25, 50, 125, 150 ) # lat_min/max, lon_min/max
+  dataset = 'EPSW' # 'WFM' or 'EPSW'
+  target_region = ( 20, 50, 120, 150 ) # lat_min/max, lon_min/max
 
   """Class & parm set """
   DR = Anl_ENASA()
-  RG = readgpv.ReadGPV(dataset,date,ft)
-  EN = readgpv.Energy_NORM(dataset)
-  MP = mapping.Mapping('CNH')
+  RG = readgpv_rish.ReadGPV(dataset,date,ft)
+  EN = readgpv_rish.Energy_NORM(dataset)
+  MP = mapping.Mapping('ALL')
 
   lon, lat = RG.set_coordinate()
   weight_lat = RG.weight_latitude(lat)
@@ -201,7 +211,10 @@ if __name__ == "__main__":
   #normalize
   print('..... @ MAKE NORMALIZE ENERGY NORM @')
   print('')
-  normal_energy_norm = statics_tool.normalize(energy_norm)
+  #normal_energy_norm = statics_tool.normalize(energy_norm)
+  normal_energy_norm = statics_tool.min_max(energy_norm)
+
+  print(np.min(normal_energy_norm), np.max(normal_energy_norm))
 
   DR.draw_driver(normal_energy_norm,np.average(hgt_data,axis=0),ft,date)
 

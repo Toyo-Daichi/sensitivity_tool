@@ -25,6 +25,13 @@ p(i=1:m)   = (p(i=1), p(i=2), ..., p(i=m)).T
 <br>
 
 ## コードの紹介
+各コードの後半に着く名称は次のことを表している。  
+- `TIGGE`: 松枝先生が取得しているTIGGEデータから作成する
+- `RISH_SERVER`: 京都大学のサーバーからアンサンブルデータを取得して作成する
+
+### スプレッド解析
+- `anl_spread.py`
+
 ### アンサンブル随伴感度解析(Ensemble adjoint sensitivity analysis; EnASA)  
 - `anl_EnASA_rate.py` 
 
@@ -38,8 +45,8 @@ for i in range(m):
 <br>
 
 ### アンサンブル特異ベクトル感度解析(Ensemble singular vector analysis; EnSVSA)  
-- `anl_EnSVSA_mode_svds.py`:特異値分解のアプローチ  
-- `anl_EnSVSA_mode_eigen.py`: 固有値問題のアプローチ
+- `anl_EnSVSA_mode_eigen.py`: 固有値問題のアプローチ 
+- `./test/anl_EnSVSA_mode_svds.py`, `./test/anl_EnSVSA_part_make_svd.py`:特異値分解のアプローチ(上記の固有値問題で解けたので図化まで作成していない)
 
 アンサンブル特異ベクトル法では、共分散`(y.T)G(y) = (p.T Y.T)G(Y p) = 1`の条件のもとで検証時刻における検証領域における擾乱`(p.T Z.T) H (Z)`を最大化する`p(i=1:m)`を求める。この問題ではラグランジュ関数からの微分から固有値問題を得る。
 
@@ -78,6 +85,7 @@ pについて微分すると、
 ![\mathbf{y}=\mathbf{Y} \mathbf{p}](https://render.githubusercontent.com/render/math?math=%5Clarge+%5Cdisplaystyle+%5Cmathbf%7Bx%7D%3D%5Cmathbf%7BY%7D+%5Cmathbf%7Bp%7D)
 
 #### 摂動が正負の組で作成されている場合の対処方法
+今回はモードを10までに指定して作成する手法にした。※正負に分けるのは下処理を加える必要があったため  
 - メンバー数を半減して、正負の組を片方のみにする。 (Matsueda et al. 2011)
 - モード数をメンバー数以下にして、固有ベクトルを作成する。`Z.T Z`の固有ベクトルの行列サイズ`(m, m)`はなので、モード抽出では`(m, mode)`とする。
 
@@ -99,7 +107,7 @@ pについて微分すると、
 
 <br>
 
-## データ取得
+## データ取得※
 `data_get.sh` : grib形式のデータを取得するコード(※1)
 
 [京都大学生存圏研究所（RISH: Research Institute for Sustainable Humanosphere）](http://database.rish.kyoto-u.ac.jp/arch/jmadata/gpv-original.html)から取得することができる。詳しい格子情報や配信時間等は[気象行支援センター](http://database.rish.kyoto-u.ac.jp/arch/jmadata/gpv-original.html)に記載されている。
@@ -124,12 +132,13 @@ pについて微分すると、
 
 ## 作成情報
 - 制作開始日　2020年7月5日
+- TIGGEでの制作開始日　2020年8月17日
 
 <br>
 
 ## 今後の計画
-1. 参考文献の再現実験を行う。 
-2. 近年の大気場でも同様の実験で行ってみる。 
+1. 参考文献の再現実験を行う。 -> OK  
+2. 近年の大気場でも同様の実験で行ってみる。 -> NOT ENOUGH  
 3. 湿潤エネルギーノルムの導入を考える。
 
 <br>

@@ -12,7 +12,6 @@ import matplotlib.pyplot as plt
 #my_module
 import readgpv
 import setup
-import statics_tool
 
 class Anl_ENSVSA:
   """Ensemble Singular Vector sensitivity anaysis(特異値ベクトルを求める)
@@ -47,7 +46,6 @@ class Anl_ENSVSA:
 
     return U_array, sigma_array, V_array
 
-    
 if __name__ == "__main__":
   """Set basic info. """
   yyyy, mm, dd, hh, init, ft = '2003', '08', '05', '12', '00', '72'
@@ -99,8 +97,4 @@ if __name__ == "__main__":
   print('..... @ MAKE SV decomposion @')
   U_array, sigma_array, V_array = DR.singular_vector_sensitivity_driver(dims_xy,pertb_uwnd,pertb_vwnd,pertb_tmp,pertb_slp,date,ft)
   print('')
-
-  print(U_array.shape)
-
-
   print('Normal END')

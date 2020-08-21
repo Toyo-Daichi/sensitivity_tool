@@ -75,17 +75,19 @@ class ReadGPV:
 
     return uwnd_data, vwnd_data, hgt_data, tmp_data, slp_data, rain_data
 
-  def set_gpv(self, gpv_file, elem):
-    return self._open_gpv(gpv_file).reshape(elem, self.nz, self.mem, self.ny, self.nx)
+  def set_gpv(self, gpv_file, elem, *, endian='little'):
+    return self._open_gpv(gpv_file,endian=endian).reshape(elem, self.nz, self.mem, self.ny, self.nx)
 
-  def read_gpv(self, gpv_file, elem):
-    return self._open_gpv(gpv_file).reshape(elem, self.nz, self.ny, self.nx)
+  def read_gpv(self, gpv_file, elem, *, endian='little'):
+    return self._open_gpv(gpv_file,endian=endian).reshape(elem, self.nz, self.ny, self.nx)
 
-  def _open_gpv(self, gpv_file, *, mode='default'):
+  def _open_gpv(self, gpv_file, *, endian='little'):
     print('...... Preparating for {}'.format(gpv_file))
     with open(gpv_file, 'rb') as ifile:
-      if mode == 'default':
+      if endian == 'little':
         data = np.fromfile(ifile, dtype='<f', sep = '')
+      elif endian == 'big':
+        data = np.fromfile(ifile, dtype='>f', sep = '')
     return data
 
   def set_coordinate(self, dx=2.5, dy=2.5):
@@ -98,7 +100,7 @@ class ReadGPV:
     return X, Y
 
   def weight_latitude(self, lat:np.ndarray) -> np.ndarray:
-    return np.sqrt(np.cos(np.deg2rad(lat)))
+    return np.sqrt(np.cos(np.deg2rad(np.abs(lat))))
 
 class Energy_NORM:
   def __init__(self,dataset):
@@ -106,7 +108,7 @@ class Energy_NORM:
     self.nx, self.ny, self.nz, self.mem = ST.set_prm()
     self.press_levels = ST.set_pressure_levels()
     self.ctrl, self.surf=1,1
-    self.Pr:float=1000.0
+    self.Pr:float=700.0
     self.Tr:float=270.0
     self.cp:float=1004.0
     self.R:float=287.0
@@ -142,7 +144,7 @@ class Energy_NORM:
     #print('..... CALCULATE WEIGHT AVE. SUM OF WEIGHT ', sum_of_weight)
     return weight_average
     
-  def calc_dry_EN_NORM_adjoint(self,
+  def calc_dry_EN_NORM(self,
     u_prime:np.ndarray, v_prime:np.ndarray, tmp_prime:np.ndarray, slp_prime:np.ndarray 
   ):
     """乾燥エネルギーノルムの計算
@@ -168,48 +170,13 @@ class Energy_NORM:
     #Potential
     tmp_term = (self.cp/self.Tr)*((tmp_prime)**2)
     vint_tmp_term = self._vint(tmp_term,self.press_levels[1:])/(2*self.Pr)
-    slp_term = (self.R*self.Tr/self.Pr)*(slp_prime**2/self.Pr)*0.5
+    slp_term = (self.R*self.Tr/self.Pr)*((slp_prime**2)/self.Pr)*0.5
     vint_potential_term = vint_tmp_term + slp_term
 
     #SUM OF TERM
     dry_energy_norm = vint_physical_term + vint_potential_term
 
     return dry_energy_norm, vint_physical_term, vint_potential_term
-
-  def calc_dry_EN_NORM_svd(self,
-    u_prime:np.ndarray, v_prime:np.ndarray, tmp_prime:np.ndarray, slp_prime:np.ndarray 
-  ):
-    """乾燥エネルギーノルムの計算
-    Args:
-      u_prime   (np.ndarray): 東西風のコントロールランからの予測時間における摂動
-      v_prime   (np.ndarray): 南北風のコントロールランからの予測時間における摂動
-      tmp_prime (np.ndarray): 気温のコントロールランからの予測時間における摂動
-      slp_prime (np.ndarray): 海面更生気圧のコントロールランからの予測時間における摂動
-    Parameters:
-      self.Pr (float) : 経験的に求めた参照気圧. Defaults to 1000 hPa.
-      self.Tr (float) : 経験的に求めた参照気温. Defaults to 270 K.
-      self.cp (float) : 定圧比熱. Defaults to 1004 J/K*kg.
-      self.R  (float) : 気体の状態定数. Defaults to 287.0 J/K*kg.
-    Returns:
-      dry_energy_norm (np.ndarray): トータル乾燥エネルギーノルム(J/kg)
-      constitution -> [緯度, 経度] 
-    """
-
-    #Physics
-    physical_term = (u_prime)**2+(v_prime)**2
-    vint_physical_term = self._vint(physical_term,self.press_levels)/(2*self.Pr)
-
-    
-    #Potential
-    tmp_term = (tmp_prime)**2
-    vint_tmp_term = self._vint(tmp_term,self.press_levels[1:])/(2*self.Pr)
-    slp_term = (slp_prime**2)*0.5
-    vint_potential_term = vint_tmp_term + slp_term
-
-    #SUM OF TERM
-    dry_energy_norm = vint_physical_term + vint_potential_term
-
-    return dry_energy_norm, vint_physical_term, vint_potential_term 
 
   def calc_humid_EN_NORM(self):
     pass
