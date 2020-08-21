@@ -51,8 +51,6 @@ if __name__ == "__main__":
   for imem in range(EN.mem-EN.ctrl):
     MP.pertubation_driver(pertb_uwnd[imem],RG.elem[0],target_region,level_layer,ft,date,imem,prj=set_prj)
 
-  sys.exit()
-
   """Calc. dry Energy NORM"""
   dry_energy_norm = np.zeros((EN.mem-EN.ctrl,EN.ny,EN.nx))
   physical_term   = np.zeros((EN.mem-EN.ctrl,EN.ny,EN.nx))

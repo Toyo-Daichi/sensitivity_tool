@@ -81,10 +81,10 @@ class Mapping_NORM:
     self.MP.saving('{}_pertubation_{:03}'.format(center,imem+1),'./work/')
     plt.close("all")
 
-  def main_norm_driver(self, dry_energy_norm, hgt_data, target_region, ft, date):
+  def main_norm_driver(self, dry_energy_norm, hgt_data, target_region, ft, date, * ,prj='lcc'):
     """Draw sensitivity area @dry enegy norm"""
     fig, ax = plt.subplots()
-    mapp = self.MP.base(projection_mode='lcc')
+    mapp = self.MP.base(projection_mode=prj)
     lon, lat = self.RG.set_coordinate() 
     x, y = self.MP.coord_change(mapp, lon, lat)
     label_cfmt = 'spread_{}hr'.format(ft)
@@ -105,7 +105,8 @@ class Mapping_NORM:
 
   def each_elem_norm_dry_rish_driver(self, 
     pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_slp, # pertbuation data
-    press_levels, target_region, ft, date 
+    press_levels, target_region, ft, date,
+    *, prj='lcc'
     ):
 
     size_x, size_y = 16, 18
@@ -123,7 +124,7 @@ class Mapping_NORM:
     # UWND
     for index, level in enumerate(press_levels):
       ax = fig.add_subplot(row,column,1+4*index)
-      mapp = self.MP.base(projection_mode='lcc')
+      mapp = self.MP.base(projection_mode=prj)
       x, y = self.MP.coord_change(mapp, lon, lat)
 
       self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
@@ -134,7 +135,7 @@ class Mapping_NORM:
     # VWND
     for index, level in enumerate(press_levels):
       ax = fig.add_subplot(row,column,1+2*index)
-      mapp = self.MP.base(projection_mode='lcc')
+      mapp = self.MP.base(projection_mode=prj)
       x, y = self.MP.coord_change(mapp, lon, lat)
 
       self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
@@ -145,7 +146,7 @@ class Mapping_NORM:
     #TMP
     for index, level in enumerate(press_levels[1:]):
       ax = fig.add_subplot(row,column,3)
-      mapp = self.MP.base(projection_mode='lcc')
+      mapp = self.MP.base(projection_mode=prj)
       x, y = self.MP.coord_change(mapp, lon, lat)
 
       self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
@@ -155,7 +156,7 @@ class Mapping_NORM:
 
     #SLP
     ax = fig.add_subplot(row,column,16)
-    mapp = self.MP.base(projection_mode='lcc')
+    mapp = self.MP.base(projection_mode=prj)
     x, y = self.MP.coord_change(mapp, lon, lat)
 
     self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
@@ -163,5 +164,145 @@ class Mapping_NORM:
     self.MP.title('SLP [ J/kg ] ')
     print('..... FINISH SLP ')
 
-    #fig.title(' Ensemble based Sensitivity Analysis (JMA) Valid time: {}, Target region: JPN'.format(date))
+    plt.suptitle(' Ensemble based Sensitivity Analysis (JMA) Valid time: {}, Target region: JPN'.format(date))
+    plt.show()
+
+  def each_elem_norm_dry_tigge_driver(self, 
+    pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_ps, # pertbuation data
+    press_levels, target_region, ft, date, 
+    *, prj='lcc', center='JMA'
+    ):
+
+    size_x, size_y = 16, 18
+    row, column = 8, 4
+    label_cfmt = 'spread_{}hr'.format(ft)
+
+    fig = plt.figure(figsize = (size_x, size_y))
+    lon, lat = self.RG.set_coordinate() 
+    lat_min_index, lat_max_index, lon_min_index, lon_max_index = \
+      self.EN.verification_region(lon,lat,
+          area_lat_min=target_region[1], area_lat_max=target_region[0],
+          area_lon_min=target_region[2], area_lon_max=target_region[3]
+      )
+
+    # UWND
+    for index, level in enumerate(press_levels):
+      ax = fig.add_subplot(row,column,1+4*index)
+      mapp = self.MP.base(projection_mode=prj)
+      x, y = self.MP.coord_change(mapp, lon, lat)
+
+      self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
+      self.MP.norm_contourf(mapp, x, y, pertb_uwnd[index]**2 ,label=label_cfmt)
+      self.MP.title('UWND [ J/kg ] {}hPa '.format(level))
+      print('..... FINISH UWND level {}hPa'.format(level))
+
+    # VWND
+    for index, level in enumerate(press_levels):
+      ax = fig.add_subplot(row,column,1+2*index)
+      mapp = self.MP.base(projection_mode=prj)
+      x, y = self.MP.coord_change(mapp, lon, lat)
+
+      self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
+      self.MP.norm_contourf(mapp, x, y, pertb_vwnd[index]**2 ,label=label_cfmt)
+      self.MP.title('VWND [ J/kg ] {}hPa '.format(level))
+      print('..... FINISH VWND level {}hPa'.format(level))
+
+    #TMP
+    for index, level in enumerate(press_levels):
+      ax = fig.add_subplot(row,column,3)
+      mapp = self.MP.base(projection_mode=prj)
+      x, y = self.MP.coord_change(mapp, lon, lat)
+
+      self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
+      self.MP.norm_contourf(mapp, x, y, (pertb_tmp[index]**2)*(1004/270) ,label=label_cfmt)
+      self.MP.title('TMP [ J/kg ] {}hPa '.format(level))
+      print('..... FINISH TMP level {}hPa'.format(level))
+
+    #SLP
+    ax = fig.add_subplot(row,column,16)
+    mapp = self.MP.base(projection_mode=prj)
+    x, y = self.MP.coord_change(mapp, lon, lat)
+
+    self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
+    self.MP.norm_contourf(mapp, x, y, ((pertb_ps[0]**2)/700)*(287*270) ,label=label_cfmt)
+    self.MP.title('SLP [ J/kg ] ')
+    print('..... FINISH SLP ')
+
+    plt.suptitle(' Ensemble based Sensitivity Analysis ({}) Valid time: {}, Target region: JPN'.format(center,date))
+    plt.show()
+  
+
+  def each_elem_norm_humid_tigge_driver(self, 
+    pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_ps, # pertbuation data
+    press_levels, target_region, ft, date, 
+    *, prj='lcc', center='JMA'
+    ):
+
+    size_x, size_y = 16, 18
+    row, column = 8, 5
+    label_cfmt = 'spread_{}hr'.format(ft)
+
+    fig = plt.figure(figsize = (size_x, size_y))
+    lon, lat = self.RG.set_coordinate() 
+    lat_min_index, lat_max_index, lon_min_index, lon_max_index = \
+      self.EN.verification_region(lon,lat,
+          area_lat_min=target_region[1], area_lat_max=target_region[0],
+          area_lon_min=target_region[2], area_lon_max=target_region[3]
+      )
+
+    # UWND
+    for index, level in enumerate(press_levels):
+      ax = fig.add_subplot(row,column,1+4*index)
+      mapp = self.MP.base(projection_mode=prj)
+      x, y = self.MP.coord_change(mapp, lon, lat)
+
+      self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
+      self.MP.norm_contourf(mapp, x, y, pertb_uwnd[index]**2 ,label=label_cfmt)
+      self.MP.title('UWND [ J/kg ] {}hPa '.format(level))
+      print('..... FINISH UWND level {}hPa'.format(level))
+
+    # VWND
+    for index, level in enumerate(press_levels):
+      ax = fig.add_subplot(row,column,1+2*index)
+      mapp = self.MP.base(projection_mode=prj)
+      x, y = self.MP.coord_change(mapp, lon, lat)
+
+      self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
+      self.MP.norm_contourf(mapp, x, y, pertb_vwnd[index]**2 ,label=label_cfmt)
+      self.MP.title('VWND [ J/kg ] {}hPa '.format(level))
+      print('..... FINISH VWND level {}hPa'.format(level))
+
+    #TMP
+    for index, level in enumerate(press_levels):
+      ax = fig.add_subplot(row,column,3)
+      mapp = self.MP.base(projection_mode=prj)
+      x, y = self.MP.coord_change(mapp, lon, lat)
+
+      self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
+      self.MP.norm_contourf(mapp, x, y, (pertb_tmp[index]**2)*(1004/270) ,label=label_cfmt)
+      self.MP.title('TMP [ J/kg ] {}hPa '.format(level))
+      print('..... FINISH TMP level {}hPa'.format(level))
+
+    #SPFH
+    for index, level in enumerate(press_levels):
+      ax = fig.add_subplot(row,column,3)
+      mapp = self.MP.base(projection_mode=prj)
+      x, y = self.MP.coord_change(mapp, lon, lat)
+
+      self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
+      self.MP.norm_contourf(mapp, x, y, (pertb_tmp[index]**2)*(1004/270) ,label=label_cfmt)
+      self.MP.title('TMP [ J/kg ] {}hPa '.format(level))
+      print('..... FINISH TMP level {}hPa'.format(level))
+
+    #SLP
+    ax = fig.add_subplot(row,column,16)
+    mapp = self.MP.base(projection_mode=prj)
+    x, y = self.MP.coord_change(mapp, lon, lat)
+
+    self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
+    self.MP.norm_contourf(mapp, x, y, ((pertb_ps[0]**2)/700)*(287*270) ,label=label_cfmt)
+    self.MP.title('SLP [ J/kg ] ')
+    print('..... FINISH SLP ')
+
+    plt.suptitle(' Ensemble based Sensitivity Analysis ({}) Valid time: {}, Target region: JPN'.format(center,date))
     plt.show()

@@ -56,9 +56,6 @@ if __name__ == "__main__":
   for imem in range(EN.mem-EN.ctrl):
     MP.pertubation_driver(pertb_uwnd[imem],RG.elem[0],target_region,level_layer,ft,date,imem,prj=set_prj,center=center)
 
-  print('Normal END')
-  sys.exit()
-  
   """Calc. dry Energy NORM"""
   dry_energy_norm = np.zeros((EN.mem-EN.ctrl,EN.ny,EN.nx))
   physical_term   = np.zeros((EN.mem-EN.ctrl,EN.ny,EN.nx))
@@ -76,7 +73,7 @@ if __name__ == "__main__":
 
   for imem in range(EN.mem-EN.ctrl):
     dry_energy_norm[imem], physical_term[imem], potential_term[imem] =\
-    EN.calc_dry_EN_NORM(pertb_uwnd[imem],pertb_vwnd[imem],pertb_tmp[imem],pertb_slp[imem])
+    EN.calc_dry_EN_NORM(pertb_uwnd[imem],pertb_vwnd[imem],pertb_tmp[imem],pertb_ps[imem])
 
     print('')
     print('..... Check Vertification area Norm SUM {:02} {}'.format(
@@ -94,7 +91,6 @@ if __name__ == "__main__":
   print('')
 
 
-  DR.main_driver(dry_energy_norm,np.average(hgt_data,axis=0),target_region, ft, date)
-  #DR.main_driver(dry_energy_norm,slp_data[0],target_region, ft, date)
+  MP.main_driver(dry_energy_norm,np.average(hgt_data,axis=0),target_region, ft, date)
 
   print('Normal END')

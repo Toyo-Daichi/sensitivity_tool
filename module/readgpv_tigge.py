@@ -5,7 +5,6 @@ import setup
 import scipy.linalg
 import scipy.sparse
 from scipy import integrate
-import sys
 import subprocess
 
 class ReadGPV:
@@ -86,10 +85,12 @@ class Energy_NORM:
     self.nx, self.ny, self.nz, self.mem = ST.set_prm()
     self.press_levels = ST.set_pressure_levels()
     self.ctrl, self.surf = 1, 1
-    self.Pr:float=1000.0
-    self.Tr:float=270.0
-    self.cp:float=1004.0
-    self.R:float=287.0
+    self.Pr:float = 800.0
+    self.Tr:float = 270.0
+    self.cp:float = 1004.0
+    self.R:float  = 287.0
+    self.Lc:float = 287.0
+    self.wq:float = 1.0
 
   def init_array(self):
     pertb_uwnd_data = np.zeros((self.mem-self.ctrl, self.nz, self.ny, self.nx))
@@ -101,9 +102,8 @@ class Energy_NORM:
 
   def data_pertb_driver(self,uwnd,vwnd,tmp,spfh,ps):
     """コントロールランからの摂動の作成
-    **Args:
-      ctrl_run(np.ndarray): 摂動を与えていないコントロールランのデータ
-      ensm_run(np.ndarray): 各アンサンブルランのデータ
+    Args:
+      elem(np.ndarray): 各アンサンブルランのデータ(配列の初期がコントロールラン)
     Returns:
       pretb_elem_data(np.ndarray): アンサンブルランのデータからコントロールランデータを引いた擾乱のデータ
     """
@@ -119,14 +119,14 @@ class Energy_NORM:
     return pertb_uwnd_data, pertb_vwnd_data, pertb_tmp_data, pertb_spfh_data, pertb_ps_data
 
   def calc_dry_EN_NORM(self,
-    u_prime:np.ndarray, v_prime:np.ndarray, tmp_prime:np.ndarray, slp_prime:np.ndarray 
+    u_prime:np.ndarray, v_prime:np.ndarray, tmp_prime:np.ndarray, ps_prime:np.ndarray 
   ):
     """乾燥エネルギーノルムの計算
-    **Args:
+    Args:
       u_prime   (np.ndarray): 東西風のコントロールランからの予測時間における摂動
       v_prime   (np.ndarray): 南北風のコントロールランからの予測時間における摂動
       tmp_prime (np.ndarray): 気温のコントロールランからの予測時間における摂動
-      slp_prime (np.ndarray): 海面更生気圧のコントロールランからの予測時間における摂動
+      ps_prime  (np.ndarray): 地表面気圧のコントロールランからの予測時間における摂動
     Parameters:
       self.Pr (float) : 経験的に求めた参照気圧. Defaults to 1000 hPa.
       self.Tr (float) : 経験的に求めた参照気温. Defaults to 270 K.
@@ -143,9 +143,10 @@ class Energy_NORM:
     
     #Potential
     tmp_term = (self.cp/self.Tr)*((tmp_prime)**2)
-    vint_tmp_term = self._vint(tmp_term,self.press_levels[1:])/(2*self.Pr)
-    slp_term = (self.R*self.Tr/self.Pr)*(slp_prime**2/self.Pr)*0.5
-    vint_potential_term = vint_tmp_term + slp_term
+    vint_tmp_term = self._vint(tmp_term,self.press_levels[:])/(2*self.Pr)
+
+    ps_term = (self.R*self.Tr/self.Pr)*(ps_prime**2/self.Pr)*0.5
+    vint_potential_term = vint_tmp_term + ps_term
 
     #SUM OF TERM
     dry_energy_norm = vint_physical_term + vint_potential_term
