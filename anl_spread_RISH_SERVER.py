@@ -84,7 +84,7 @@ if __name__ == "__main__":
   print('')
 
   # Draw Energy norm
-  MP.main_driver(dry_energy_norm,np.average(hgt_data,axis=0),target_region, ft, date)
-  MP.each_elem_norm_dry_rish_driver(pertb_uwnd,pertb_vwnd,pertb_tmp,pertb_slp,target_region,ft,date)
+  MP.main_norm_driver(dry_energy_norm,np.average(hgt_data,axis=0),target_region, ft, date)
+  MP.each_elem_norm_dry_rish_driver(pertb_uwnd[0],pertb_vwnd[0],pertb_tmp[0],pertb_slp[0],target_region,ft,date)
 
   print('Normal END')

@@ -98,13 +98,13 @@ class Mapping_NORM:
 
   def each_elem_norm_dry_rish_driver(self, 
     pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_slp,
-    target_region, press_level, ft, date
+    target_region, ft, date
     ):
 
     size_x, size_y = 16, 18
     row, column = 4, 4
     fig = plt.figure(figsize = (size_x, size_y))
-    ax = [0]*max
+    lon, lat = self.RG.set_coordinate() 
     lat_min_index, lat_max_index, lon_min_index, lon_max_index = \
       self.EN.verification_region(lon,lat,
           area_lat_min=target_region[1], area_lat_max=target_region[0],
@@ -114,7 +114,6 @@ class Mapping_NORM:
     # UWND
     ax = fig.add_subplot(4,4,1)
     mapp = self.MP.base(projection_mode='lcc')
-    lon, lat = self.RG.set_coordinate() 
     x, y = self.MP.coord_change(mapp, lon, lat)
 
     self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
@@ -123,8 +122,6 @@ class Mapping_NORM:
 
     ax = fig.add_subplot(4,4,5)
     mapp = self.MP.base(projection_mode='lcc')
-    lon, lat = self.RG.set_coordinate() 
-    x, y = self.MP.coord_change(mapp, lon, lat)
 
     self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
     self.MP.norm_contourf(mapp, x, y, pertb_uwnd[2]**2 ,label='spread_{}hr'.format(ft))
@@ -132,8 +129,6 @@ class Mapping_NORM:
 
     ax = fig.add_subplot(4,4,9)
     mapp = self.MP.base(projection_mode='lcc')
-    lon, lat = self.RG.set_coordinate() 
-    x, y = self.MP.coord_change(mapp, lon, lat)
 
     self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
     self.MP.norm_contourf(mapp, x, y, pertb_uwnd[1]**2 ,label='spread_{}hr'.format(ft))
@@ -141,8 +136,6 @@ class Mapping_NORM:
 
     ax = fig.add_subplot(4,4,13)
     mapp = self.MP.base(projection_mode='lcc')
-    lon, lat = self.RG.set_coordinate() 
-    x, y = self.MP.coord_change(mapp, lon, lat)
 
     self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
     self.MP.norm_contourf(mapp, x, y, pertb_uwnd[3]**2 ,label='spread_{}hr'.format(ft))
@@ -151,8 +144,6 @@ class Mapping_NORM:
     # VWND
     ax = fig.add_subplot(4,4,2)
     mapp = self.MP.base(projection_mode='lcc')
-    lon, lat = self.RG.set_coordinate() 
-    x, y = self.MP.coord_change(mapp, lon, lat)
 
     self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
     self.MP.norm_contourf(mapp, x, y, pertb_vwnd[3]**2 ,label='spread_{}hr'.format(ft))
@@ -160,8 +151,6 @@ class Mapping_NORM:
 
     ax = fig.add_subplot(4,4,6)
     mapp = self.MP.base(projection_mode='lcc')
-    lon, lat = self.RG.set_coordinate() 
-    x, y = self.MP.coord_change(mapp, lon, lat)
 
     self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
     self.MP.norm_contourf(mapp, x, y, pertb_vwnd[2]**2 ,label='spread_{}hr'.format(ft))
@@ -169,8 +158,6 @@ class Mapping_NORM:
 
     ax = fig.add_subplot(4,4,10)
     mapp = self.MP.base(projection_mode='lcc')
-    lon, lat = self.RG.set_coordinate() 
-    x, y = self.MP.coord_change(mapp, lon, lat)
 
     self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
     self.MP.norm_contourf(mapp, x, y, pertb_vwnd[1]**2 ,label='spread_{}hr'.format(ft))
@@ -178,8 +165,6 @@ class Mapping_NORM:
 
     ax = fig.add_subplot(4,4,14)
     mapp = self.MP.base(projection_mode='lcc')
-    lon, lat = self.RG.set_coordinate() 
-    x, y = self.MP.coord_change(mapp, lon, lat)
 
     self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
     self.MP.norm_contourf(mapp, x, y, pertb_tmp[2]**2 ,label='spread_{}hr'.format(ft))
@@ -188,39 +173,31 @@ class Mapping_NORM:
     #TMP
     ax = fig.add_subplot(4,4,3)
     mapp = self.MP.base(projection_mode='lcc')
-    lon, lat = self.RG.set_coordinate() 
-    x, y = self.MP.coord_change(mapp, lon, lat)
 
     self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
-    self.MP.norm_contourf(mapp, x, y, pertb_tmp[1]**2 ,label='spread_{}hr'.format(ft))
+    self.MP.norm_contourf(mapp, x, y, (pertb_tmp[2]**2)*(1004/270) ,label='spread_{}hr'.format(ft))
     self.MP.title('TMP [ J/kg ] FT={}hr INIT = {}'.format(ft,date))
 
     ax = fig.add_subplot(4,4,7)
     mapp = self.MP.base(projection_mode='lcc')
-    lon, lat = self.RG.set_coordinate() 
-    x, y = self.MP.coord_change(mapp, lon, lat)
 
     self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
-    self.MP.norm_contourf(mapp, x, y, pertb_tmp[2]**2 ,label='spread_{}hr'.format(ft))
+    self.MP.norm_contourf(mapp, x, y, (pertb_tmp[1]**2)*(1004/270) ,label='spread_{}hr'.format(ft))
     self.MP.title('TMP [ J/kg ] FT={}hr INIT = {}'.format(ft,date))
 
     ax = fig.add_subplot(4,4,11)
     mapp = self.MP.base(projection_mode='lcc')
-    lon, lat = self.RG.set_coordinate() 
-    x, y = self.MP.coord_change(mapp, lon, lat)
 
     self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
-    self.MP.norm_contourf(mapp, x, y, pertb_tmp[0]**2 ,label='spread_{}hr'.format(ft))
+    self.MP.norm_contourf(mapp, x, y, (pertb_tmp[0]**2)*(1004/270) ,label='spread_{}hr'.format(ft))
     self.MP.title('TMP [ J/kg ] FT={}hr INIT = {}'.format(ft,date))
 
-    #TMP
+    #SLP
     ax = fig.add_subplot(4,4,16)
     mapp = self.MP.base(projection_mode='lcc')
-    lon, lat = self.RG.set_coordinate() 
-    x, y = self.MP.coord_change(mapp, lon, lat)
 
     self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
-    self.MP.norm_contourf(mapp, x, y, pertb_slp[0]**2 ,label='spread_{}hr'.format(ft))
+    self.MP.norm_contourf(mapp, x, y, (pertb_slp[0]**2/700)*(287*270) ,label='spread_{}hr'.format(ft))
     self.MP.title('SLP [ J/kg ] FT={}hr INIT = {}'.format(ft,date))
 
     plt.show()
