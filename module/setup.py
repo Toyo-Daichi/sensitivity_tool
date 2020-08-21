@@ -13,7 +13,7 @@ class Setup:
     elif self.dataset == 'TIGGE_JMA':
       nx, ny, nz, mem = 288, 145, 8, 27 
     elif self.dataset == 'TIGGE_NCEP':
-      nx, ny, nz, mem = 288, 145, 8, 17 
+      nx, ny, nz, mem = 288, 145, 8, 21 
     elif self.dataset == 'TIGGE_ECMWF':
       nx, ny, nz, mem = 288, 145, 8, 51 
     elif self.dataset == 'TIGGE_CMC':
