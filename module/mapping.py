@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 """ If you use local env., please check out. """
-#
 #import os, conda
 #conda_file_dir = conda.__file__
 #conda_dir = conda_file_dir.split('lib')[0]

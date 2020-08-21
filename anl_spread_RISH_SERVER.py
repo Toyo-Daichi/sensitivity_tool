@@ -12,107 +12,29 @@ import warnings
 warnings.filterwarnings('ignore')
 
 #my_module
-import mapping
+import mapping_draw_NORM
 import readgpv_rish
-
-class Anl_SPREAD:
-  """Ensemble spread anaysis(for RISH)
-    検証時刻でのトータルエネルギーノルムを作成。
-    詳細は, README.md or Enomoto et al. (2015)に記載されている.
-  """
-  
-  def __init__(self):
-    pass
-     
-  def main_driver(self, dry_energy_norm, hgt_data, target_region, ft, date):
-    """Draw sensitivity area @dry enegy norm"""
-    fig, ax = plt.subplots()
-    mapp = MP.base(projection_mode='lcc')
-    lon, lat = RG.set_coordinate() 
-    x, y = MP.coord_change(mapp, lon, lat)
-
-    lat_min_index, lat_max_index, lon_min_index, lon_max_index = \
-      EN.verification_region(lon,lat,
-          area_lat_min=target_region[1], area_lat_max=target_region[0],
-          area_lon_min=target_region[2], area_lon_max=target_region[3]
-      )
-
-    #vertifcation region
-    MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
-    
-    MP.norm_contourf(mapp, x, y, np.average(dry_energy_norm[1:26:2],axis=0), label='spread_{}hr'.format(ft))
-    MP.contour(mapp, x, y, hgt_data[0], elem='850hPa')
-    MP.title('TE spread [ J/kg ] FT={}hr INIT = {}'.format(ft,date))
-    plt.show()
-
-  def spaghetti_diagram_driver(self, data, elem, target_region, level_layer, ft, date):
-    fig, ax = plt.subplots()
-    mapp = MP.base(projection_mode='lcc')
-    lon, lat = RG.set_coordinate() 
-    x, y = MP.coord_change(mapp, lon[0:EN.ny,:], lat[0:EN.ny,:])
-    level = RG.press_levels[level_layer]
-
-    lat_min_index, lat_max_index, lon_min_index, lon_max_index = \
-      EN.verification_region(lon,lat,
-          area_lat_min=target_region[1], area_lat_max=target_region[0],
-          area_lon_min=target_region[2], area_lon_max=target_region[3]
-      )
-
-    #vertifcation region
-    MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
-    
-    for _ in range(1,EN.mem-1):
-      MP.contour(mapp, x, y, data[_, level_layer, 0:EN.ny, :], elem='850hPa',colors='blue')
-
-    MP.contour(mapp, x, y, data[0, level_layer, 0:EN.ny, :], elem='850hPa', linewidths=2.0)
-
-    MP.title('{} SPAGHETTI DIAGRAM level={}hPa FT={}hr INIT = {}'.format(elem,level,ft,date))
-    plt.show()
-
-  def pertubation_driver(self, pertb_data, elem, target_region, level_layer, ft, date):
-    fig, ax = plt.subplots()
-    mapp = MP.base(projection_mode='lcc')
-    lon, lat = RG.set_coordinate() 
-    lat_size=37
-    x, y = MP.coord_change(mapp, lon[0:lat_size,:], lat[0:lat_size,:])
-    level = RG.press_levels[level_layer]
-
-
-    lat_min_index, lat_max_index, lon_min_index, lon_max_index = \
-      EN.verification_region(lon,lat,
-          area_lat_min=target_region[1], area_lat_max=target_region[0],
-          area_lon_min=target_region[2], area_lon_max=target_region[3]
-      )
-
-    #vertifcation region
-    MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
-    
-    MP.norm_contourf(mapp, x, y, pertb_data[_, level_layer, 0:lat_size, :]**2, label='spread_00hr')
-    MP.title('{} PERTUBATION level={}hPa, FT={}hr INIT = {}'.format(elem,level,ft,date))
-    plt.show()
-    plt.close("all")
 
 if __name__ == "__main__":
   """Set basic info. """
   yyyy, mm, dd, hh, ft = '2018', '07', '04', '12', '00'
   date = yyyy+mm+dd+hh
   dataset = 'EPSW' # 'WFM' or 'EPSW'
+  map_prj = 'CNH' 
   target_region = ( 25, 50, 125, 150 ) # lat_min/max, lon_min/max
 
   """Class & parm set """
-  DR = Anl_SPREAD()
   RG = readgpv_rish.ReadGPV(dataset,date,ft)
   EN = readgpv_rish.Energy_NORM(dataset)
-  MP = mapping.Mapping('CNH')
-
-  lon, lat = RG.set_coordinate()
-  weight_lat = RG.weight_latitude(lat)
+  MP = mapping_draw_NORM.Mapping_NORM(dataset, map_prj)
 
   """Making pretubation data"""
   indir = '/work3/daichi/Data/GSM_EnData/bin/'
   uwnd_data, vwnd_data, hgt_data, tmp_data, slp_data, rain_data = RG.data_read_ft_driver(indir+date[0:8])
   pertb_uwnd,pertb_vwnd,pertb_tmp,pertb_slp = EN.data_pertb_driver(uwnd_data,vwnd_data,tmp_data,slp_data)   
- 
+  lon, lat = RG.set_coordinate()
+  weight_lat = RG.weight_latitude(lat)
+
   for imem in range(EN.mem-EN.ctrl):
     for i_level in range(EN.nz):
       pertb_uwnd[imem,i_level,:,:] = pertb_uwnd[imem,i_level,:,:]*weight_lat
@@ -121,15 +43,11 @@ if __name__ == "__main__":
       pertb_tmp[imem,i_level,:,:] = pertb_tmp[imem,i_level,:,:]*weight_lat
     pertb_slp[imem,:,:] = pertb_slp[imem,:,:]*weight_lat
 
-  # Draw spaghetti
+  # Draw function
   #level_layer=2
-  #DR.spaghetti_diagram_driver(hgt_data,RG.elem[2],target_region,level_layer,ft,date)
-
-  # Draw pertubation
+  #MP.spaghetti_diagram_driver(hgt_data,RG.elem[2],target_region,level_layer,ft,date)
   #for _ in range(EN.mem):
-  #  DR.pertubation_driver(pertb_uwnd,RG.elem[1],target_region,level_layer,ft,date)
-
-  #print('Normal END')
+  #  MP.pertubation_driver(pertb_uwnd,RG.elem[1],target_region,level_layer,ft,date)
 
   """Calc. dry Energy NORM"""
   dry_energy_norm = np.zeros((EN.mem-EN.ctrl,EN.ny,EN.nx))
@@ -166,7 +84,7 @@ if __name__ == "__main__":
   print('')
 
   # Draw Energy norm
-  DR.main_driver(dry_energy_norm,np.average(hgt_data,axis=0),target_region, ft, date)
-  #DR.main_driver(dry_energy_norm,slp_data[0],target_region, ft, date)
+  MP.main_norm_driver(dry_energy_norm,np.average(hgt_data,axis=0),target_region, ft, date)
+  MP.each_elem_norm_dry_rish_driver(pertb_uwnd[0],pertb_vwnd[0],pertb_tmp[0],pertb_slp[0],target_region,ft,date)
 
   print('Normal END')
