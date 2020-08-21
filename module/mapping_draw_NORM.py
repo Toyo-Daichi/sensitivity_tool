@@ -48,14 +48,16 @@ class Mapping_NORM:
     self.MP.title('{} SPAGHETTI DIAGRAM level={}hPa FT={}hr INIT = {}'.format(elem,level,ft,date))
     plt.show()
 
-  def pertubation_driver(self, pertb_data, elem, target_region, level_layer, ft, date):
+  def pertubation_driver(self, pertb_data, elem, target_region, level_layer, ft, date, prj, imem):
+    """
+    コントロールランからの差(摂動)を作成
+    """
     fig, ax = plt.subplots()
-    mapp = self.MP.base(projection_mode='lcc')
+    mapp = self.MP.base(projection_mode=prj)
     lon, lat = self.RG.set_coordinate() 
     lat_size=37
     x, y = self.MP.coord_change(mapp, lon[0:lat_size,:], lat[0:lat_size,:])
-    level = self.RG.level[level_layer]
-
+    level = self.RG.press_levels[level_layer]
 
     lat_min_index, lat_max_index, lon_min_index, lon_max_index = \
       self.EN.verification_region(lon,lat,
@@ -66,9 +68,9 @@ class Mapping_NORM:
     #vertifcation region
     self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
     
-    self.MP.norm_contourf(mapp, x, y, pertb_data[_, level_layer, 0:lat_size, :]**2, label='spread_00hr')
+    self.MP.diff_contourf(mapp, x, y, pertb_data[level_layer, 0:lat_size, :], elem='normalize')
     self.MP.title('{} PERTUBATION level={}hPa, FT={}hr INIT = {}'.format(elem,level,ft,date))
-    plt.show()
+    self.MP.saving('pertubation_{:03}'.format(imem+1),'./work/')
     plt.close("all")
 
   def main_norm_driver(self, dry_energy_norm, hgt_data, target_region, ft, date):
@@ -77,6 +79,7 @@ class Mapping_NORM:
     mapp = self.MP.base(projection_mode='lcc')
     lon, lat = self.RG.set_coordinate() 
     x, y = self.MP.coord_change(mapp, lon, lat)
+    label_cfmt = 'spread_{}hr'.format(ft)
 
     lat_min_index, lat_max_index, lon_min_index, lon_max_index = \
       self.EN.verification_region(lon,lat,
@@ -89,12 +92,12 @@ class Mapping_NORM:
     
     self.MP.norm_contourf(mapp, x, y, np.average(dry_energy_norm[1:26:2],axis=0), label=label_cfmt)
     self.MP.contour(mapp, x, y, hgt_data[0], elem='850hPa')
-    self.MP.title('TE spread [ J/kg ] {}hPa '.format(level))
+    self.MP.title('TE spread [ J/kg ] FT={}hr, INIT={}'.format(ft,date))
     plt.show()
 
   def each_elem_norm_dry_rish_driver(self, 
     pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_slp, # pertbuation data
-    level, target_region, ft, date 
+    press_levels, target_region, ft, date 
     ):
 
     size_x, size_y = 16, 18
@@ -110,29 +113,29 @@ class Mapping_NORM:
       )
 
     # UWND
-    for index, level in enumerate(level):
+    for index, level in enumerate(press_levels):
       ax = fig.add_subplot(row,column,1+4*index)
       mapp = self.MP.base(projection_mode='lcc')
       x, y = self.MP.coord_change(mapp, lon, lat)
 
       self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
-      self.MP.norm_contourf(mapp, x, y, pertb_uwnd[index]**2 ,label=label_cfmt, cbar)
+      self.MP.norm_contourf(mapp, x, y, pertb_uwnd[index]**2 ,label=label_cfmt)
       self.MP.title('UWND [ J/kg ] {}hPa '.format(level))
       print('..... FINISH UWND level {}hPa'.format(level))
 
     # VWND
-    for index, level in enumerate(level):
+    for index, level in enumerate(press_levels):
       ax = fig.add_subplot(row,column,1+2*index)
       mapp = self.MP.base(projection_mode='lcc')
       x, y = self.MP.coord_change(mapp, lon, lat)
 
       self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
-      self.MP.norm_contourf(mapp, x, y, pertb_vwnd[index]**2 ,label=label_cfmt, cbar)
+      self.MP.norm_contourf(mapp, x, y, pertb_vwnd[index]**2 ,label=label_cfmt)
       self.MP.title('VWND [ J/kg ] {}hPa '.format(level))
       print('..... FINISH VWND level {}hPa'.format(level))
 
     #TMP
-    for index, level in enumerate(level[1:]):
+    for index, level in enumerate(press_levels[1:]):
       ax = fig.add_subplot(row,column,3)
       mapp = self.MP.base(projection_mode='lcc')
       x, y = self.MP.coord_change(mapp, lon, lat)
@@ -152,5 +155,5 @@ class Mapping_NORM:
     self.MP.title('SLP [ J/kg ] {}hPa '.format(level))
     print('..... FINISH SLP level {}hPa'.format(level))
 
-    fig.title(' Ensemble based Sensitivity Analysis (JMA) Valid time: {}, Target region: JPN'.format(date))
+    #fig.title(' Ensemble based Sensitivity Analysis (JMA) Valid time: {}, Target region: JPN'.format(date))
     plt.show()
