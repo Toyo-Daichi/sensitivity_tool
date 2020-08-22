@@ -132,6 +132,9 @@ class Mapping:
     elif elem == 'normalize':
       levels = np.arange(-1.0, 1.05, 0.05)
       label = '[ none ]'
+    elif elem == 'HGT':
+      levels = np.arange(-5.0, 5.01, 0.1)
+      label = '[ m ]'
     elif elem == 'small':
       levels = np.arange(-0.2, 0.21, 0.01)
       label = '[ none ]'
@@ -186,7 +189,10 @@ class Mapping:
     elif cbar_on == 1:
       return cmap
 
-  def contour(self, basemap, x, y, data, *, elem='default', colors="black", linestyles='-', linewidths=0.5):
+  def hatch_contourf(self, basemap, x, y, data, *, levels=[0.0, 5.0], extend='max'):
+    basemap.contourf(x, y, data, levels, alpha=0.0, hatches=['xx'], lw=0.5, colors='None', extend=extend)
+    
+  def contour(self, basemap, x, y, data, *, elem='default', colors="black", linestyles='-', linewidths=0.5, font_on=0):
     if elem == 'default':
       clevs = np.arange(995.0, 1020.0, 5.0) 
     elif elem == 'diff':
@@ -201,7 +207,8 @@ class Mapping:
       clevs = np.arange(970.0, 1020.0, 2.5) 
 
     contour = basemap.contour(x, y, data, clevs, colors=colors, linestyles=linestyles, linewidths=linewidths)
-    #contour.clabel(fmt='%1.1f', fontsize=8)
+    if font_on == 1:
+      contour.clabel(fmt='%1.1f', fontsize=8)
   
   def vector(self, basemap, x, y, u, v, *, skip=10, scale=1.0e-4):
     arr_skip = (slice(None,None,skip),slice(None,None,skip))

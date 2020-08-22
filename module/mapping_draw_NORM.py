@@ -17,24 +17,33 @@ import readgpv_rish, readgpv_tigge
 class Mapping_NORM:
   def __init__(self, dataset, map_prj):
     self.MP = mapping.Mapping(map_prj)
-    if dataset == 'WFM' or 'EPSW':
+    if dataset == 'WFM' or dataset == 'EPSW':
       self.RG = readgpv_rish.ReadGPV(dataset,'_','_')
       self.EN = readgpv_rish.Energy_NORM(dataset)
-    elif 'TIGEE' in dataset:
+    elif 'TIGGE' in dataset:
+      print('ok_2')
       self.RG = readgpv_tigge.ReadGPV(dataset,'_','_')
       self.EN = readgpv_tigge.Energy_NORM(dataset)
 
   def spaghetti_diagram_driver(self, 
     data, elem, target_region, level_layer, ft, date, 
-    *, prj='lcc', center='JMA'
+    *, prj='lcc', center='JMA', elem_cfmt='500hPa', level_fix=0
     ):
     """(基本は)500or850hPaのスパゲッティ図"""
     
     fig, ax = plt.subplots()
     mapp = self.MP.base(projection_mode=prj)
     lon, lat = self.RG.set_coordinate() 
-    x, y = self.MP.coord_change(mapp, lon[0:self.EN.ny,:], lat[0:self.EN.ny,:])
-    level = self.RG.press_levels[level_layer]
+    if 
+    lat_size = self.EN.ny // 2
+
+    x, y = self.MP.coord_change(mapp, lon[0:lat_size,:], lat[0:lat_size,:])
+    
+    # if 'WFM' or 'EPSW'
+    if level_fix == 1:
+      level = self.RG.press_levels[level_layer+1]
+    else:
+      level = self.RG.press_levels[level_layer]
 
     lat_min_index, lat_max_index, lon_min_index, lon_max_index = \
       self.EN.verification_region(lon,lat,
@@ -46,24 +55,35 @@ class Mapping_NORM:
     self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
     
     for _ in range(1,self.EN.mem-1):
-      self.MP.contour(mapp, x, y, data[_, level_layer, 0:self.EN.ny, :], elem='500hPa',colors='blue')
+      self.MP.contour(mapp, x, y, data[_, level_layer, 0:lat_size, :], elem=elem_cfmt,colors='blue')
 
-    self.MP.contour(mapp, x, y, data[0, level_layer, 0:self.EN.ny, :], elem='500hPa', linewidths=2.0)
+    self.MP.contour(mapp, x, y, data[0, level_layer, 0:lat_size, :], elem=elem_cfmt, linewidths=2.0, font_on=1)
 
-    self.MP.title('{} SPAGHETTI DIAGRAM level={}hPa FT={}hr INIT={} CENTER={}'.format(elem,level,ft,date,center),fontsize=8)
+    self.MP.title('{} SPAGHETTI DIAGRAM level={}hPa FT={}hr INIT={} CENTER={}'.format(elem,level,ft,date,center),fontsize=7.5)
+    plt.show()
     self.MP.saving('{}_spaghetthi_diagram'.format(center),'./work/')
 
   def pertubation_driver(self,
-    pertb_data, elem, target_region, level_layer, ft, date, imem, 
-    *, prj='lcc', center='JMA'
+    pertb_data, elem, target_region, level_layer, ft, date, imem, lat_half_on 
+    *, prj='lcc', center='JMA', elem_cfmt='HGT', level_fix=0
     ):
     """(基本は)500or850hPaのコントロールランからの差(摂動)図"""
     fig, ax = plt.subplots()
     mapp = self.MP.base(projection_mode=prj)
     lon, lat = self.RG.set_coordinate() 
-    lat_size=37
+    
+    if lat_half_on == 0:
+      lat_size = self.EN.ny
+    elif lat_half_on == 1:
+      lat_size = self.EN.ny // 2
+
     x, y = self.MP.coord_change(mapp, lon[0:lat_size,:], lat[0:lat_size,:])
-    level = self.RG.press_levels[level_layer]
+
+    # if 'WFM' or 'EPSW'
+    if level_fix == 1:
+      level = self.RG.press_levels[level_layer+1]
+    else:
+      level = self.RG.press_levels[level_layer]
 
     lat_min_index, lat_max_index, lon_min_index, lon_max_index = \
       self.EN.verification_region(lon,lat,
@@ -75,8 +95,10 @@ class Mapping_NORM:
     self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
 
     #pertubation
-    self.MP.diff_contourf(mapp, x, y, pertb_data[level_layer, 0:lat_size, :], elem='normalize')
-    self.MP.title('{} PERTUBATION level={}hPa, FT={}hr INIT={} CENTER={}'.format(elem,level,ft,date,center))
+    self.MP.diff_contourf(mapp, x, y, pertb_data[level_layer, 0:lat_size, :], elem='HGT')
+    self.MP.hatch_contourf(mapp, x, y, pertb_data[level_layer, 0:lat_size, :], levels=[8.0, 10.0], extend='max')
+    self.MP.hatch_contourf(mapp, x, y, pertb_data[level_layer, 0:lat_size, :], levels=[-10.0, -8.0], extend='min')
+    self.MP.title('{} PERTUBATION level={}hPa FT={}hr INIT={} CENTER={}'.format(elem,level,ft,date,center),fontsize=7.5)
     self.MP.saving('{}_pertubation_{:03}'.format(center,imem+1),'./work/')
     plt.close("all")
 

@@ -17,7 +17,7 @@ class Setup:
     elif self.dataset == 'TIGGE_ECMWF':
       nx, ny, nz, mem = 288, 145, 8, 51 
     elif self.dataset == 'TIGGE_CMC':
-      nx, ny, nz, mem = 288, 145, 8, 20 
+      nx, ny, nz, mem = 288, 145, 8, 21 
     elif self.dataset == 'TIGGE_UKMO':
       nx, ny, nz, mem = 288, 145, 8, 17 
 
