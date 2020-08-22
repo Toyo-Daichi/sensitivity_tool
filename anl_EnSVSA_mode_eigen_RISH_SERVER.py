@@ -123,7 +123,7 @@ class Anl_ENSVSA:
 
 if __name__ == "__main__":
   """Set basic info. """
-  yyyy, mm, dd, hh, init, ft = '2018', '07', '04', '12', '00', '72'
+  yyyy, mm, dd, hh, init, ft = '2015', '09', '09', '12', '00', '72'
   date = yyyy+mm+dd+hh
   dataset = 'EPSW' # 'WFM' or 'EPSW'
   map_prj, set_prj = 'CNH', 'lcc'

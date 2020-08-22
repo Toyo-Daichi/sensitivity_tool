@@ -136,7 +136,7 @@ class Anl_ENASA:
 
 if __name__ == "__main__":
   """Set basic info. """
-  yyyy, mm, dd, hh, init, ft = '2018', '07', '04', '12', '00', '72'
+  yyyy, mm, dd, hh, init, ft = '2015', '09', '09', '12', '00', '72'
   date = yyyy+mm+dd+hh
   dataset = 'EPSW' # 'WFM' or 'EPSW'
   map_prj, set_prj = 'CNH', 'lcc'
@@ -197,7 +197,7 @@ if __name__ == "__main__":
   print('MIN :: ', np.min(normal_energy_norm), 'MAX :: ', np.max(normal_energy_norm))
 
   """ Draw function NORM """
-  #MP.main_norm_driver(normal_energy_norm,np.average(hgt_data,axis=0),target_region,ft,date,label_cfmt='adjoint')
+  MP.main_norm_driver(normal_energy_norm,np.average(hgt_data,axis=0),target_region,ft,date,label_cfmt='adjoint')
   #MP.each_elem_norm_dry_rish_driver(ave_pertb_uwnd,ave_pertb_vwnd,ave_pertb_tmp,ave_pertb_slp,EN.press_levels,target_region,ft,date)
 
   print('Normal END')
