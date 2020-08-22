@@ -7,19 +7,18 @@ Created from 2020.8.16
 import os, sys
 sys.path.append(os.path.join(os.path.dirname(__file__), './module'))
 import numpy as np
-import matplotlib.pyplot as plt
 import warnings
 warnings.filterwarnings('ignore')
 
 #my_module
-import mapping
+import mapping_draw_NORM
 import readgpv_rish
 import statics_tool
 
 class Anl_ENSVSA:
   """
     Basic info.
-      nsemble Singular Vector sensitivity anaysis(ここでは、固有値ベクトルを求める)
+      Ensemble Singular Vector sensitivity anaysis(ここでは、固有値ベクトルを求める)
       詳細は, README.md or Enomoto et al. (2015)に記載されている.
     Note:
       Z.T G Z = (mems, dims) (dims, mems) = (mems, mems) 
@@ -35,7 +34,16 @@ class Anl_ENSVSA:
     return Z_array, dims
 
   def eigen_value_and_vector_driver(self, dims_xy, pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_slp):
-    """eigen vector """
+    """ 固有値問題
+      Eigen vector
+      Args:
+        pertb_elem (np.ndarray) : 検証領域の各要素の摂動から, Zの行列を作成
+        -> Z.T G Z = (mems, dims) (dims, mems) = (mems, mems) 
+        dims_xy (int) : 検証領域の水平グリッド数
+      Returns:
+        eigen_value (np.ndarray)  : 固有値(各モードの寄与率を計算する際に使用)
+        eigen_vector (np.ndarray) : 固有ベクトル(p_vectorに相当)
+    """
     Z_array, dims = self.init_Z_array(dims_xy)
     svd_pertb_tmp = pertb_tmp[:]*np.sqrt(EN.cp/EN.Tr)
     svd_pertb_slp = pertb_slp[:,0]*np.sqrt((EN.R*EN.Tr)/EN.Pr)
@@ -113,33 +121,12 @@ class Anl_ENSVSA:
 
     return dry_energy_norm, physical_term, potential_term
 
-  def draw_driver(self, energy_norm, hgt_data, ft, date, mode, contribute):
-    """Draw sensitivity area @dry enegy norm"""
-    fig, ax = plt.subplots()
-    mapp = MP.base(projection_mode='lcc')
-    lon, lat = RG.set_coordinate() 
-    x, y = MP.coord_change(mapp, lon, lat)
-
-    lat_min_index, lat_max_index, lon_min_index, lon_max_index = \
-      EN.verification_region(lon,lat,
-          area_lat_min=target_region[1], area_lat_max=target_region[0],
-          area_lon_min=target_region[2], area_lon_max=target_region[3]
-      )
-    
-    #vertifcation region
-    MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
-
-    #norm draw
-    MP.norm_contourf(mapp, x, y, energy_norm, label='svd')
-    MP.contour(mapp, x, y, hgt_data[0], elem='slp')
-    MP.title('NORMALIZE TE [ J/kg ] mode = 1-{0:} contribute={1:.1f}%, FT= {2:}hr, INIT = {3:}'.format(mode,contribute,ft,date),fontsize=8)
-    plt.show()
-    
 if __name__ == "__main__":
   """Set basic info. """
   yyyy, mm, dd, hh, init, ft = '2018', '07', '04', '12', '00', '72'
   date = yyyy+mm+dd+hh
   dataset = 'EPSW' # 'WFM' or 'EPSW'
+  map_prj, set_prj = 'CNH', 'lcc'
   target_region = ( 25, 50, 125, 150 ) # lat_min/max, lon_min/max
   mode = 10
 
@@ -147,8 +134,8 @@ if __name__ == "__main__":
   DR = Anl_ENSVSA()
   RG = readgpv_rish.ReadGPV(dataset,date,ft)
   EN = readgpv_rish.Energy_NORM(dataset)
-  MP = mapping.Mapping('CNH')
-  
+  MP = mapping_draw_NORM.Mapping_NORM(dataset, map_prj)
+
   lon, lat = RG.set_coordinate()
   weight_lat = RG.weight_latitude(lat)
 
@@ -220,7 +207,10 @@ if __name__ == "__main__":
   print('')
   #normal_energy_norm = statics_tool.normalize(energy_norm)
   normal_energy_norm = statics_tool.min_max(energy_norm)
-  DR.draw_driver(normal_energy_norm,np.average(slp_data,axis=0),ft,date,mode,contribute)
-  #DR.draw_driver(energy_norm,np.average(hgt_data,axis=0),ft,date,mode,contribute)
+
+   """ Draw function NORM """
+  MP.main_norm_driver(energy_norm,np.average(hgt_data,axis=0),target_region,ft,date)
+  #MP.each_elem_norm_dry_rish_driver(np.average(pertb_uwnd[::2],axis=0),np.average(pertb_vwnd[::2],axis=0),np.average(pertb_tmp[::2],axis=0),np.average(pertb_slp[::2],axis=0),EN.press_levels,target_region,ft,date)
+  #MP.each_elem_norm_dry_rish_driver(pertb_uwnd[0],pertb_vwnd[0],pertb_tmp[0],pertb_slp[0],EN.press_levels,target_region,ft,date)
 
   print('Normal END')
