@@ -89,6 +89,6 @@ if __name__ == "__main__":
   """ Draw function NORM """
   MP.main_norm_driver(dry_energy_norm,np.average(hgt_data,axis=0),target_region, ft, date)
   #MP.each_elem_norm_dry_rish_driver(np.average(pertb_uwnd[::2],axis=0),np.average(pertb_vwnd[::2],axis=0),np.average(pertb_tmp[::2],axis=0),np.average(pertb_slp[::2],axis=0),EN.press_levels,target_region,ft,date)
-  MP.each_elem_norm_dry_rish_driver(pertb_uwnd[0],pertb_vwnd[0],pertb_tmp[0],pertb_slp[0],EN.press_levels,target_region,ft,date)
+  #MP.each_elem_norm_dry_rish_driver(pertb_uwnd[0],pertb_vwnd[0],pertb_tmp[0],pertb_slp[0],EN.press_levels,target_region,ft,date)
 
   print('Normal END')

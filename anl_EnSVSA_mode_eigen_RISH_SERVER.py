@@ -208,9 +208,8 @@ if __name__ == "__main__":
   #normal_energy_norm = statics_tool.normalize(energy_norm)
   normal_energy_norm = statics_tool.min_max(energy_norm)
 
-   """ Draw function NORM """
-  MP.main_norm_driver(energy_norm,np.average(hgt_data,axis=0),target_region,ft,date)
-  #MP.each_elem_norm_dry_rish_driver(np.average(pertb_uwnd[::2],axis=0),np.average(pertb_vwnd[::2],axis=0),np.average(pertb_tmp[::2],axis=0),np.average(pertb_slp[::2],axis=0),EN.press_levels,target_region,ft,date)
-  #MP.each_elem_norm_dry_rish_driver(pertb_uwnd[0],pertb_vwnd[0],pertb_tmp[0],pertb_slp[0],EN.press_levels,target_region,ft,date)
+  """ Draw function NORM """
+  MP.main_norm_driver(normal_energy_norm,np.average(hgt_data,axis=0),target_region,ft,date,label_cfmt='SVD')
+  MP.each_elem_norm_dry_rish_driver(svd_pertb_uwnd,svd_pertb_vwnd,svd_pertb_tmp,svd_pertb_slp,EN.press_levels,target_region,ft,date)
 
   print('Normal END')

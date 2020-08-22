@@ -173,11 +173,11 @@ class Energy_NORM:
     #Potential
     tmp_term = (self.cp/self.Tr)*((tmp_prime)**2)
     #matsueda et al. (2014)
-    vint_tmp_term = self._vint(tmp_term,self.press_levels[:])*0.5
+    vint_tmp_term = self._vint(tmp_term,self.press_levels[1:])*0.5
     #enomoto et al. (2015)
-    #vint_tmp_term = self._vint(tmp_term,self.press_levels[:])/(2*self.Pr)
+    #vint_tmp_term = self._vint(tmp_term,self.press_levels[1:])/(2*self.Pr)
 
-    ps_term = (self.R*self.Tr/self.Pr)*(ps_prime**2/self.Pr)*0.5
+    ps_term = (self.R*self.Tr/self.Pr)*(slp_prime**2/self.Pr)*0.5
 
     #SUM OF TERM
     vint_potential_term = vint_tmp_term + ps_term
@@ -218,6 +218,8 @@ class Energy_NORM:
     Note:
       今回使用した積分方法はシンプソン則
     """
+    print('Pressure shape & LEVEL :: ', x_array.shape, press_array)
+
     y_array = np.empty_like(x_array[0], dtype=np.float32)
 
     for iy in range(self.ny):

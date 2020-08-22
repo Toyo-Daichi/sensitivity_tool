@@ -81,13 +81,23 @@ class Mapping_NORM:
     self.MP.saving('{}_pertubation_{:03}'.format(center,imem+1),'./work/')
     plt.close("all")
 
-  def main_norm_driver(self, dry_energy_norm, hgt_data, target_region, ft, date, * ,prj='lcc'):
+  def main_norm_driver(self, dry_energy_norm, hgt_data, target_region, ft, date, *, prj='lcc', label_cfmt='spread'):
     """Draw sensitivity area @dry enegy norm"""
     fig, ax = plt.subplots()
     mapp = self.MP.base(projection_mode=prj)
     lon, lat = self.RG.set_coordinate() 
     x, y = self.MP.coord_change(mapp, lon, lat)
-    label_cfmt = 'spread_{}hr'.format(ft)
+    
+    if label_cfmt == 'spread':
+      label_cfmt = 'spread_{}hr'.format(ft)
+      title_cfmt = 'TE spread [ J/kg ] FT={}hr, INIT={}'.format(ft,date)
+    elif label_cfmt == 'adjoint':
+      #label_cfmt = 'adjoint'
+      label_cfmt = 'normal'
+      title_cfmt = 'NORMALIZE TE Adjoint sensitivity [ J/kg ] FT={}hr, INIT={}'.format(ft,date)
+    elif label_cfmt == 'SVD':
+      label_cfmt = 'normal'
+      title_cfmt = 'NORMALIZE TE MODE sensitivity [ J/kg ] FT={}hr, INIT={}'.format(ft,date)
 
     lat_min_index, lat_max_index, lon_min_index, lon_max_index = \
       self.EN.verification_region(lon,lat,
@@ -98,9 +108,10 @@ class Mapping_NORM:
     #vertifcation region
     self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
     
-    self.MP.norm_contourf(mapp, x, y, np.average(dry_energy_norm[1:26:2],axis=0), label=label_cfmt)
+    self.MP.norm_contourf(mapp, x, y, dry_energy_norm, label=label_cfmt)
+    #self.MP.norm_contourf(mapp, x, y, np.average(dry_energy_norm[1:26:2],axis=0), label=label_cfmt)
     self.MP.contour(mapp, x, y, hgt_data[0], elem='850hPa')
-    self.MP.title('TE spread [ J/kg ] FT={}hr, INIT={}'.format(ft,date))
+    self.MP.title(title_cfmt)
     plt.show()
 
   def each_elem_norm_dry_rish_driver(self, 
@@ -128,7 +139,7 @@ class Mapping_NORM:
       x, y = self.MP.coord_change(mapp, lon, lat)
 
       self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
-      self.MP.norm_contourf(mapp, x, y, pertb_uwnd[index]**2 ,label=label_cfmt)
+      self.MP.norm_contourf(mapp, x, y, 0.5*(pertb_uwnd[index]**2) ,label=label_cfmt)
       self.MP.title('UWND [ J/kg ] {}hPa '.format(level))
       print('..... FINISH UWND level {}hPa'.format(level))
 
@@ -139,7 +150,7 @@ class Mapping_NORM:
       x, y = self.MP.coord_change(mapp, lon, lat)
 
       self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
-      self.MP.norm_contourf(mapp, x, y, pertb_vwnd[index]**2 ,label=label_cfmt)
+      self.MP.norm_contourf(mapp, x, y, 0.5*(pertb_vwnd[index]**2) ,label=label_cfmt)
       self.MP.title('VWND [ J/kg ] {}hPa '.format(level))
       print('..... FINISH VWND level {}hPa'.format(level))
 
@@ -150,7 +161,7 @@ class Mapping_NORM:
       x, y = self.MP.coord_change(mapp, lon, lat)
 
       self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
-      self.MP.norm_contourf(mapp, x, y, (pertb_tmp[index]**2)*(1004/270) ,label=label_cfmt)
+      self.MP.norm_contourf(mapp, x, y, 0.5*((pertb_tmp[index]**2)*(1004/270)) ,label=label_cfmt)
       self.MP.title('TMP [ J/kg ] {}hPa '.format(level))
       print('..... FINISH TMP  level {}hPa'.format(level))
 
@@ -160,7 +171,7 @@ class Mapping_NORM:
     x, y = self.MP.coord_change(mapp, lon, lat)
 
     self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
-    self.MP.norm_contourf(mapp, x, y, ((pertb_slp[0]**2)/700)*(287*270) ,label=label_cfmt)
+    self.MP.norm_contourf(mapp, x, y, 0.5*(((pertb_slp**2)/700)*(287*270)) ,label=label_cfmt)
     self.MP.title('SLP [ J/kg ] ')
     print('..... FINISH SLP ')
 
