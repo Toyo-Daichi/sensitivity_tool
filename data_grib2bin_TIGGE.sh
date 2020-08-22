@@ -7,7 +7,7 @@ mm=7     ; e_mm=7
 dd=4     ; e_dd=4
 hh=12    ; e_hh=12
 
-center='CMC' #'JMA', 'NCEP', 'ECMWF', 'CMC', ('UKMO' ->  not include Q)
+center='ECMWF' #'JMA', 'NCEP', 'ECMWF', 'CMC', ('UKMO' ->  not include Q)
 #ft_list=( 'anl' )
 ft_list=( 'anl' '24' '48' '72' )
 level_list=( '1000' '925' '850' '700' '500' '300' '250' '200' )

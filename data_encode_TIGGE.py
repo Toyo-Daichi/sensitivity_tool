@@ -16,7 +16,7 @@ if __name__ == "__main__":
   """Set basic info. """
   yyyy, mm, dd, hh, ft = 2018, 7, 4, 12, 00 
   date = '{:04}{:02}{:02}{:02}'.format(yyyy,mm,dd,hh)
-  center = 'CMC'
+  center = 'NCEP'
   dataset = 'TIGGE_' + center 
   set_endian = 'big' 
   var_list = ('UGRD', 'VGRD', 'HGT', 'TMP', 'SPFH', 'PS')
@@ -40,7 +40,7 @@ if __name__ == "__main__":
 
     for ivar, name in enumerate(var_list):
       with open(outdir+name+'.grd','wb') as ofile:
-        _data =np.ravel(data[ivar,:,imem,:,:])
+        _data =np.ravel(data[ivar,:,imem,::-1,:])
         grd = struct.pack(cfmt,*_data)
         ofile.write(grd)
     

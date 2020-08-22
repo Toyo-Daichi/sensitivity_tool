@@ -45,9 +45,9 @@ if __name__ == "__main__":
 
   """ Draw function SPREAD """
   level_layer = 0
-  MP.spaghetti_diagram_driver(hgt_data,RG.elem[2],target_region,level_layer,ft,date,prj=set_prj,elem_cfmt='850hPa',level_fix=1)
+  MP.spaghetti_diagram_driver(hgt_data,RG.elem[2],target_region,level_layer,ft,date,prj=set_prj,elem_cfmt='850hPa',lat_half_on=1,level_fix=1)
   for imem in range(EN.mem-EN.ctrl):
-    MP.pertubation_driver(pertb_hgt[imem],RG.elem[2],target_region,level_layer,ft,date,imem,prj=set_prj,level_fix=1)
+    MP.pertubation_driver(pertb_hgt[imem],RG.elem[2],target_region,level_layer,ft,date,imem,prj=set_prj,lat_half_on=1,level_fix=1)
 
   print('Normal END')
   sys.exit()

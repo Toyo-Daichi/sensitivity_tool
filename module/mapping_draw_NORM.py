@@ -21,21 +21,23 @@ class Mapping_NORM:
       self.RG = readgpv_rish.ReadGPV(dataset,'_','_')
       self.EN = readgpv_rish.Energy_NORM(dataset)
     elif 'TIGGE' in dataset:
-      print('ok_2')
       self.RG = readgpv_tigge.ReadGPV(dataset,'_','_')
       self.EN = readgpv_tigge.Energy_NORM(dataset)
 
   def spaghetti_diagram_driver(self, 
     data, elem, target_region, level_layer, ft, date, 
-    *, prj='lcc', center='JMA', elem_cfmt='500hPa', level_fix=0
+    *, prj='lcc', center='JMA', elem_cfmt='500hPa', lat_half_on=1, level_fix=0
     ):
     """(基本は)500or850hPaのスパゲッティ図"""
     
     fig, ax = plt.subplots()
     mapp = self.MP.base(projection_mode=prj)
     lon, lat = self.RG.set_coordinate() 
-    if 
-    lat_size = self.EN.ny // 2
+
+    if lat_half_on == 0:
+      lat_size = self.EN.ny
+    elif lat_half_on == 1:
+      lat_size = self.EN.ny // 2
 
     x, y = self.MP.coord_change(mapp, lon[0:lat_size,:], lat[0:lat_size,:])
     
@@ -60,12 +62,12 @@ class Mapping_NORM:
     self.MP.contour(mapp, x, y, data[0, level_layer, 0:lat_size, :], elem=elem_cfmt, linewidths=2.0, font_on=1)
 
     self.MP.title('{} SPAGHETTI DIAGRAM level={}hPa FT={}hr INIT={} CENTER={}'.format(elem,level,ft,date,center),fontsize=7.5)
-    plt.show()
+    #plt.show()
     self.MP.saving('{}_spaghetthi_diagram'.format(center),'./work/')
 
   def pertubation_driver(self,
-    pertb_data, elem, target_region, level_layer, ft, date, imem, lat_half_on 
-    *, prj='lcc', center='JMA', elem_cfmt='HGT', level_fix=0
+    pertb_data, elem, target_region, level_layer, ft, date, imem,  
+    *, prj='lcc', center='JMA', elem_cfmt='HGT', lat_half_on=1, level_fix=0
     ):
     """(基本は)500or850hPaのコントロールランからの差(摂動)図"""
     fig, ax = plt.subplots()
