@@ -28,6 +28,7 @@ class Mapping_NORM:
     data, elem, target_region, level_layer, ft, date, 
     *, prj='lcc', center='JMA'
     ):
+    """(基本は)500or850hPaのスパゲッティ図"""
     
     fig, ax = plt.subplots()
     mapp = self.MP.base(projection_mode=prj)
@@ -50,15 +51,13 @@ class Mapping_NORM:
     self.MP.contour(mapp, x, y, data[0, level_layer, 0:self.EN.ny, :], elem='500hPa', linewidths=2.0)
 
     self.MP.title('{} SPAGHETTI DIAGRAM level={}hPa FT={}hr INIT={} CENTER={}'.format(elem,level,ft,date,center),fontsize=8)
-    plt.show()
+    self.MP.saving('{}_spaghetthi_diagram'.format(center),'./work/')
 
   def pertubation_driver(self,
     pertb_data, elem, target_region, level_layer, ft, date, imem, 
     *, prj='lcc', center='JMA'
     ):
-    """
-    コントロールランからの差(摂動)を作成
-    """
+    """(基本は)500or850hPaのコントロールランからの差(摂動)図"""
     fig, ax = plt.subplots()
     mapp = self.MP.base(projection_mode=prj)
     lon, lat = self.RG.set_coordinate() 

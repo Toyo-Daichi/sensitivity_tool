@@ -4,6 +4,7 @@ Created from 2020.8.4
 @author: Toyo_Daichi
 """
 
+from Users.toyo.Terminal.sensitivity_tool.anl_spread_TIGGE import pertb_hgt
 import os, sys
 
 from numpy.lib.function_base import average
@@ -19,7 +20,7 @@ import readgpv_rish
 
 if __name__ == "__main__":
   """Set basic info. """
-  yyyy, mm, dd, hh, ft = '2018', '07', '04', '12', '00'
+  yyyy, mm, dd, hh, ft = '2003', '01', '21', '12', '00'
   date = yyyy+mm+dd+hh
   dataset = 'EPSW' # 'WFM' or 'EPSW'
   map_prj, set_prj = 'CNH', 'lcc'
@@ -33,7 +34,7 @@ if __name__ == "__main__":
   """Making pretubation data"""
   indir = '/work3/daichi/Data/GSM_EnData/bin/'
   uwnd_data, vwnd_data, hgt_data, tmp_data, slp_data, rain_data = RG.data_read_ft_driver(indir+date[0:8])
-  pertb_uwnd,pertb_vwnd,pertb_tmp,pertb_slp = EN.data_pertb_driver(uwnd_data,vwnd_data,tmp_data,slp_data)   
+  pertb_uwnd,pertb_vwnd,pertb_tmp,pertb_hgt,pertb_slp = EN.data_pertb_driver(uwnd_data,vwnd_data,tmp_data,slp_data)   
   lon, lat = RG.set_coordinate()
   weight_lat = RG.weight_latitude(lat)
 
@@ -46,10 +47,13 @@ if __name__ == "__main__":
     pertb_slp[imem,:,:] = pertb_slp[imem,:,:]*weight_lat
 
   """ Draw function SPREAD """
-  #level_layer = 0
-  #MP.spaghetti_diagram_driver(hgt_data,RG.elem[2],target_region,level_layer,ft,date)
-  #for imem in range(EN.mem-EN.ctrl):
-  #  MP.pertubation_driver(pertb_uwnd[imem],RG.elem[0],target_region,level_layer,ft,date,imem,prj=set_prj)
+  level_layer = 0
+  MP.spaghetti_diagram_driver(hgt_data,RG.elem[2],target_region,level_layer,ft,date)
+  for imem in range(EN.mem-EN.ctrl):
+    MP.pertubation_driver(pertb_hgt[imem],RG.elem[2],target_region,level_layer,ft,date,imem,prj=set_prj)
+
+  print('Normal END')
+  sys.exit()
 
   """Calc. dry Energy NORM"""
   dry_energy_norm = np.zeros((EN.mem-EN.ctrl,EN.ny,EN.nx))

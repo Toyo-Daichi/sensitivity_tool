@@ -37,7 +37,7 @@ class ReadGPV:
       data_path(str): 週間アンサンブルデータのPATH
     Returns:
       data structure: (アンサンブル数, 鉛直層, 緯度, 経度)
-      dara (np.ndarray): 各種要素のデータ
+      data (np.ndarray): 各種要素のデータ
     """
     uwnd_data, vwnd_data, hgt_data, tmp_data, spfh_data, ps_data = self.init_array()
 
@@ -96,27 +96,29 @@ class Energy_NORM:
     pertb_uwnd_data = np.zeros((self.mem-self.ctrl, self.nz, self.ny, self.nx))
     pertb_vwnd_data = np.zeros((self.mem-self.ctrl, self.nz, self.ny, self.nx))
     pertb_tmp_data  = np.zeros((self.mem-self.ctrl, self.nz, self.ny, self.nx))
+    pertb_hgt_data  = np.zeros((self.mem-self.ctrl, self.nz, self.ny, self.nx))
     pertb_spfh_data = np.zeros((self.mem-self.ctrl, self.nz, self.ny, self.nx))
     pertb_ps_data   = np.zeros((self.mem-self.ctrl, self.nz, self.ny, self.nx))
-    return pertb_uwnd_data, pertb_vwnd_data, pertb_tmp_data, pertb_spfh_data, pertb_ps_data
+    return pertb_uwnd_data, pertb_vwnd_data, pertb_tmp_data, pertb_hgt_data, pertb_spfh_data, pertb_ps_data
 
-  def data_pertb_driver(self,uwnd,vwnd,tmp,spfh,ps):
+  def data_pertb_driver(self,uwnd,vwnd,tmp,hgt,spfh,ps):
     """コントロールランからの摂動の作成
     Args:
       elem(np.ndarray): 各アンサンブルランのデータ(配列の初期がコントロールラン)
     Returns:
       pretb_elem_data(np.ndarray): アンサンブルランのデータからコントロールランデータを引いた擾乱のデータ
     """
-    pertb_uwnd_data, pertb_vwnd_data, pertb_tmp_data, pertb_spfh_data, pertb_ps_data = self.init_array()
+    pertb_uwnd_data, pertb_vwnd_data, pertb_tmp_data, pertb_hgt_data, pertb_spfh_data, pertb_ps_data = self.init_array()
     
     for imem in range(self.mem-self.ctrl):
       pertb_uwnd_data[imem,:,:,:] = uwnd[imem+1,:,:,:] - uwnd[self.ctrl-1,:,:,:]
       pertb_vwnd_data[imem,:,:,:] = vwnd[imem+1,:,:,:] - vwnd[self.ctrl-1,:,:,:]
       pertb_tmp_data[imem,:,:,:]  = tmp[imem+1,:,:,:]  - tmp[self.ctrl-1,:,:,:]
+      pertb_hgt_data[imem,:,:,:]  = hgt[imem+1,:,:,:]  - hgt[self.ctrl-1,:,:,:]
       pertb_spfh_data[imem,:,:,:] = spfh[imem+1,:,:,:] - spfh[self.ctrl-1,:,:,:]
       pertb_ps_data[imem,:,:,:]   = ps[imem+1,:,:,:]   - ps[self.ctrl-1,:,:,:]
 
-    return pertb_uwnd_data, pertb_vwnd_data, pertb_tmp_data, pertb_spfh_data, pertb_ps_data
+    return pertb_uwnd_data, pertb_vwnd_data, pertb_tmp_data, pertb_hgt_data, pertb_spfh_data, pertb_ps_data
 
   def calc_dry_EN_NORM(self,
     u_prime:np.ndarray, v_prime:np.ndarray, tmp_prime:np.ndarray, ps_prime:np.ndarray 

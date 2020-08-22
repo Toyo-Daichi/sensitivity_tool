@@ -17,16 +17,16 @@ import readgpv_tigge
 
 """Ensemble spread anaysis(for TIGGE)
   検証時刻でのトータルエネルギーノルムを作成。
-  詳細は, README.md or Enomoto et al. (2015)に記載されている.
+  詳細は, README.md or Enomoto et al. (2015) or Matsueda et al. (2014) に記載されている.
 """
 
 if __name__ == "__main__":
   """Set basic info. """
   yyyy, mm, dd, hh, ft = '2018', '07', '04', '12', '00'
   date = yyyy+mm+dd+hh
-  center = 'NCEP'
+  center = 'JMA'
   dataset = 'TIGGE_' + center
-  map_prj, set_prj = 'CNH', 'lcc'
+  map_prj, set_prj = 'CNH', 'lcc' # 'CNH', 'lcc' or 'ALL', 'cyl'
   target_region = ( 25, 50, 125, 150 ) # lat_min/max, lon_min/max
 
   """Class & parm set """
@@ -37,7 +37,7 @@ if __name__ == "__main__":
   """Making pretubation data"""
   indir = '/work3/daichi/Data/TIGGE/' + center + '/'
   uwnd_data, vwnd_data, hgt_data, tmp_data, spfh_data, ps_data = RG.data_read_driver(indir+date)
-  pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_spfh, pertb_ps = EN.data_pertb_driver(uwnd_data,vwnd_data,tmp_data,spfh_data,ps_data)   
+  pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_hgt, pertb_spfh, pertb_ps = EN.data_pertb_driver(uwnd_data,vwnd_data,tmp_data,hgt_data, spfh_data,ps_data)   
   lon, lat = RG.set_coordinate()
   weight_lat = RG.weight_latitude(lat)
   
@@ -50,11 +50,14 @@ if __name__ == "__main__":
       pertb_ps[imem,i_level,:,:]   = pertb_ps[imem,i_level,:,:]*weight_lat
 
   """ Draw function SPREAD """
-  level_layer = 0
-  #MP.spaghetti_diagram_driver(hgt_data,RG.elem[2],target_region,level_layer,ft,date,prj=set_prj,center=center)
+  level_layer = 2
+  MP.spaghetti_diagram_driver(hgt_data,RG.elem[2],target_region,level_layer,ft,date,prj=set_prj,center=center)
 
   for imem in range(EN.mem-EN.ctrl):
-    MP.pertubation_driver(pertb_uwnd[imem],RG.elem[0],target_region,level_layer,ft,date,imem,prj=set_prj,center=center)
+    MP.pertubation_driver(pertb_hgt[imem],RG.elem[2],target_region,level_layer,ft,date,imem,prj=set_prj,center=center)
+
+  print('Normal END')
+  sys.exit()
 
   """Calc. dry Energy NORM"""
   dry_energy_norm = np.zeros((EN.mem-EN.ctrl,EN.ny,EN.nx))
