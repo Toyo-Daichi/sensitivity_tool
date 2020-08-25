@@ -165,20 +165,23 @@ class Mapping:
     
     #simple
     elif label == 'adjoint':
+      #levels = [0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50]
       #levels = [0.05, 0.1, 0.2, 0.5, 1.0, 2.0, 5.0]
-      levels = [0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50]
+      levels = [1.00, 1.25, 1.5, 2.0, 2.5, 3.0, 5.0]
     
     elif label == 'svd':
       levels = [7.5, 10.0, 15.0, 30.0, 50.0, 70.0, 100.0]
 
-    elif label == 'spread_00hr' or 'spread_12hr':
+    elif label == 'spread_00hr' or label == 'spread_12hr':
       #levels = [0.25, 0.5, 1.0, 1.5, 2.0, 3.0, 5.0]
       #levels = [5.0, 7.5, 10.0, 12.5, 15.0, 20.0, 30.0]
-      levels = [20.0, 40.0, 60.0, 80.0, 100.0, 120.0, 150.0]
+      #levels = [250.0, 300.0, 350.0, 400.0, 500.0, 750.0, 1000.0]
+      levels = [850.0, 1000.0, 1150.0, 1300.0, 1500.0, 2000.0, 3000.0]
     
-    elif label == 'spread_48hr' or 'spread_72hr':
+    elif label == 'spread_48hr' or label == 'spread_72hr':
       #levels = [7.5, 10.0, 15.0, 30.0, 50.0, 70.0, 100.0]
-      levels = [20.0, 40.0, 60.0, 80.0, 100.0, 120.0, 150.0]
+      #levels = [20.0, 40.0, 60.0, 80.0, 100.0, 120.0, 150.0]
+      levels = [7000.0, 8000.0, 9000.0, 10000.0, 12000.0, 15000.0, 20000.0]
     
     colors = ['#FFFFFF', '#00FFFF', '#000080', '#228B22', '#FFFF00', '#FF8000', '#FF0000', '#FF00FF']
     cmap = plt.contourf(x, y, data, levels, colors=colors, extend='both')

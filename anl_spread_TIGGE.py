@@ -22,9 +22,9 @@ import readgpv_tigge
 
 if __name__ == "__main__":
   """Set basic info. """
-  yyyy, mm, dd, hh, ft = '2018', '07', '04', '12', '00'
+  yyyy, mm, dd, hh, ft = '2018', '07', '04', '12', '72'
   date = yyyy+mm+dd+hh
-  center = 'JMA'
+  center = 'CMC'
   dataset = 'TIGGE_' + center
   mode = 'dry' # 'dry' or 'humid'
   map_prj, set_prj = 'CNH', 'lcc' # 'CNH', 'lcc' or 'ALL', 'cyl'
@@ -37,7 +37,7 @@ if __name__ == "__main__":
 
   """Making pretubation data"""
   indir = '/work3/daichi/Data/TIGGE/' + center + '/'
-  uwnd_data, vwnd_data, hgt_data, tmp_data, spfh_data, ps_data = RG.data_read_init_driver(indir+date)
+  uwnd_data, vwnd_data, hgt_data, tmp_data, spfh_data, ps_data = RG.data_read_ft_driver(indir+date)
   pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_hgt, pertb_spfh, pertb_ps = EN.data_pertb_driver(uwnd_data,vwnd_data,tmp_data,hgt_data, spfh_data,ps_data)   
   lon, lat = RG.set_coordinate()
   weight_lat = RG.weight_latitude(lat)
@@ -97,6 +97,6 @@ if __name__ == "__main__":
   print('..... @ MAKE EMSEMBLE MEMBER SPREAD : MODE {} @'.format(mode))
   print('')
 
-  MP.main_norm_driver(np.average(energy_norm,axis=0),np.average(hgt_data,axis=0),target_region, ft, date)
+  MP.main_norm_driver(np.average(energy_norm,axis=0),np.average(hgt_data,axis=0),target_region, ft, date, center=center, TE_mode=mode)
 
   print('Normal END')

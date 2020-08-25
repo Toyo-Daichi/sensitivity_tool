@@ -55,7 +55,7 @@ def min_max(x, axis=None):
   result = (x-min)/(max-min)
   return result
 
-def weight_average(self, data:np.ndarray, weight_list:np.ndarray):
+def weight_average(data:np.ndarray, weight_list:np.ndarray):
   weight_average, sum_of_weight = np.average( 
     a = data, axis = 0, weights = weight_list, returned = True
   )

@@ -19,7 +19,7 @@ import statics_tool
 class Anl_ENSVSA:
   """
     Basic info.
-      nsemble Singular Vector sensitivity anaysis(ここでは、固有値ベクトルを求める)
+      Ensemble Singular Vector sensitivity anaysis(ここでは、固有値ベクトルを求める)
       詳細は, README.md or Enomoto et al. (2015)に記載されている.
     Note:
       Z.T G Z = (mems, dims) (dims, mems) = (mems, mems) 

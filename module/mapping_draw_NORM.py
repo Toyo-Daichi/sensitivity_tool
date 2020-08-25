@@ -104,7 +104,14 @@ class Mapping_NORM:
     self.MP.saving('{}_pertubation_{:03}'.format(center,imem+1),'./work/')
     plt.close("all")
 
-  def main_norm_driver(self, energy_norm, hgt_data, target_region, ft, date, *, prj='lcc', label_cfmt='spread'):
+  def main_norm_driver(self,
+    energy_norm, hgt_data, target_region, ft, date, 
+    *,
+    prj='lcc', label_cfmt='spread',  # for title & colorbar
+    center='JMA', TE_mode='dry',     # for savefig
+    mode:int=0, contibute:float=0.0  # for svd
+    ):
+
     """Draw sensitivity area @dry enegy norm"""
     fig, ax = plt.subplots()
     mapp = self.MP.base(projection_mode=prj)
@@ -114,13 +121,16 @@ class Mapping_NORM:
     if label_cfmt == 'spread':
       label_cfmt = 'spread_{}hr'.format(ft)
       title_cfmt = 'TE spread [ J/kg ] FT={}hr, INIT={}'.format(ft,date)
+      save_cfmt = '{}_TE_{}_{}'.format(center,TE_mode,label_cfmt)
     elif label_cfmt == 'adjoint':
-      #label_cfmt = 'adjoint'
-      label_cfmt = 'normal'
-      title_cfmt = 'NORMALIZE TE Adjoint sensitivity [ J/kg ] FT={}hr, INIT={}'.format(ft,date)
+      label_cfmt = 'adjoint'
+      title_cfmt = ' TE Adjoint sensitivity [ J/kg ] FT={}hr, INIT={}'.format(ft,date)
+      #title_cfmt = ' NORMALIZE TE Adjoint sensitivity [ J/kg ] FT={}hr, INIT={}'.format(ft,date)
+      save_cfmt = '{}_TE_{}_{}_{}hr'.format(center,TE_mode,label_cfmt,ft)
     elif label_cfmt == 'SVD':
       label_cfmt = 'normal'
-      title_cfmt = 'NORMALIZE TE MODE sensitivity [ J/kg ] FT={}hr, INIT={}'.format(ft,date)
+      title_cfmt = ' TE MODE 1-{} contribute:{}% sensitivity [ J/kg ] FT={}hr, INIT={}'.format(ft,date)
+      #title_cfmt = ' NORMALIZE TE MODE sensitivity [ J/kg ] FT={}hr, INIT={}'.format(ft,date)
 
     lat_min_index, lat_max_index, lon_min_index, lon_max_index = \
       self.EN.verification_region(lon,lat,
@@ -132,8 +142,9 @@ class Mapping_NORM:
     self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
     
     self.MP.norm_contourf(mapp, x, y, energy_norm, label=label_cfmt)
-    self.MP.contour(mapp, x, y, hgt_data[0], elem='850hPa')
+    self.MP.contour(mapp, x, y, hgt_data[1], elem='850hPa', font_on=1)
     self.MP.title(title_cfmt)
+    self.MP.saving(save_cfmt,'./work/')
     plt.show()
 
   def each_elem_norm_dry_rish_driver(self, 

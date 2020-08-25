@@ -101,16 +101,16 @@ class Anl_ENASA:
 
     ave_pertb_uwnd = np.zeros((EN.nz,EN.ny,EN.nx))
     ave_pertb_vwnd = np.zeros((EN.nz,EN.ny,EN.nx))
-    ave_pertb_tmp  = np.zeros((EN.nz-EN.surf,EN.ny,EN.nx))
-    ave_pertb_spfh = np.zeros((EN.nz-EN.surf,EN.ny,EN.nx))
+    ave_pertb_tmp  = np.zeros((EN.nz,EN.ny,EN.nx))
+    ave_pertb_spfh = np.zeros((EN.nz,EN.ny,EN.nx))
     ave_pertb_ps   = np.zeros((EN.ny,EN.nx))
 
     for i_level in range(EN.nz):
-      ave_pertb_uwnd[i_level,:,:] = EN.weight_average(pertb_uwnd[:,i_level,:,:],theta)
-      ave_pertb_vwnd[i_level,:,:] = EN.weight_average(pertb_vwnd[:,i_level,:,:],theta)
-      ave_pertb_tmp[i_level,:,:]  = EN.weight_average(pertb_tmp[:,i_level,:,:],theta)
-      ave_pertb_spfh[i_level,:,:] = EN.weight_average(pertb_spfh[:,i_level,:,:],theta)
-    ave_pertb_ps[:,:] = EN.weight_average(pertb_ps[:,:,:],theta)
+      ave_pertb_uwnd[i_level,:,:] = statics_tool.weight_average(pertb_uwnd[:,i_level,:,:],theta)
+      ave_pertb_vwnd[i_level,:,:] = statics_tool.weight_average(pertb_vwnd[:,i_level,:,:],theta)
+      ave_pertb_tmp[i_level,:,:]  = statics_tool.weight_average(pertb_tmp[:,i_level,:,:],theta)
+      ave_pertb_spfh[i_level,:,:] = statics_tool.weight_average(pertb_spfh[:,i_level,:,:],theta)
+    ave_pertb_ps[:,:] = statics_tool.weight_average(pertb_ps[:,EN.surf-1,:,:],theta)
 
     lat_min_index, lat_max_index, lon_min_index, lon_max_index = \
       EN.verification_region(lon,lat,
@@ -152,7 +152,7 @@ if __name__ == "__main__":
   """Set basic info. """
   yyyy, mm, dd, hh, init, ft = '2018', '07', '04', '12', '00', '72'
   date = yyyy+mm+dd+hh
-  center = 'NCEP'
+  center = 'ECMWF'
   dataset = 'TIGGE_' + center
   mode = 'dry' # 'dry' or 'humid' 
   map_prj, set_prj = 'CNH', 'lcc'
@@ -166,7 +166,7 @@ if __name__ == "__main__":
 
   """Making pretubation data"""
   indir = '/work3/daichi/Data/TIGGE/' + center + '/'
-  uwnd_data, vwnd_data, hgt_data, tmp_data, spfh_data, ps_data = RG.data_ft_read_driver(indir+date)
+  uwnd_data, vwnd_data, hgt_data, tmp_data, spfh_data, ps_data = RG.data_read_ft_driver(indir+date)
   pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_hgt, pertb_spfh, pertb_ps = EN.data_pertb_driver(uwnd_data,vwnd_data,tmp_data,hgt_data, spfh_data,ps_data)
   lon, lat = RG.set_coordinate()
   weight_lat = RG.weight_latitude(lat)
@@ -185,7 +185,7 @@ if __name__ == "__main__":
   print('')
 
   """Calc. Sensitivity Region"""
-  uwnd_data, vwnd_data, hgt_data, tmp_data, spfh_data, ps_data  = RG.data_read_init_driver(indir+date[0:8])
+  uwnd_data, vwnd_data, hgt_data, tmp_data, spfh_data, ps_data = RG.data_read_init_driver(indir+date)
   pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_hgt, pertb_spfh, pertb_ps = EN.data_pertb_driver(uwnd_data,vwnd_data,tmp_data,hgt_data, spfh_data,ps_data)
 
   for imem in range(EN.mem-EN.ctrl):
@@ -198,20 +198,17 @@ if __name__ == "__main__":
 
   print('')
   print('..... @ MAKE SENSITIVITY REGION @')
-  energy_norm, _, _ , ave_pertb_uwnd,ave_pertb_vwnd,ave_pertb_tmp,ave_pertb_slp =\
-     DR.sensitivity_driver(pertb_uwnd,pertb_vwnd,pertb_tmp,pertb_spfh,pertb_ps,theta)
+  energy_norm, _, _ , ave_pertb_uwnd,ave_pertb_vwnd,ave_pertb_tmp,ave_pertb_spfh,ave_pertb_ps =\
+     DR.sensitivity_driver(pertb_uwnd,pertb_vwnd,pertb_tmp,pertb_spfh,pertb_ps,target_region,theta)
 
   #normalize
   print('..... @ MAKE NORMALIZE ENERGY NORM @')
   print('')
   #normal_energy_norm = statics_tool.normalize(energy_norm)
   #normal_energy_norm = statics_tool.min_max(energy_norm)
-
-  print('MIN :: 'np.min(normal_energy_norm), 'MAX :: 'np.max(normal_energy_norm))
+  #print('MIN :: ', np.min(normal_energy_norm), 'MAX :: ', np.max(normal_energy_norm))
 
   """ Draw function NORM """
-  MP.main_norm_driver(energy_norm,np.average(hgt_data,axis=0),target_region,ft,date)
-  #MP.each_elem_norm_dry_rish_driver(np.average(pertb_uwnd[::2],axis=0),np.average(pertb_vwnd[::2],axis=0),np.average(pertb_tmp[::2],axis=0),np.average(pertb_slp[::2],axis=0),EN.press_levels,target_region,ft,date)
-  #MP.each_elem_norm_dry_rish_driver(pertb_uwnd[0],pertb_vwnd[0],pertb_tmp[0],pertb_slp[0],EN.press_levels,target_region,ft,date)
+  MP.main_norm_driver(energy_norm,np.average(hgt_data,axis=0),target_region,ft,date,label_cfmt='adjoint')
 
   print('Normal END')
