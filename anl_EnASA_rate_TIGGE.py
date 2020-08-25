@@ -27,7 +27,7 @@ class Anl_ENASA:
     pass
 
   def adjoint_sensitivity_driver(self, pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_spfh, pertb_ps, target_region, *, mode='dry'):
-    """Adjoint sensitivity anaysis(theta を求める)
+    """Adjoint sensitivity anaysis(thetaを求める=予測時刻でのエネルギー計算)
     Args:
       pertb_elem (np.ndarray) : 各要素の摂動
       target_region (tuple)   : 検証領域の設定
@@ -37,7 +37,7 @@ class Anl_ENASA:
     Note:
       || theta || = 1
     """
-    dry_energy_norm = np.zeros((EN.mem-EN.ctrl,EN.ny,EN.nx))
+    energy_norm     = np.zeros((EN.mem-EN.ctrl,EN.ny,EN.nx))
     physical_term   = np.zeros((EN.mem-EN.ctrl,EN.ny,EN.nx))
     potential_term  = np.zeros((EN.mem-EN.ctrl,EN.ny,EN.nx))
     region_TE       = np.zeros((EN.mem-EN.ctrl))
@@ -55,10 +55,10 @@ class Anl_ENASA:
     for imem in range(EN.mem-EN.ctrl):
       if mode is 'dry':
         energy_norm[imem], physical_term[imem], potential_term[imem] =\
-          EN.calc_dry_EN_NORM(pertb_uwnd[imem],pertb_vwnd[imem],pertb_tmp[imem],pertb_ps[imem])
+          EN.calc_dry_EN_NORM(pertb_uwnd[imem],pertb_vwnd[imem],pertb_tmp[imem],pertb_ps[imem,EN.surf-1])
       elif mode is 'humid':
         energy_norm[imem], physical_term[imem], potential_term[imem] =\
-          EN.calc_humid_EN_NORM(pertb_uwnd[imem],pertb_vwnd[imem],pertb_tmp[imem],pertb_spfh[imem],pertb_ps[imem])
+          EN.calc_humid_EN_NORM(pertb_uwnd[imem],pertb_vwnd[imem],pertb_tmp[imem],pertb_spfh[imem],pertb_ps[imem,EN.surf-1])
 
       region_TE[imem] = np.sum(energy_norm[imem,lat_min_index:lat_max_index,lon_min_index:lon_max_index])/dims
       
@@ -90,47 +90,50 @@ class Anl_ENASA:
       theta[imem] = region_TE[imem]/np.sum(region_TE[::2])
     return theta
 
-  def sensitivity_driver(self, pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_slp, theta):
-    """Total Energy NORM を計算する """
+  def sensitivity_driver(self, pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_spfh, pertb_ps, target_region, theta, *, mode='dry'):
+    """Adjoint sensitivity anaysis
+    求めた重みthetaで初期時刻でのTotal Energy NORM を計算する
+    """
 
-    dry_energy_norm = np.zeros((EN.ny,EN.nx))
+    energy_norm     = np.zeros((EN.ny,EN.nx))
     physical_term   = np.zeros((EN.ny,EN.nx))
     potential_term  = np.zeros((EN.ny,EN.nx))
 
     ave_pertb_uwnd = np.zeros((EN.nz,EN.ny,EN.nx))
     ave_pertb_vwnd = np.zeros((EN.nz,EN.ny,EN.nx))
     ave_pertb_tmp  = np.zeros((EN.nz-EN.surf,EN.ny,EN.nx))
-    ave_pertb_slp  = np.zeros((EN.ny,EN.nx))
+    ave_pertb_spfh = np.zeros((EN.nz-EN.surf,EN.ny,EN.nx))
+    ave_pertb_ps   = np.zeros((EN.ny,EN.nx))
 
     for i_level in range(EN.nz):
       ave_pertb_uwnd[i_level,:,:] = EN.weight_average(pertb_uwnd[:,i_level,:,:],theta)
       ave_pertb_vwnd[i_level,:,:] = EN.weight_average(pertb_vwnd[:,i_level,:,:],theta)
-    for i_level in range(EN.nz-EN.surf):
-      ave_pertb_tmp[i_level,:,:] = EN.weight_average(pertb_tmp[:,i_level,:,:],theta)
-    ave_pertb_slp[:,:] = EN.weight_average(pertb_slp[:,0],theta)
+      ave_pertb_tmp[i_level,:,:]  = EN.weight_average(pertb_tmp[:,i_level,:,:],theta)
+      ave_pertb_spfh[i_level,:,:] = EN.weight_average(pertb_spfh[:,i_level,:,:],theta)
+    ave_pertb_ps[:,:] = EN.weight_average(pertb_ps[:,:,:],theta)
 
     lat_min_index, lat_max_index, lon_min_index, lon_max_index = \
       EN.verification_region(lon,lat,
           area_lat_min=target_region[1], area_lat_max=target_region[0],
           area_lon_min=target_region[2], area_lon_max=target_region[3]
       )
-    
+
     lat_grd = lat_max_index-lat_min_index +1
     lon_grd = lon_max_index-lon_min_index +1
     dims = lat_grd*lon_grd
 
     if mode is 'dry':
-      dry_energy_norm, physical_term, potential_term = EN.calc_dry_EN_NORM(
-        ave_pertb_uwnd, ave_pertb_vwnd, ave_pertb_tmp, ave_pertb_slp
+      energy_norm, physical_term, potential_term = EN.calc_dry_EN_NORM(
+        ave_pertb_uwnd, ave_pertb_vwnd, ave_pertb_tmp, ave_pertb_ps
         )
     elif mode is 'humid':
-      dry_energy_norm, physical_term, potential_term = EN.calc_dry_EN_NORM(
-        ave_pertb_uwnd, ave_pertb_vwnd, ave_pertb_tmp, ave_pertb_slp
+      energy_norm, physical_term, potential_term = EN.calc_dry_EN_NORM(
+        ave_pertb_uwnd, ave_pertb_vwnd, ave_pertb_tmp, ave_pertb_spfh, ave_pertb_ps
         )
 
     print('')
     print('..... Check Vertification area Norm SUM {} {}'.format(
-      'Adjoint', np.sum(dry_energy_norm[lat_min_index:lat_max_index,lon_min_index:lon_max_index])/dims
+      'Adjoint', np.sum(energy_norm[lat_min_index:lat_max_index,lon_min_index:lon_max_index])/dims
     ))
     print('..... Check Vertification area physical_term {} {}'.format(
       'Adjoint', np.sum(physical_term[lat_min_index:lat_max_index,lon_min_index:lon_max_index])/dims
@@ -142,7 +145,7 @@ class Anl_ENASA:
     print('')
     #print(dry_energy_norm[lat_min_index:lat_max_index,lon_min_index:lon_max_index])
 
-    return dry_energy_norm, physical_term, potential_term, \
+    return energy_norm, physical_term, potential_term, \
            ave_pertb_uwnd, ave_pertb_vwnd, ave_pertb_tmp, ave_pertb_spfh, ave_pertb_ps
 
 if __name__ == "__main__":
@@ -163,7 +166,7 @@ if __name__ == "__main__":
 
   """Making pretubation data"""
   indir = '/work3/daichi/Data/TIGGE/' + center + '/'
-  uwnd_data, vwnd_data, hgt_data, tmp_data, spfh_data, ps_data = RG.data_read_driver(indir+date)
+  uwnd_data, vwnd_data, hgt_data, tmp_data, spfh_data, ps_data = RG.data_ft_read_driver(indir+date)
   pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_hgt, pertb_spfh, pertb_ps = EN.data_pertb_driver(uwnd_data,vwnd_data,tmp_data,hgt_data, spfh_data,ps_data)
   lon, lat = RG.set_coordinate()
   weight_lat = RG.weight_latitude(lat)
@@ -177,33 +180,32 @@ if __name__ == "__main__":
       pertb_ps[imem,i_level,:,:]   = pertb_ps[imem,i_level,:,:]*weight_lat
 
   print('')
-  print('..... @ MAKE EMSEMBLE MEMBER WEIGHT @')
+  print('..... @ MAKE EMSEMBLE MEMBER WEIGHT : MODE {} @'.format(mode))
   theta = DR.adjoint_sensitivity_driver(pertb_uwnd,pertb_vwnd,pertb_tmp,pertb_spfh,pertb_ps,target_region)
   print('')
 
   """Calc. Sensitivity Region"""
-  uwnd_data, vwnd_data, hgt_data, tmp_data, slp_data, rain_data = RG.data_read_init_driver(indir+date[0:8])
-  pertb_uwnd,pertb_vwnd,pertb_tmp,pertb_slp = EN.data_pertb_driver(uwnd_data,vwnd_data,tmp_data,slp_data)
+  uwnd_data, vwnd_data, hgt_data, tmp_data, spfh_data, ps_data  = RG.data_read_init_driver(indir+date[0:8])
+  pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_hgt, pertb_spfh, pertb_ps = EN.data_pertb_driver(uwnd_data,vwnd_data,tmp_data,hgt_data, spfh_data,ps_data)
 
-  #weight on latitude
   for imem in range(EN.mem-EN.ctrl):
     for i_level in range(EN.nz):
       pertb_uwnd[imem,i_level,:,:] = pertb_uwnd[imem,i_level,:,:]*weight_lat
       pertb_vwnd[imem,i_level,:,:] = pertb_vwnd[imem,i_level,:,:]*weight_lat
-    for i_level in range(EN.nz-EN.surf):
-      pertb_tmp[imem,i_level,:,:] = pertb_tmp[imem,i_level,:,:]*weight_lat
-    pertb_slp[imem,0,:,:] = pertb_slp[imem,0,:,:]*weight_lat
+      pertb_tmp[imem,i_level,:,:]  = pertb_tmp[imem,i_level,:,:]*weight_lat
+      pertb_spfh[imem,i_level,:,:] = pertb_spfh[imem,i_level,:,:]*weight_lat
+      pertb_ps[imem,i_level,:,:]   = pertb_ps[imem,i_level,:,:]*weight_lat
 
   print('')
   print('..... @ MAKE SENSITIVITY REGION @')
   energy_norm, _, _ , ave_pertb_uwnd,ave_pertb_vwnd,ave_pertb_tmp,ave_pertb_slp =\
-     DR.sensitivity_driver(pertb_uwnd,pertb_vwnd,pertb_tmp,pertb_slp,theta)
+     DR.sensitivity_driver(pertb_uwnd,pertb_vwnd,pertb_tmp,pertb_spfh,pertb_ps,theta)
 
   #normalize
   print('..... @ MAKE NORMALIZE ENERGY NORM @')
   print('')
   #normal_energy_norm = statics_tool.normalize(energy_norm)
-  normal_energy_norm = statics_tool.min_max(energy_norm)
+  #normal_energy_norm = statics_tool.min_max(energy_norm)
 
   print('MIN :: 'np.min(normal_energy_norm), 'MAX :: 'np.max(normal_energy_norm))
 

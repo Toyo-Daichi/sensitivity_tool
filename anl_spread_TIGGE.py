@@ -77,10 +77,10 @@ if __name__ == "__main__":
   for imem in range(0,EN.mem-EN.ctrl,1):
     if mode is 'dry':
       energy_norm[imem], physical_term[imem], potential_term[imem] =\
-        EN.calc_dry_EN_NORM(pertb_uwnd[imem],pertb_vwnd[imem],pertb_tmp[imem],pertb_ps[imem,0])
+        EN.calc_dry_EN_NORM(pertb_uwnd[imem],pertb_vwnd[imem],pertb_tmp[imem],pertb_ps[imem,EN.surf-1])
     elif mode is 'humid':
       energy_norm[imem], physical_term[imem], potential_term[imem] =\
-        EN.calc_humid_EN_NORM(pertb_uwnd[imem],pertb_vwnd[imem],pertb_tmp[imem],pertb_spfh[imem],pertb_ps[imem,0])
+        EN.calc_humid_EN_NORM(pertb_uwnd[imem],pertb_vwnd[imem],pertb_tmp[imem],pertb_spfh[imem],pertb_ps[imem,EN.surf-1])
 
     print('')
     print('..... Check Vertification area Norm SUM {:02} {}'.format(
@@ -96,7 +96,6 @@ if __name__ == "__main__":
   print('')
   print('..... @ MAKE EMSEMBLE MEMBER SPREAD : MODE {} @'.format(mode))
   print('')
-
 
   MP.main_norm_driver(np.average(energy_norm,axis=0),np.average(hgt_data,axis=0),target_region, ft, date)
 
