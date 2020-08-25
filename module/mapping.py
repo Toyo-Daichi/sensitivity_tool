@@ -153,32 +153,32 @@ class Mapping:
     cbar = basemap.colorbar(cmap, 'right', size='2.5%')
     cbar.set_label(label, size=8)
 
-  def norm_contourf(self, basemap, x, y, data, *, label='normal', cbar_on=0):
+  def norm_contourf(self, basemap, x, y, data, *, label='normalize', cbar_on=0):
     #normalize
-    if label == 'normal':
+    if label == 'normalize':
       levels = [0.025, 0.05, 0.1, 0.2, 0.5, 0.75, 1.0]
 
-    elif label == 'scope':
-      #levels = [0.025, 0.050, 0.075, 0.100, 0.125, 0.150, 0.200]
-      levels = [0.025, 0.05, 0.10, 0.15, 0.20, 0.25, 0.30]
+    elif label == 'normalize_scope':
+      levels = [0.025, 0.050, 0.075, 0.100, 0.125, 0.150, 0.200]
+      #levels = [0.025, 0.05, 0.10, 0.15, 0.20, 0.25, 0.30]
       #levels = [0.075, 0.100, 0.125, 0.150, 0.175, 0.200, 0.250]
-
+    
+    #simple
     elif label == 'adjoint':
       #levels = [0.05, 0.1, 0.2, 0.5, 1.0, 2.0, 5.0]
       levels = [0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50]
     
     elif label == 'svd':
-      #normalize
-      levels = [0.075, 0.100, 0.125, 0.150, 0.200, 0.300, 0.400]
-      #normal
-      #levels = [7.5, 10.0, 15.0, 30.0, 50.0, 70.0, 100.0]
+      levels = [7.5, 10.0, 15.0, 30.0, 50.0, 70.0, 100.0]
 
     elif label == 'spread_00hr' or 'spread_12hr':
       #levels = [0.25, 0.5, 1.0, 1.5, 2.0, 3.0, 5.0]
-      levels = [5.0, 7.5, 10.0, 12.5, 15.0, 20.0, 30.0]
+      #levels = [5.0, 7.5, 10.0, 12.5, 15.0, 20.0, 30.0]
+      levels = [20.0, 40.0, 60.0, 80.0, 100.0, 120.0, 150.0]
     
     elif label == 'spread_48hr' or 'spread_72hr':
-      levels = [7.5, 10.0, 15.0, 30.0, 50.0, 70.0, 100.0]
+      #levels = [7.5, 10.0, 15.0, 30.0, 50.0, 70.0, 100.0]
+      levels = [20.0, 40.0, 60.0, 80.0, 100.0, 120.0, 150.0]
     
     colors = ['#FFFFFF', '#00FFFF', '#000080', '#228B22', '#FFFF00', '#FF8000', '#FF0000', '#FF00FF']
     cmap = plt.contourf(x, y, data, levels, colors=colors, extend='both')

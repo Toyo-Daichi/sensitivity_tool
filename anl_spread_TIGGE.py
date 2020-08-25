@@ -24,8 +24,9 @@ if __name__ == "__main__":
   """Set basic info. """
   yyyy, mm, dd, hh, ft = '2018', '07', '04', '12', '00'
   date = yyyy+mm+dd+hh
-  center = 'NCEP'
+  center = 'JMA'
   dataset = 'TIGGE_' + center
+  mode = 'dry' # 'dry' or 'humid'
   map_prj, set_prj = 'CNH', 'lcc' # 'CNH', 'lcc' or 'ALL', 'cyl'
   target_region = ( 25, 50, 125, 150 ) # lat_min/max, lon_min/max
 
@@ -50,19 +51,18 @@ if __name__ == "__main__":
       pertb_ps[imem,i_level,:,:]   = pertb_ps[imem,i_level,:,:]*weight_lat
 
   """ Draw function SPREAD """
-  level_layer = 2
-  MP.spaghetti_diagram_driver(hgt_data,RG.elem[2],target_region,level_layer,ft,date,prj=set_prj,center=center,elem_cfmt='850hPa')
+  #level_layer = 2
+  #MP.spaghetti_diagram_driver(hgt_data,RG.elem[2],target_region,level_layer,ft,date,prj=set_prj,center=center,elem_cfmt='850hPa')
+  #for imem in range(EN.mem-EN.ctrl):
+  #  MP.pertubation_driver(pertb_hgt[imem],RG.elem[2],target_region,level_layer,ft,date,imem,prj=set_prj,center=center)
 
-  for imem in range(EN.mem-EN.ctrl):
-    MP.pertubation_driver(pertb_hgt[imem],RG.elem[2],target_region,level_layer,ft,date,imem,prj=set_prj,center=center)
+  #print('Normal END')
+  #sys.exit()
 
-  print('Normal END')
-  sys.exit()
-
-  """Calc. dry Energy NORM"""
-  dry_energy_norm = np.zeros((EN.mem-EN.ctrl,EN.ny,EN.nx))
-  physical_term   = np.zeros((EN.mem-EN.ctrl,EN.ny,EN.nx))
-  potential_term  = np.zeros((EN.mem-EN.ctrl,EN.ny,EN.nx))
+  """Calc. Energy NORM"""
+  energy_norm    = np.zeros((EN.mem-EN.ctrl,EN.ny,EN.nx))
+  physical_term  = np.zeros((EN.mem-EN.ctrl,EN.ny,EN.nx))
+  potential_term = np.zeros((EN.mem-EN.ctrl,EN.ny,EN.nx))
 
   lat_min_index, lat_max_index, lon_min_index, lon_max_index = \
     EN.verification_region(lon,lat,
@@ -74,13 +74,17 @@ if __name__ == "__main__":
   lon_grd = lon_max_index-lon_min_index +1
   dims = lat_grd*lon_grd
 
-  for imem in range(0,EN.mem-EN.ctrl,2):
-    dry_energy_norm[imem], physical_term[imem], potential_term[imem] =\
-    EN.calc_dry_EN_NORM(pertb_uwnd[imem],pertb_vwnd[imem],pertb_tmp[imem],pertb_ps[imem,0])
+  for imem in range(0,EN.mem-EN.ctrl,1):
+    if mode is 'dry':
+      energy_norm[imem], physical_term[imem], potential_term[imem] =\
+        EN.calc_dry_EN_NORM(pertb_uwnd[imem],pertb_vwnd[imem],pertb_tmp[imem],pertb_ps[imem,0])
+    elif mode is 'humid':
+      energy_norm[imem], physical_term[imem], potential_term[imem] =\
+        EN.calc_humid_EN_NORM(pertb_uwnd[imem],pertb_vwnd[imem],pertb_tmp[imem],pertb_spfh[imem],pertb_ps[imem,0])
 
     print('')
     print('..... Check Vertification area Norm SUM {:02} {}'.format(
-      imem+1, np.sum(dry_energy_norm[imem, lat_min_index:lat_max_index,lon_min_index:lon_max_index])/dims)
+      imem+1, np.sum(energy_norm[imem, lat_min_index:lat_max_index,lon_min_index:lon_max_index])/dims)
     )
     print('..... Check Vertification area physical_term {:02} {}'.format(
       imem+1, np.sum(physical_term[imem, lat_min_index:lat_max_index,lon_min_index:lon_max_index])/dims)
@@ -90,10 +94,10 @@ if __name__ == "__main__":
     )
 
   print('')
-  print('..... @ MAKE EMSEMBLE MEMBER SPREAD @')
+  print('..... @ MAKE EMSEMBLE MEMBER SPREAD : MODE {} @'.format(mode))
   print('')
 
 
-  MP.main_norm_driver(dry_energy_norm,np.average(hgt_data,axis=0),target_region, ft, date)
+  MP.main_norm_driver(np.average(energy_norm,axis=0),np.average(hgt_data,axis=0),target_region, ft, date)
 
   print('Normal END')

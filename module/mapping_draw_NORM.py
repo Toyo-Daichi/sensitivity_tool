@@ -104,7 +104,7 @@ class Mapping_NORM:
     self.MP.saving('{}_pertubation_{:03}'.format(center,imem+1),'./work/')
     plt.close("all")
 
-  def main_norm_driver(self, dry_energy_norm, hgt_data, target_region, ft, date, *, prj='lcc', label_cfmt='spread'):
+  def main_norm_driver(self, energy_norm, hgt_data, target_region, ft, date, *, prj='lcc', label_cfmt='spread'):
     """Draw sensitivity area @dry enegy norm"""
     fig, ax = plt.subplots()
     mapp = self.MP.base(projection_mode=prj)
@@ -131,8 +131,7 @@ class Mapping_NORM:
     #vertifcation region
     self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
     
-    self.MP.norm_contourf(mapp, x, y, dry_energy_norm, label=label_cfmt)
-    #self.MP.norm_contourf(mapp, x, y, np.average(dry_energy_norm[1:26:2],axis=0), label=label_cfmt)
+    self.MP.norm_contourf(mapp, x, y, energy_norm, label=label_cfmt)
     self.MP.contour(mapp, x, y, hgt_data[0], elem='850hPa')
     self.MP.title(title_cfmt)
     plt.show()

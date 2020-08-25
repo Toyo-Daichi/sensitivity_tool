@@ -258,6 +258,7 @@ class Energy_NORM:
     Note:
       今回使用した積分方法はシンプソン則
     """
+    print('Pressure shape & LEVEL :: ', x_array.shape, press_array)
     y_array = np.empty_like(x_array[0], dtype=np.float32)
 
     for iy in range(self.ny):
