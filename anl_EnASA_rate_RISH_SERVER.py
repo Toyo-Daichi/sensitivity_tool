@@ -153,8 +153,8 @@ if __name__ == "__main__":
 
   """Making pretubation data Vertificate TIME"""
   indir = '/work3/daichi/Data/GSM_EnData/bin/'
-  uwnd_data, vwnd_data, hgt_data, tmp_data, slp_data, rain_data = RG.data_read_ft_driver(indir+date[0:8])
-  pertb_uwnd,pertb_vwnd,pertb_tmp,pertb_slp = EN.data_pertb_driver(uwnd_data,vwnd_data,tmp_data,slp_data)   
+  uwnd_data, vwnd_data, hgt_data, tmp_data, slp_data, rain_data = RG.data_read_init_driver(indir+date[0:8])
+  pertb_uwnd,pertb_vwnd,pertb_tmp,pertb_hgt,pertb_slp = EN.data_pertb_driver(uwnd_data,vwnd_data,tmp_data,hgt_data,slp_data)
  
   #weight on latitude
   for imem in range(EN.mem-EN.ctrl):
@@ -173,7 +173,7 @@ if __name__ == "__main__":
 
   """Calc. Sensitivity Region"""
   uwnd_data, vwnd_data, hgt_data, tmp_data, slp_data, rain_data = RG.data_read_init_driver(indir+date[0:8])
-  pertb_uwnd,pertb_vwnd,pertb_tmp,pertb_slp = EN.data_pertb_driver(uwnd_data,vwnd_data,tmp_data,slp_data)
+  pertb_uwnd,pertb_vwnd,pertb_tmp,pertb_hgt,pertb_slp = EN.data_pertb_driver(uwnd_data,vwnd_data,tmp_data,hgt_data,slp_data)
 
   #weight on latitude
   for imem in range(EN.mem-EN.ctrl):
