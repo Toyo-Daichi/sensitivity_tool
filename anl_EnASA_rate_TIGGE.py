@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created from 2020.8.9
+Created from 2020.8.25
 @author: Toyo_Daichi
 """
 
@@ -13,11 +13,11 @@ warnings.filterwarnings('ignore')
 
 #my_module
 import mapping_draw_NORM
-import readgpv_rish
+import readgpv_tigge
 import statics_tool
 
 class Anl_ENASA:
-  """Adjoint sensitivity anaysis(theta を求める)
+  """Adjoint sensitivity anaysis(theta を求める for TIGGE)
     初期時刻の擾乱が線形成長すると仮定して, 検証時刻/検証領域での擾乱を計算して各メンバーの重みを計算する.
     各メンバーの重みで作成した初期大気場でTEを計算すると感度領域とも見なす.
     詳細は, README.md or Enomoto et al. (2015)に記載されている.
@@ -26,11 +26,12 @@ class Anl_ENASA:
   def __init__(self):
     pass
 
-  def adjoint_sensitivity_driver(self, pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_slp, target_region):
+  def adjoint_sensitivity_driver(self, pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_spfh, pertb_ps, target_region, *, mode='dry'):
     """Adjoint sensitivity anaysis(theta を求める)
     Args:
       pertb_elem (np.ndarray) : 各要素の摂動
       target_region (tuple)   : 検証領域の設定
+      mode (str) : dry -> 乾燥静的エネルギー, humid -> 湿潤静的エネルギー
     Returns:
       theta (list) : 各メンバーの重みの割合
     Note:
@@ -52,10 +53,14 @@ class Anl_ENASA:
     dims = lat_grd*lon_grd
 
     for imem in range(EN.mem-EN.ctrl):
-      dry_energy_norm[imem], physical_term[imem], potential_term[imem] =\
-        EN.calc_dry_EN_NORM(pertb_uwnd[imem],pertb_vwnd[imem],pertb_tmp[imem],pertb_slp[imem])
+      if mode is 'dry':
+        energy_norm[imem], physical_term[imem], potential_term[imem] =\
+          EN.calc_dry_EN_NORM(pertb_uwnd[imem],pertb_vwnd[imem],pertb_tmp[imem],pertb_ps[imem])
+      elif mode is 'humid':
+        energy_norm[imem], physical_term[imem], potential_term[imem] =\
+          EN.calc_humid_EN_NORM(pertb_uwnd[imem],pertb_vwnd[imem],pertb_tmp[imem],pertb_spfh[imem],pertb_ps[imem])
 
-      region_TE[imem] = np.sum(dry_energy_norm[imem,lat_min_index:lat_max_index,lon_min_index:lon_max_index])/dims
+      region_TE[imem] = np.sum(energy_norm[imem,lat_min_index:lat_max_index,lon_min_index:lon_max_index])/dims
       
       print('')
       print('..... Check Vertification area Norm SUM {:02} {}'.format(
@@ -84,7 +89,6 @@ class Anl_ENASA:
     for imem in range(0, EN.mem-EN.ctrl, 2):
       theta[imem] = region_TE[imem]/np.sum(region_TE[::2])
     return theta
-
 
   def sensitivity_driver(self, pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_slp, theta):
     """Total Energy NORM を計算する """
@@ -115,9 +119,14 @@ class Anl_ENASA:
     lon_grd = lon_max_index-lon_min_index +1
     dims = lat_grd*lon_grd
 
-    dry_energy_norm, physical_term, potential_term = EN.calc_dry_EN_NORM(
-      ave_pertb_uwnd, ave_pertb_vwnd, ave_pertb_tmp, ave_pertb_slp
-      )
+    if mode is 'dry':
+      dry_energy_norm, physical_term, potential_term = EN.calc_dry_EN_NORM(
+        ave_pertb_uwnd, ave_pertb_vwnd, ave_pertb_tmp, ave_pertb_slp
+        )
+    elif mode is 'humid':
+      dry_energy_norm, physical_term, potential_term = EN.calc_dry_EN_NORM(
+        ave_pertb_uwnd, ave_pertb_vwnd, ave_pertb_tmp, ave_pertb_slp
+        )
 
     print('')
     print('..... Check Vertification area Norm SUM {} {}'.format(
@@ -134,43 +143,42 @@ class Anl_ENASA:
     #print(dry_energy_norm[lat_min_index:lat_max_index,lon_min_index:lon_max_index])
 
     return dry_energy_norm, physical_term, potential_term, \
-           ave_pertb_uwnd, ave_pertb_vwnd, ave_pertb_tmp, ave_pertb_slp
+           ave_pertb_uwnd, ave_pertb_vwnd, ave_pertb_tmp, ave_pertb_spfh, ave_pertb_ps
 
 if __name__ == "__main__":
   """Set basic info. """
   yyyy, mm, dd, hh, init, ft = '2018', '07', '04', '12', '00', '72'
   date = yyyy+mm+dd+hh
-  dataset = 'EPSW' # 'WFM' or 'EPSW'
+  center = 'NCEP'
+  dataset = 'TIGGE_' + center
+  mode = 'dry' # 'dry' or 'humid' 
   map_prj, set_prj = 'CNH', 'lcc'
   target_region = ( 20, 50, 120, 150 ) # lat_min/max, lon_min/max
 
   """Class & parm set """
   DR = Anl_ENASA()
-  RG = readgpv_rish.ReadGPV(dataset,date,ft)
-  EN = readgpv_rish.Energy_NORM(dataset)
-  MP = mapping_draw_NORM.Mapping_NORM(dataset, map_prj)
+  RG = readgpv_tigge.ReadGPV(dataset,date,ft)
+  EN = readgpv_tigge.Energy_NORM(dataset)
+  MP = mapping_draw_NORM.Mapping_NORM(dataset,map_prj)
 
+  """Making pretubation data"""
+  indir = '/work3/daichi/Data/TIGGE/' + center + '/'
+  uwnd_data, vwnd_data, hgt_data, tmp_data, spfh_data, ps_data = RG.data_read_driver(indir+date)
+  pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_hgt, pertb_spfh, pertb_ps = EN.data_pertb_driver(uwnd_data,vwnd_data,tmp_data,hgt_data, spfh_data,ps_data)
   lon, lat = RG.set_coordinate()
   weight_lat = RG.weight_latitude(lat)
 
-  """Making pretubation data Vertificate TIME"""
-  indir = '/work3/daichi/Data/GSM_EnData/bin/'
-  uwnd_data, vwnd_data, hgt_data, tmp_data, slp_data, rain_data = RG.data_read_ft_driver(indir+date[0:8])
-  pertb_uwnd,pertb_vwnd,pertb_tmp,pertb_slp = EN.data_pertb_driver(uwnd_data,vwnd_data,tmp_data,slp_data)   
- 
-  #weight on latitude
   for imem in range(EN.mem-EN.ctrl):
     for i_level in range(EN.nz):
       pertb_uwnd[imem,i_level,:,:] = pertb_uwnd[imem,i_level,:,:]*weight_lat
       pertb_vwnd[imem,i_level,:,:] = pertb_vwnd[imem,i_level,:,:]*weight_lat
-    for i_level in range(EN.nz-EN.surf):
-      pertb_tmp[imem,i_level,:,:] = pertb_tmp[imem,i_level,:,:]*weight_lat
-    pertb_slp[imem,0,:,:] = pertb_slp[imem,0,:,:]*weight_lat
-
+      pertb_tmp[imem,i_level,:,:]  = pertb_tmp[imem,i_level,:,:]*weight_lat
+      pertb_spfh[imem,i_level,:,:] = pertb_spfh[imem,i_level,:,:]*weight_lat
+      pertb_ps[imem,i_level,:,:]   = pertb_ps[imem,i_level,:,:]*weight_lat
 
   print('')
   print('..... @ MAKE EMSEMBLE MEMBER WEIGHT @')
-  theta = DR.adjoint_sensitivity_driver(pertb_uwnd,pertb_vwnd,pertb_tmp,pertb_slp,target_region)
+  theta = DR.adjoint_sensitivity_driver(pertb_uwnd,pertb_vwnd,pertb_tmp,pertb_spfh,pertb_ps,target_region)
   print('')
 
   """Calc. Sensitivity Region"""

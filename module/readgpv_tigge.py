@@ -19,7 +19,7 @@ class ReadGPV:
     self.elem_num = len(self.elem)
 
   def data_kind(self):
-    elem      = ( 'UGRD', 'VGRD', 'HGT', 'TMP', 'SPFH', 'PS') 
+    elem  = ( 'UGRD', 'VGRD', 'HGT', 'TMP', 'SPFH', 'PS') 
     return elem
 
   def init_array(self):
@@ -31,7 +31,7 @@ class ReadGPV:
     ps_data   = np.zeros((self.mem, self.nz, self.ny, self.nx))
     return uwnd_data, vwnd_data, hgt_data, tmp_data, spfh_data, ps_data
 
-  def data_read_driver(self, data_path:str, *, endian='little'):
+  def data_read_init_driver(self, data_path:str, *, endian='little'):
     """
     Args:
       data_path(str): 週間アンサンブルデータのPATH
@@ -43,6 +43,27 @@ class ReadGPV:
 
     for imem in range(self.mem):
       full_mem_data = self.read_gpv(data_path+'/{:03}/{}_{}hr.grd'.format(imem+1,self.date,self.init),self.elem_num,endian=endian)
+      uwnd_data[imem,:,:,:] = full_mem_data[0,:,:,:]
+      vwnd_data[imem,:,:,:] = full_mem_data[1,:,:,:]
+      hgt_data[imem,:,:,:]  = full_mem_data[2,:,:,:]
+      tmp_data[imem,:,:,:]  = full_mem_data[3,:,:,:]
+      spfh_data[imem,:,:,:] = full_mem_data[4,:,:,:]
+      ps_data[imem,:,:,:]   = full_mem_data[5,:,:,:]*0.01
+
+    return uwnd_data, vwnd_data, hgt_data, tmp_data, spfh_data, ps_data
+
+  def data_read_ft_driver(self, data_path:str, *, endian='little'):
+    """
+    Args:
+      data_path(str): 週間アンサンブルデータのPATH
+    Returns:
+      data structure: (アンサンブル数, 鉛直層, 緯度, 経度)
+      data (np.ndarray): 各種要素のデータ
+    """
+    uwnd_data, vwnd_data, hgt_data, tmp_data, spfh_data, ps_data = self.init_array()
+
+    for imem in range(self.mem):
+      full_mem_data = self.read_gpv(data_path+'/{:03}/{}_{}hr.grd'.format(imem+1,self.date,self.ft),self.elem_num,endian=endian)
       uwnd_data[imem,:,:,:] = full_mem_data[0,:,:,:]
       vwnd_data[imem,:,:,:] = full_mem_data[1,:,:,:]
       hgt_data[imem,:,:,:]  = full_mem_data[2,:,:,:]
@@ -120,9 +141,7 @@ class Energy_NORM:
 
     return pertb_uwnd_data, pertb_vwnd_data, pertb_tmp_data, pertb_hgt_data, pertb_spfh_data, pertb_ps_data
 
-  def calc_dry_EN_NORM(self,
-    u_prime:np.ndarray, v_prime:np.ndarray, tmp_prime:np.ndarray, ps_prime:np.ndarray 
-  ):
+  def calc_dry_EN_NORM(self,u_prime:np.ndarray, v_prime:np.ndarray, tmp_prime:np.ndarray, ps_prime:np.ndarray):
     """乾燥エネルギーノルムの計算
     Args:
       u_prime   (np.ndarray): 東西風のコントロールランからの予測時間における摂動
@@ -139,20 +158,21 @@ class Energy_NORM:
       constitution -> [緯度, 経度] 
     """
 
-    #Physics
+    #wind term
     physical_term = (u_prime)**2+(v_prime)**2
     #matsueda et al. (2014)
     vint_physical_term = self._vint(physical_term,self.press_levels)*0.5
     #enomoto et al. (2015)
     #vint_physical_term = self._vint(physical_term,self.press_levels)/(2*self.Pr)
 
-    #Potential
+    #temperture term
     tmp_term = (self.cp/self.Tr)*((tmp_prime)**2)
     #matsueda et al. (2014)
     vint_tmp_term = self._vint(tmp_term,self.press_levels[:])*0.5
     #enomoto et al. (2015)
     #vint_tmp_term = self._vint(tmp_term,self.press_levels[:])/(2*self.Pr)
 
+    #pressure term
     ps_term = (self.R*self.Tr/self.Pr)*(ps_prime**2/self.Pr)*0.5
 
     #SUM OF TERM
@@ -161,14 +181,55 @@ class Energy_NORM:
 
     return dry_energy_norm, vint_physical_term, vint_potential_term
 
-  def calc_humid_EN_NORM(self):
-    pass
+  def calc_humid_EN_NORM(self, u_prime, v_prime, tmp_prime, spfh_prime, ps_prime):
+    """湿潤エネルギーノルムの計算
+    Args:
+      u_prime   (np.ndarray) : 東西風のコントロールランからの予測時間における摂動
+      v_prime   (np.ndarray) : 南北風のコントロールランからの予測時間における摂動
+      tmp_prime (np.ndarray) : 気温のコントロールランからの予測時間における摂動
+      spfh_prime (np.ndarray): 比湿のコントロールランからの予測時間における摂動
+      ps_prime  (np.ndarray) : 地表面気圧のコントロールランからの予測時間における摂動
+    Parameters:
+      self.Pr (float) : 経験的に求めた参照気圧. Defaults to 1000 hPa.
+      self.Tr (float) : 経験的に求めた参照気温. Defaults to 270 K.
+      self.cp (float) : 定圧比熱. Defaults to 1004 J/K*kg.
+      self.R  (float) : 気体の状態定数. Defaults to 287.0 J/K*kg.
+    Returns:
+      dry_energy_norm (np.ndarray): トータル乾燥エネルギーノルム(J/kg)
+      constitution -> [緯度, 経度] 
+    """
+    #wind term
+    physical_term = (u_prime)**2+(v_prime)**2
+    #matsueda et al. (2014)
+    vint_physical_term = self._vint(physical_term,self.press_levels)*0.5
+    #enomoto et al. (2015)
+    #vint_physical_term = self._vint(physical_term,self.press_levels)/(2*self.Pr)
+
+    #temperture term
+    tmp_term = (self.cp/self.Tr)*((tmp_prime)**2)
+    #matsueda et al. (2014)
+    vint_tmp_term = self._vint(tmp_term,self.press_levels[:])*0.5
+    #enomoto et al. (2015)
+    #vint_tmp_term = self._vint(tmp_term,self.press_levels[:])/(2*self.Pr)
+
+    #humid term
+    spfh_term = self.wq*(self.Lc**2)*(spfh_prime**2)/(self.cp*self.Tr)
+    vint_spfh_term = self._vint(spfh_term,self.press_levels[:])*0.5
+
+    #pressure term
+    ps_term = (self.R*self.Tr/self.Pr)*(ps_prime**2/self.Pr)*0.5
+
+    #SUM OF TERM
+    vint_potential_term = vint_tmp_term + vint_spfh_term + ps_term
+    humid_energy_norm = vint_physical_term + vint_potential_term
+
+    return humid_energy_norm, vint_physical_term, vint_potential_term
 
   def verification_region(self, 
     lon, lat, *,
     area_lat_min:float =50.0, area_lat_max:float =20.0,
     area_lon_min:float =120.0, area_lon_max:float =150.0
-  ):
+    ):
     """検証領域のインデックス番号を返す
     Args:
       lon, lat (np.ndarray): 経度, 緯度のnp.ndarray
