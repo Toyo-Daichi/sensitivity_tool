@@ -172,7 +172,7 @@ class Mapping:
     elif label == 'svd':
       levels = [7.5, 10.0, 15.0, 30.0, 50.0, 70.0, 100.0]
 
-    elif label == 'spread_00hr' or label == 'spread_12hr':
+    elif label == 'spread_00hr' or label == 'spread_12hr' or label == 'spread_24hr':
       #levels = [0.25, 0.5, 1.0, 1.5, 2.0, 3.0, 5.0]
       #levels = [5.0, 7.5, 10.0, 12.5, 15.0, 20.0, 30.0]
       #levels = [250.0, 300.0, 350.0, 400.0, 500.0, 750.0, 1000.0]

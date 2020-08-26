@@ -22,9 +22,9 @@ import readgpv_tigge
 
 if __name__ == "__main__":
   """Set basic info. """
-  yyyy, mm, dd, hh, ft = '2018', '07', '04', '12', '72'
+  yyyy, mm, dd, hh, ft = '2018', '07', '03', '12', '24'
   date = yyyy+mm+dd+hh
-  center = 'CMC'
+  center = 'JMA'
   dataset = 'TIGGE_' + center
   mode = 'dry' # 'dry' or 'humid'
   map_prj, set_prj = 'CNH', 'lcc' # 'CNH', 'lcc' or 'ALL', 'cyl'

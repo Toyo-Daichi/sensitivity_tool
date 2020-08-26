@@ -14,7 +14,7 @@ import subprocess
 
 if __name__ == "__main__":
   """Set basic info. """
-  yyyy, mm, dd, hh, ft = 2018, 7, 2, 12, 72 
+  yyyy, mm, dd, hh, ft = 2018, 7, 5, 12, 72 
   date = '{:04}{:02}{:02}{:02}'.format(yyyy,mm,dd,hh)
   center = 'JMA'
   dataset = 'TIGGE_' + center 
