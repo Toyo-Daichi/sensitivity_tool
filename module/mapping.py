@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 """ If you use local env., please check out. """
-#
 #import os, conda
 #conda_file_dir = conda.__file__
 #conda_dir = conda_file_dir.split('lib')[0]
@@ -43,30 +42,46 @@ class Mapping:
 
     elif area == 'CNH':
       self.area = area
-      self.lon_min, self.lon_max = 100, 180
+      self.lon_min, self.lon_max = 100, 200
       self.lat_min, self.lat_max = 10, 60 
       self.lat_0, self.lon_0 = 35, 135
 
+    elif area == 'ALL':
+      self.area = area
+      self.lat_0, self.lon_0 = 0, 180
+
   def base(self, *, projection_mode='lcc'):
     
-    mapping = Basemap( 
-      projection=projection_mode,
-      resolution="i", 
-      lat_0=self.lat_0, lon_0=self.lon_0, fix_aspect=(1,1),
-      llcrnrlat=self.lat_min, urcrnrlat=self.lat_max, 
-      llcrnrlon=self.lon_min, urcrnrlon=self.lon_max
-    )
+    if projection_mode is 'lcc':
+      mapping = Basemap( 
+        projection=projection_mode,
+        resolution="i", 
+        lat_0=self.lat_0, lon_0=self.lon_0, fix_aspect=(1,1),
+        llcrnrlat=self.lat_min, urcrnrlat=self.lat_max, 
+        llcrnrlon=self.lon_min, urcrnrlon=self.lon_max
+      )
+
+    elif projection_mode is 'cyl':
+      mapping = Basemap( 
+        projection=projection_mode,
+        resolution="l", 
+        lat_0=self.lat_0, lon_0=self.lon_0,
+       )
     
     mapping.drawcoastlines(color='black', linewidth=0.5)
-    
+
     if 'NH' in self.area:
       mapping.drawmeridians(np.arange(0, 360, 15),  labels=[False, False, False, True], fontsize='small', color='gray', linewidth=0.5)
-      mapping.drawparallels(np.arange(-90, 90, 15), labels=[True, False, False, True], fontsize='small', color='gray', linewidth=0.5)
+      mapping.drawparallels(np.arange(-90, 90, 15), labels=[True, False, False, False], fontsize='small', color='gray', linewidth=0.5)
 
-    elif 'NH' not in self.area:
-      mapping.drawmeridians(np.arange(0, 360, 5),  labels=[False, True, False, True], fontsize='small', color='gray', linewidth=0.5)
-      mapping.drawparallels(np.arange(-90, 90, 5), labels=[True, False, False, True], fontsize='small', color='gray', linewidth=0.5)
-        
+    elif 'JPN' in self.area:
+      mapping.drawmeridians(np.arange(0, 360, 5),  labels=[False, False, False, True], fontsize='small', color='gray', linewidth=0.5)
+      mapping.drawparallels(np.arange(-90, 90, 5), labels=[True, False, False, False], fontsize='small', color='gray', linewidth=0.5)
+
+    elif self.area == 'ALL':
+      mapping.drawmeridians(np.arange(0, 360, 40),  labels=[False, False, False, True], fontsize='small', color='gray', linewidth=0.5)
+      mapping.drawparallels(np.arange(-90, 90, 25), labels=[False, False, False, True], fontsize='small', color='gray', linewidth=0.5)
+      
     return mapping
 
   def coord_change(self, basemap, x, y):
@@ -113,7 +128,16 @@ class Mapping:
   def diff_contourf(self, basemap, x, y, data, *, elem='default'):
     if elem == 'default':
       levels = np.arange(-7.0, 7.0, 0.5) 
-      label = '[none]'
+      label = '[ none ]'
+    elif elem == 'normalize':
+      levels = np.arange(-1.0, 1.05, 0.05)
+      label = '[ none ]'
+    elif elem == 'HGT':
+      levels = np.arange(-5.0, 5.01, 0.1)
+      label = '[ m ]'
+    elif elem == 'small':
+      levels = np.arange(-0.2, 0.21, 0.01)
+      label = '[ none ]'
     elif elem == 'rain':
       levels = np.arange(-15.0, 16.0, 1.0)
       label = '[mm]'
@@ -129,30 +153,52 @@ class Mapping:
     cbar = basemap.colorbar(cmap, 'right', size='2.5%')
     cbar.set_label(label, size=8)
 
-  def norm_contourf(self, basemap, x, y, data, *, label='normal'):
-    if label == 'normal':
+  def norm_contourf(self, basemap, x, y, data, *, label='normalize', cbar_on=0):
+    #normalize
+    if label == 'normalize':
       levels = [0.025, 0.05, 0.1, 0.2, 0.5, 0.75, 1.0]
 
-    elif label == 'scope':
-      #levels = [0.025, 0.050, 0.075, 0.100, 0.125, 0.150, 0.200]
-      levels = [0.025, 0.05, 0.10, 0.15, 0.20, 0.25, 0.30]
+    elif label == 'normalize_scope':
+      levels = [0.025, 0.050, 0.075, 0.100, 0.125, 0.150, 0.200]
+      #levels = [0.025, 0.05, 0.10, 0.15, 0.20, 0.25, 0.30]
       #levels = [0.075, 0.100, 0.125, 0.150, 0.175, 0.200, 0.250]
-
+    
+    #simple
     elif label == 'adjoint':
-      levels = [0.01, 0.025, 0.05, 0.1, 0.2, 0.5, 1.0]
+      #levels = [0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50]
+      #levels = [0.05, 0.1, 0.2, 0.5, 1.0, 2.0, 5.0]
+      levels = [1.00, 1.25, 1.5, 2.0, 2.5, 3.0, 5.0]
     
-    elif label == 'spread_00hr':
-      levels = [5.0, 7.5, 10.0, 12.5, 15.0, 20.0, 30.0]
+    elif label == 'svd':
+      #levels = [7.5, 10.0, 15.0, 30.0, 50.0, 70.0, 100.0]
+      #levels = [850.0, 1000.0, 1150.0, 1300.0, 1500.0, 2000.0, 3000.0]
+      #levels = [7000.0, 8000.0, 9000.0, 10000.0, 12000.0, 15000.0, 20000.0]
+      levels = [10000.0, 12500.0, 15000.0, 17500.0, 20000.0, 30000.0, 50000.0]
+
+    elif label == 'spread_00hr' or label == 'spread_12hr' or label == 'spread_24hr':
+      #levels = [0.25, 0.5, 1.0, 1.5, 2.0, 3.0, 5.0]
+      #levels = [5.0, 7.5, 10.0, 12.5, 15.0, 20.0, 30.0]
+      #levels = [250.0, 300.0, 350.0, 400.0, 500.0, 750.0, 1000.0]
+      levels = [850.0, 1000.0, 1150.0, 1300.0, 1500.0, 2000.0, 3000.0]
     
-    elif label == 'spread_72hr':
-      levels = [7.5, 10.0, 15.0, 30.0, 50.0, 70.0, 100.0]
+    elif label == 'spread_48hr' or label == 'spread_72hr':
+      #levels = [7.5, 10.0, 15.0, 30.0, 50.0, 70.0, 100.0]
+      #levels = [20.0, 40.0, 60.0, 80.0, 100.0, 120.0, 150.0]
+      levels = [7000.0, 8000.0, 9000.0, 10000.0, 12000.0, 15000.0, 20000.0]
     
     colors = ['#FFFFFF', '#00FFFF', '#000080', '#228B22', '#FFFF00', '#FF8000', '#FF0000', '#FF00FF']
     cmap = plt.contourf(x, y, data, levels, colors=colors, extend='both')
-    cbar = basemap.colorbar(cmap, 'right', size='2.5%')
-    cbar.set_label('[J/kg]', size=6)
+    
+    if cbar_on == 0:
+      cbar = basemap.colorbar(cmap, 'right', size='2.5%')
+      cbar.set_label('[ J/kg ]', size=8)
+    elif cbar_on == 1:
+      return cmap
 
-  def contour(self, basemap, x, y, data, *, elem='default', colors="black", linestyles='-', linewidths=0.5):
+  def hatch_contourf(self, basemap, x, y, data, *, levels=[0.0, 5.0], extend='max'):
+    basemap.contourf(x, y, data, levels, alpha=0.0, hatches=['xx'], lw=0.5, colors='None', extend=extend)
+    
+  def contour(self, basemap, x, y, data, *, elem='default', colors="black", linestyles='-', linewidths=0.5, font_on=0):
     if elem == 'default':
       clevs = np.arange(995.0, 1020.0, 5.0) 
     elif elem == 'diff':
@@ -160,10 +206,15 @@ class Mapping:
     elif elem == 'norm':
       clevs = np.arange(0.0, 5.0, 0.1) 
     elif elem == '500hPa':
-      clevs = np.arange(500.0, 6000.0, 100) 
+      clevs = np.arange(5000.0, 6000.0, 100) 
+    elif elem == '850hPa':
+      clevs = np.arange(500.0, 2500.0, 50) 
+    elif elem == 'slp':
+      clevs = np.arange(970.0, 1020.0, 2.5) 
 
     contour = basemap.contour(x, y, data, clevs, colors=colors, linestyles=linestyles, linewidths=linewidths)
-    contour.clabel(fmt='%1.1f', fontsize=8)
+    if font_on == 1:
+      contour.clabel(fmt='%1.1f', fontsize=8)
   
   def vector(self, basemap, x, y, u, v, *, skip=10, scale=1.0e-4):
     arr_skip = (slice(None,None,skip),slice(None,None,skip))
@@ -173,10 +224,10 @@ class Mapping:
     pass
 
   def point_linear(self, basemap, lon, lat, x_min, x_max, y_min, y_max, *, color='red', ls='-', lw=2.0):
-    basemap.plot(lon[y_min:y_max,x_max], lat[y_min:y_max,x_max], color=color, ls=ls, lw=lw)
-    basemap.plot(lon[y_min:y_max,x_min], lat[y_min:y_max,x_min], color=color, ls=ls, lw=lw)
+    basemap.plot(lon[y_min:y_max+1,x_max], lat[y_min:y_max+1,x_max], color=color, ls=ls, lw=lw)
+    basemap.plot(lon[y_min:y_max+1,x_min], lat[y_min:y_max+1,x_min], color=color, ls=ls, lw=lw)
     basemap.plot(lon[y_min,x_min:x_max+1], lat[y_min,x_min:x_max+1], color=color, ls=ls, lw=lw)
-    basemap.plot(lon[y_max-1,x_min:x_max+1], lat[y_max-1,x_min:x_max+1], color=color, ls=ls, lw=lw)
+    basemap.plot(lon[y_max,x_min:x_max+1], lat[y_max,x_min:x_max+1], color=color, ls=ls, lw=lw)
 
   def point(self, basemap, lon, lat, x, y, *, marker="*", markersize=30):
     basemap.plot(
@@ -186,8 +237,8 @@ class Mapping:
   def text(self, basemap, x, y, string, *, size=20, color="black"):
     plt.text(x, y, string, size=size, color=color)
 
-  def title(self, txt):
-    plt.title(txt, loc='left', fontsize=10)
+  def title(self, txt, *, fontsize=10):
+    plt.title(txt, loc='left', fontsize=fontsize)
 
   def saving(self, title, outpath):
     plt.savefig(outpath + title + '.png')

@@ -34,12 +34,12 @@ class ReadGPV:
     return uwnd_data, vwnd_data, hgt_data, tmp_data, slp_data, rain_data
 
   def data_read_init_driver(self, data_path:str):
-    """
+    """(初期時刻 ver.)
     Args:
       data_path(str): 週間アンサンブルデータのPATH
     Returns:
       data structure: (アンサンブル数, 鉛直層, 緯度, 経度)
-      dara (np.ndarray): 各種要素のデータ
+      data (np.ndarray): 各種要素のデータ
     """
     uwnd_data, vwnd_data, hgt_data, tmp_data, slp_data, rain_data = self.init_array()
 
@@ -55,12 +55,12 @@ class ReadGPV:
     return uwnd_data, vwnd_data, hgt_data, tmp_data, slp_data, rain_data
 
   def data_read_ft_driver(self, data_path:str):
-    """
+    """(予測時刻 ver.)
     Args:
       data_path(str): 週間アンサンブルデータのPATH
     Returns:
       data structure: (アンサンブル数, 鉛直層, 緯度, 経度)
-      dara (np.ndarray): 各種要素のデータ
+      data (np.ndarray): 各種要素のデータ
     """
     uwnd_data, vwnd_data, hgt_data, tmp_data, slp_data, rain_data = self.init_array()
     
@@ -75,17 +75,19 @@ class ReadGPV:
 
     return uwnd_data, vwnd_data, hgt_data, tmp_data, slp_data, rain_data
 
-  def set_gpv(self, gpv_file, elem):
-    return self._open_gpv(gpv_file).reshape(elem, self.nz, self.mem, self.ny, self.nx)
+  def set_gpv(self, gpv_file, elem, *, endian='little'):
+    return self._open_gpv(gpv_file,endian=endian).reshape(elem, self.nz, self.mem, self.ny, self.nx)
 
-  def read_gpv(self, gpv_file, elem):
-    return self._open_gpv(gpv_file).reshape(elem, self.nz, self.ny, self.nx)
+  def read_gpv(self, gpv_file, elem, *, endian='little'):
+    return self._open_gpv(gpv_file,endian=endian).reshape(elem, self.nz, self.ny, self.nx)
 
-  def _open_gpv(self, gpv_file, *, mode='default'):
+  def _open_gpv(self, gpv_file, *, endian='little'):
     print('...... Preparating for {}'.format(gpv_file))
     with open(gpv_file, 'rb') as ifile:
-      if mode == 'default':
+      if endian == 'little':
         data = np.fromfile(ifile, dtype='<f', sep = '')
+      elif endian == 'big':
+        data = np.fromfile(ifile, dtype='>f', sep = '')
     return data
 
   def set_coordinate(self, dx=2.5, dy=2.5):
@@ -98,7 +100,7 @@ class ReadGPV:
     return X, Y
 
   def weight_latitude(self, lat:np.ndarray) -> np.ndarray:
-    return np.sqrt(np.cos(np.deg2rad(lat)))
+    return np.sqrt(np.cos(np.deg2rad(np.abs(lat))))
 
 class Energy_NORM:
   def __init__(self,dataset):
@@ -115,10 +117,11 @@ class Energy_NORM:
     pertb_uwnd_data = np.zeros((self.mem-self.ctrl, self.nz, self.ny, self.nx))
     pertb_vwnd_data = np.zeros((self.mem-self.ctrl, self.nz, self.ny, self.nx))
     pertb_tmp_data  = np.zeros((self.mem-self.ctrl, self.nz-self.surf, self.ny, self.nx))
+    pertb_hgt_data  = np.zeros((self.mem-self.ctrl, self.nz-self.surf, self.ny, self.nx))
     pertb_slp_data  = np.zeros((self.mem-self.ctrl, self.surf, self.ny, self.nx))
-    return pertb_uwnd_data, pertb_vwnd_data, pertb_tmp_data, pertb_slp_data
+    return pertb_uwnd_data, pertb_vwnd_data, pertb_tmp_data, pertb_hgt_data, pertb_slp_data
 
-  def data_pertb_driver(self,uwnd,vwnd,tmp,slp):
+  def data_pertb_driver(self,uwnd,vwnd,tmp,hgt,slp):
     """コントロールランからの摂動の作成
     Args:
       ctrl_run(np.ndarray): 摂動を与えていないコントロールランのデータ
@@ -126,14 +129,15 @@ class Energy_NORM:
     Returns:
       pretb_elem_data(np.ndarray): アンサンブルランのデータからコントロールランデータを引いた擾乱のデータ
     """
-    pertb_uwnd_data, pertb_vwnd_data, pertb_tmp_data, pertb_slp_data = self.init_array()
+    pertb_uwnd_data, pertb_vwnd_data, pertb_tmp_data, pertb_hgt_data, pertb_slp_data = self.init_array()
     for imem in range(self.mem-self.ctrl):
       pertb_uwnd_data[imem,:,:,:] = uwnd[imem+1,:,:,:] - uwnd[self.ctrl-1,:,:,:]
       pertb_vwnd_data[imem,:,:,:] = vwnd[imem+1,:,:,:] - vwnd[self.ctrl-1,:,:,:]
       pertb_tmp_data[imem,:,:,:] = tmp[imem+1,:,:,:] - tmp[self.ctrl-1,:,:,:]
+      pertb_hgt_data[imem,:,:,:] = hgt[imem+1,:,:,:] - hgt[self.ctrl-1,:,:,:]
       pertb_slp_data[imem,:,:,:] = slp[imem+1,:,:,:] - slp[self.ctrl-1,:,:,:]
 
-    return pertb_uwnd_data, pertb_vwnd_data, pertb_tmp_data, pertb_slp_data
+    return pertb_uwnd_data, pertb_vwnd_data, pertb_tmp_data, pertb_hgt_data, pertb_slp_data
 
   def weight_average(self, data:np.ndarray, weight_list:np.ndarray):
     weight_average, sum_of_weight = np.average( 
@@ -142,9 +146,9 @@ class Energy_NORM:
     #print('..... CALCULATE WEIGHT AVE. SUM OF WEIGHT ', sum_of_weight)
     return weight_average
     
-  def calc_dry_EN_NORM_adjoint(self,
+  def calc_dry_EN_NORM(self,
     u_prime:np.ndarray, v_prime:np.ndarray, tmp_prime:np.ndarray, slp_prime:np.ndarray 
-  ):
+    ):
     """乾燥エネルギーノルムの計算
     Args:
       u_prime   (np.ndarray): 東西風のコントロールランからの予測時間における摂動
@@ -163,62 +167,31 @@ class Energy_NORM:
 
     #Physics
     physical_term = (u_prime)**2+(v_prime)**2
-    vint_physical_term = self._vint(physical_term,self.press_levels)/(2*self.Pr)
-    
+    #matsueda et al. (2014)
+    vint_physical_term = self._vint(physical_term,self.press_levels)*0.5
+    #enomoto et al. (2015)
+    #vint_physical_term = self._vint(physical_term,self.press_levels)/(2*self.Pr)
+
     #Potential
     tmp_term = (self.cp/self.Tr)*((tmp_prime)**2)
-    vint_tmp_term = self._vint(tmp_term,self.press_levels[1:])/(2*self.Pr)
-    slp_term = (self.R*self.Tr/self.Pr)*(slp_prime**2/self.Pr)*0.5
-    vint_potential_term = vint_tmp_term + slp_term
+    #matsueda et al. (2014)
+    vint_tmp_term = self._vint(tmp_term,self.press_levels[1:])*0.5
+    #enomoto et al. (2015)
+    #vint_tmp_term = self._vint(tmp_term,self.press_levels[1:])/(2*self.Pr)
+
+    ps_term = (self.R*self.Tr/self.Pr)*(slp_prime**2/self.Pr)*0.5
 
     #SUM OF TERM
+    vint_potential_term = vint_tmp_term + ps_term
     dry_energy_norm = vint_physical_term + vint_potential_term
 
     return dry_energy_norm, vint_physical_term, vint_potential_term
-
-  def calc_dry_EN_NORM_svd(self,
-    u_prime:np.ndarray, v_prime:np.ndarray, tmp_prime:np.ndarray, slp_prime:np.ndarray 
-  ):
-    """乾燥エネルギーノルムの計算
-    Args:
-      u_prime   (np.ndarray): 東西風のコントロールランからの予測時間における摂動
-      v_prime   (np.ndarray): 南北風のコントロールランからの予測時間における摂動
-      tmp_prime (np.ndarray): 気温のコントロールランからの予測時間における摂動
-      slp_prime (np.ndarray): 海面更生気圧のコントロールランからの予測時間における摂動
-    Parameters:
-      self.Pr (float) : 経験的に求めた参照気圧. Defaults to 1000 hPa.
-      self.Tr (float) : 経験的に求めた参照気温. Defaults to 270 K.
-      self.cp (float) : 定圧比熱. Defaults to 1004 J/K*kg.
-      self.R  (float) : 気体の状態定数. Defaults to 287.0 J/K*kg.
-    Returns:
-      dry_energy_norm (np.ndarray): トータル乾燥エネルギーノルム(J/kg)
-      constitution -> [緯度, 経度] 
-    """
-
-    #Physics
-    physical_term = (u_prime)**2+(v_prime)**2
-    vint_physical_term = self._vint(physical_term,self.press_levels)/(2*self.Pr)
-
-    
-    #Potential
-    tmp_term = (tmp_prime)**2
-    vint_tmp_term = self._vint(tmp_term,self.press_levels[1:])/(2*self.Pr)
-    slp_term = (slp_prime**2)*0.5
-    vint_potential_term = vint_tmp_term + slp_term
-
-    #SUM OF TERM
-    dry_energy_norm = vint_physical_term + vint_potential_term
-
-    return dry_energy_norm, vint_physical_term, vint_potential_term 
-
-  def calc_humid_EN_NORM(self):
-    pass
 
   def verification_region(self, 
     lon, lat, *,
     area_lat_min:float =50.0, area_lat_max:float =20.0,
     area_lon_min:float =120.0, area_lon_max:float =150.0
-  ):
+    ):
     """検証領域のインデックス番号を返す
     Args:
       lon, lat (np.ndarray): 経度, 緯度のnp.ndarray
@@ -247,6 +220,8 @@ class Energy_NORM:
     Note:
       今回使用した積分方法はシンプソン則
     """
+    print('Pressure shape & LEVEL :: ', x_array.shape, press_array)
+
     y_array = np.empty_like(x_array[0], dtype=np.float32)
 
     for iy in range(self.ny):

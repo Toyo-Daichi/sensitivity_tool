@@ -7,18 +7,19 @@ Created from 2020.8.3
 import os, sys
 sys.path.append(os.path.join(os.path.dirname(__file__), './module'))
 import numpy as np
-import readgpv
+import readgpv_rish
 import setup
 import struct
 import subprocess
 
 if __name__ == "__main__":
   """Set basic info. """
-  yyyy, mm, dd, hh, ft = 2003, 8, 5, 12, 72 
+  yyyy, mm, dd, hh, ft = 2015, 9, 9, 12, 72 
   date = '{:04}{:02}{:02}{:02}'.format(yyyy,mm,dd,hh)
-  dataset = 'WFM'
+  dataset = 'EPSW' # 'WFM' or 'EPSW'
+  set_endian = 'big' if (dataset is 'EPSW') else 'little'
   var_list = ('UGRD', 'VGRD', 'HGT', 'TMP') #level=surf, HGT, TMP -> PRMSL, APCP
-  make_var = 1 # 0(make each var output) or 1(only full data)
+  make_var = 0 # 0(make each var output) or 1(only full data)
   
   """Class & data set """
   ST = setup.Setup(dataset)
@@ -26,8 +27,9 @@ if __name__ == "__main__":
   data_dir = '/work3/daichi/Data/GSM_EnData'
   indata = data_dir + '/bin/{}{:02}{:02}/'.format(yyyy,mm,dd) + '{}{:02}{:02}{:02}_{:02}hr_{:02}mem.grd'.format(yyyy,mm,dd,hh,ft,mem)
 
-  RG = readgpv.ReadGPV(dataset,date,ft)
-  full_data = RG.set_gpv(indata,len(var_list))
+
+  RG = readgpv_rish.ReadGPV(dataset,date,ft)
+  full_data = RG.set_gpv(indata,len(var_list),endian=set_endian)
   cfmt = 'f'*(nx*ny*nz)
 
   for imem in range(mem):
@@ -36,12 +38,15 @@ if __name__ == "__main__":
 
     for ivar, name in enumerate(var_list):
       with open(outdir+name+'.grd','wb') as ofile:
-        _data =np.ravel(full_data[ivar,:,imem,:,:])
+        if (dataset is 'WFM'):
+          _data =np.ravel(full_data[ivar,:,imem,:,:])
+        elif (dataset is 'EPSW'):
+          _data =np.ravel(full_data[ivar,:,imem,::-1,:])
         grd = struct.pack(cfmt,*_data)
         ofile.write(grd)
     
     try: 
-      command = ["bash","./module/cat.sh",outdir,'{:04}{:02}{:02}{:02}'.format(yyyy,mm,dd,hh),'{:02}'.format(ft)]
+      command = ["bash","./module/cat.sh",outdir,'{:04}{:02}{:02}{:02}'.format(yyyy,mm,dd,hh),'{:02}'.format(ft),'RISH']
       res = subprocess.call(command)
       print('...... Output data on '+'{}{:02}{:02}{:02}_{:02}hr.grd'.format(yyyy,mm,dd,hh,ft)+' MEM::{:03}'.format(imem+1))
 
