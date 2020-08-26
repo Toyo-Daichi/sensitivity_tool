@@ -37,7 +37,7 @@ class Anl_ENSVSA:
 
   def eigen_value_and_vector_driver(self, dims_xy, pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_spfh, pertb_ps,*,mode='dry'):
     """eigen vector """
-    Z_array, _ = self.init_Z_array(dims_xy,mode)
+    Z_array, _ = self.init_Z_array(dims_xy,mode=mode)
 
     if mode is 'dry':
       #multi const
@@ -69,35 +69,26 @@ class Anl_ENSVSA:
     return eigen_value, eigen_vector
 
   def making_initial_pertb_array(self, dims_xy, pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_spfh, pertb_ps, p_array, *, mode='dry', eigen_mode=10):
-    Z_array, dims = self.init_Z_array(dims_xy,mode)
-    array = np.zeros((dims,mode))
+    Z_array, dims = self.init_Z_array(dims_xy,mode=mode)
+    array = np.zeros((dims,eigen_mode))
 
     if mode is 'dry':
-      #multi const
-      svd_pertb_tmp  = pertb_tmp[:]*np.sqrt(EN.cp/EN.Tr)
-      svd_pertb_ps   = pertb_ps[:,EN.surf-1]*np.sqrt((EN.R*EN.Tr)/EN.Pr)
-
       for imem in range(EN.mem-EN.ctrl):
         Z_array[(0*EN.nz*dims_xy):(1*(EN.nz*dims_xy)),imem] = pertb_uwnd[imem].reshape(-1)
         Z_array[(1*EN.nz*dims_xy):(2*(EN.nz*dims_xy)),imem] = pertb_vwnd[imem].reshape(-1)
-        Z_array[(2*EN.nz*dims_xy):(3*(EN.nz*dims_xy)),imem] = svd_pertb_tmp[imem].reshape(-1)
-        Z_array[(3*EN.nz*dims_xy):(3*(EN.nz*dims_xy)+dims_xy),imem] = svd_pertb_ps[imem,EN.surf-1].reshape(-1)
+        Z_array[(2*EN.nz*dims_xy):(3*(EN.nz*dims_xy)),imem] = pertb_tmp[imem].reshape(-1)
+        Z_array[(3*EN.nz*dims_xy):(3*(EN.nz*dims_xy)+dims_xy),imem] = pertb_ps[imem,EN.surf-1].reshape(-1)
 
     elif mode is 'humid':
-      #multi const
-      svd_pertb_tmp  = pertb_tmp[:]*np.sqrt(EN.cp/EN.Tr)
-      svd_pertb_spfh = pertb_spfh[:]*np.sqrt(EN.wq*(EN.Lc**2)/(EN.cp*EN.Tr))
-      svd_pertb_ps   = pertb_ps[:,EN.surf-1]*np.sqrt((EN.R*EN.Tr)/EN.Pr)
-
       for imem in range(EN.mem-EN.ctrl):
         Z_array[(0*EN.nz*dims_xy):(1*(EN.nz*dims_xy)),imem] = pertb_uwnd[imem].reshape(-1)
         Z_array[(1*EN.nz*dims_xy):(2*(EN.nz*dims_xy)),imem] = pertb_vwnd[imem].reshape(-1)
-        Z_array[(2*EN.nz*dims_xy):(3*(EN.nz*dims_xy)),imem] = svd_pertb_tmp[imem].reshape(-1)
-        Z_array[(3*EN.nz*dims_xy):(4*(EN.nz*dims_xy)),imem] = svd_pertb_spfh[imem,EN.surf-1].reshape(-1)
-        Z_array[(4*EN.nz*dims_xy):(4*(EN.nz*dims_xy)+dims_xy),imem] = svd_pertb_ps[imem,EN.surf-1].reshape(-1)
+        Z_array[(2*EN.nz*dims_xy):(3*(EN.nz*dims_xy)),imem] = pertb_tmp[imem].reshape(-1)
+        Z_array[(3*EN.nz*dims_xy):(4*(EN.nz*dims_xy)),imem] = pertb_spfh[imem,EN.surf-1].reshape(-1)
+        Z_array[(4*EN.nz*dims_xy):(4*(EN.nz*dims_xy)+dims_xy),imem] = pertb_ps[imem,EN.surf-1].reshape(-1)
 
-    for _ in range(mode):
-      array[:,_] = Z_array @ p_array[:,mode]
+    for _ in range(eigen_mode):
+      array[:,_] = Z_array @ p_array[:,eigen_mode]
 
     sum_array = np.sum(array, axis=1)
     svd_pertb_uwnd = np.zeros((EN.nz,EN.ny,EN.nx))
@@ -107,17 +98,17 @@ class Anl_ENSVSA:
     svd_pertb_ps   = np.zeros((EN.ny,EN.nx))
 
     if mode is 'dry':
-      svd_pertb_uwnd[:,:,:] = sum_array[(0*EN.nz*dims_xy):(1*EN.nz*dims_xy)]
-      svd_pertb_vwnd[:,:,:] = sum_array[(1*EN.nz*dims_xy):(2*EN.nz*dims_xy)]
-      svd_pertb_tmp[:,:,:]  = sum_array[(2*EN.nz*dims_xy):(3*EN.nz*dims_xy)]
-      svd_pertb_ps[:,:]     = sum_array[(3*EN.nz*dims_xy):(3*EN.nz*dims_xy)+dims_xy]
+      svd_pertb_uwnd[:,:,:] = sum_array[(0*EN.nz*dims_xy):(1*EN.nz*dims_xy)].reshape(EN.nz,EN.ny,EN.nx)
+      svd_pertb_vwnd[:,:,:] = sum_array[(1*EN.nz*dims_xy):(2*EN.nz*dims_xy)].reshape(EN.nz,EN.ny,EN.nx)
+      svd_pertb_tmp[:,:,:]  = sum_array[(2*EN.nz*dims_xy):(3*EN.nz*dims_xy)].reshape(EN.nz,EN.ny,EN.nx)
+      svd_pertb_ps[:,:]     = sum_array[(3*EN.nz*dims_xy):(3*EN.nz*dims_xy)+dims_xy].reshape(EN.ny,EN.nx)
 
     elif mode is 'humid':
-      svd_pertb_uwnd[:,:,:] = sum_array[(0*EN.nz*dims_xy):(1*EN.nz*dims_xy)]
-      svd_pertb_vwnd[:,:,:] = sum_array[(1*EN.nz*dims_xy):(2*EN.nz*dims_xy)]
-      svd_pertb_tmp[:,:,:]  = sum_array[(2*EN.nz*dims_xy):(3*EN.nz*dims_xy)]
-      svd_pertb_spfh[:,:,:] = sum_array[(3*EN.nz*dims_xy):(4*EN.nz*dims_xy)]
-      svd_pertb_ps[:,:]     = sum_array[(4*EN.nz*dims_xy):(4*EN.nz*dims_xy)+dims_xy]
+      svd_pertb_uwnd[:,:,:] = sum_array[(0*EN.nz*dims_xy):(1*EN.nz*dims_xy)].reshape(EN.nz,EN.ny,EN.nx)
+      svd_pertb_vwnd[:,:,:] = sum_array[(1*EN.nz*dims_xy):(2*EN.nz*dims_xy)].reshape(EN.nz,EN.ny,EN.nx)
+      svd_pertb_tmp[:,:,:]  = sum_array[(2*EN.nz*dims_xy):(3*EN.nz*dims_xy)].reshape(EN.nz,EN.ny,EN.nx)
+      svd_pertb_spfh[:,:,:] = sum_array[(3*EN.nz*dims_xy):(4*EN.nz*dims_xy)].reshape(EN.nz,EN.ny,EN.nx)
+      svd_pertb_ps[:,:]     = sum_array[(4*EN.nz*dims_xy):(4*EN.nz*dims_xy)+dims_xy].reshape(EN.ny,EN.nx)
 
     return svd_pertb_uwnd, svd_pertb_vwnd, svd_pertb_tmp, svd_pertb_spfh, svd_pertb_ps
 
@@ -165,14 +156,14 @@ class Anl_ENSVSA:
     
 if __name__ == "__main__":
   """Set basic info. """
-  yyyy, mm, dd, hh, init, ft = '2018', '07', '03', '12', '00', '72'
+  yyyy, mm, dd, hh, init, ft = '2018', '07', '04', '12', '00', '72'
   date = yyyy+mm+dd+hh
-  center = 'ECMWF'
+  center = 'JMA'
   dataset = 'TIGGE_' + center
   mode = 'dry' # 'dry' or 'humid'
   map_prj, set_prj = 'CNH', 'lcc'
   target_region = ( 25, 50, 125, 150 ) # lat_min/max, lon_min/max
-  eigen_mode = 1
+  eigen_mode = 10
 
   """Class & parm set """
   DR = Anl_ENSVSA()
@@ -245,17 +236,17 @@ if __name__ == "__main__":
   svd_pertb_uwnd,svd_pertb_vwnd,svd_pertb_tmp,svd_pertb_spfh,svd_pertb_ps = DR.making_initial_pertb_array(dims_xy,pertb_uwnd,pertb_vwnd,pertb_tmp,pertb_spfh,pertb_ps,p_array,mode=mode)
 
   energy_norm, _, _ = DR.sensitivity_driver(svd_pertb_uwnd,svd_pertb_vwnd,svd_pertb_tmp,svd_pertb_spfh,svd_pertb_ps,target_region)
-  contribute = float((np.sum(eigen_value[:mode+1])/np.sum(eigen_value))*100)
+  contribute = float((np.sum(eigen_value[:eigen_mode+1])/np.sum(eigen_value))*100)
 
   #normalize
   print('..... @ MAKE NORMALIZE ENERGY NORM @')
   print('')
-  normal_energy_norm = statics_tool.normalize(energy_norm)
+  #normal_energy_norm = statics_tool.normalize(energy_norm)
   #normal_energy_norm = statics_tool.normalize(energy_norm)
   #normal_energy_norm = statics_tool.min_max(energy_norm)
   #print('MIN :: ', np.min(normal_energy_norm), 'MAX :: ', np.max(normal_energy_norm))
 
   """ Draw function NORM """
-  MP.main_norm_driver(energy_norm,np.average(hgt_data,axis=0),target_region,ft,date,label_cfmt='adjoint')
+  MP.main_norm_driver(energy_norm,np.average(hgt_data,axis=0),target_region,ft,date,label_cfmt='SVD',center=center,TE_mode=mode,mode=eigen_mode, contribute=contribute)
 
   print('Normal END')

@@ -109,7 +109,7 @@ class Mapping_NORM:
     *,
     prj='lcc', label_cfmt='spread',  # for title & colorbar
     center='JMA', TE_mode='dry',     # for savefig
-    mode:int=0, contibute:float=0.0  # for svd
+    mode:int=0, contribute:float=0.0  # for svd
     ):
 
     """Draw sensitivity area @dry enegy norm"""
@@ -128,9 +128,10 @@ class Mapping_NORM:
       #title_cfmt = ' NORMALIZE TE Adjoint sensitivity [ J/kg ] FT={}hr, INIT={}'.format(ft,date)
       save_cfmt = '{}_TE_{}_{}_{}hr'.format(center,TE_mode,label_cfmt,ft)
     elif label_cfmt == 'SVD':
-      label_cfmt = 'normal'
-      title_cfmt = ' TE MODE 1-{} contribute:{}% sensitivity [ J/kg ] FT={}hr, INIT={}'.format(ft,date)
+      label_cfmt = 'svd'
+      title_cfmt = ' TE MODE 1-{} contribute:{}% sensitivity [ J/kg ] FT={}hr, INIT={}'.format(mode,int(contribute),ft,date)
       #title_cfmt = ' NORMALIZE TE MODE sensitivity [ J/kg ] FT={}hr, INIT={}'.format(ft,date)
+      save_cfmt = '{}_TE_{}_{}_{}hr'.format(center,TE_mode,label_cfmt,ft)
 
     lat_min_index, lat_max_index, lon_min_index, lon_max_index = \
       self.EN.verification_region(lon,lat,
@@ -143,7 +144,7 @@ class Mapping_NORM:
     
     self.MP.norm_contourf(mapp, x, y, energy_norm, label=label_cfmt)
     self.MP.contour(mapp, x, y, hgt_data[1], elem='850hPa', font_on=1)
-    self.MP.title(title_cfmt)
+    self.MP.title(title_cfmt, fontsize=8)
     self.MP.saving(save_cfmt,'./work/')
     plt.show()
 
