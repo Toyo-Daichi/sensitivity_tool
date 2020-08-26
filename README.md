@@ -1,5 +1,6 @@
 ## 基本情報(sensitivity_toolについて)
-- アンサンブル手法に基づく簡易予報感度解析(Enomoto et al. 2015; 榎本ほか 2014; Matsueda et al. 2011)
+- アンサンブル手法に基づく簡易予報感度解析(Enomoto et al. 2015; 榎本ほか 2014; Matsueda et al. 2011)  
+- 新しいTIGGEデータについて
 
 #### 基本となる考え方
 
@@ -133,6 +134,17 @@ pについて微分すると、
 ## 作成情報
 - 制作開始日　2020年7月5日
 - TIGGEでの制作開始日　2020年8月17日
+
+### TIGGE増長分について  
+
+下記のスクリプトを増長した。
+
+(1)`data_grib2bin_TIGGE.sh`  
+Grib形式のTIGGEデータをbig endianのGrads形式に変更する。  
+(2)`data_encode_TIGGE.py`  
+メンバーごとのディレクトリを作成して、実行しやすいフォーマットにデータを変更する。  
+(3)`anl_(spread/EnASA/EnSVSA)_TIGGE.py`  
+各種手法の場合を増長した。TIGGEデータは乾燥エネルギーノルム/湿潤エネルギーノルムどちらも対応している。  
 
 <br>
 
