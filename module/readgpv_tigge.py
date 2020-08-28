@@ -326,3 +326,25 @@ class Energy_NORM:
       eig_vec [i] = eig_vec[i]/np.linalg.norm(eig_vec[i])
     
     return eig_val, eig_vec
+
+  def eigen_vector_normalization(self, eigen_vector):
+    """固有ベクトルの総和を１にずる規格化
+    Args:
+      eigen_vector(np.ndarray): 固有ベクトル
+    Returns:
+      normalize_eigen_vector(np.ndarray): 総和が１の固有ベクトル
+    """
+
+    normalize_eigen_vector = np.empty_like(eigen_vector)
+    part_eigen_vector = []
+    total_sum_eigen_vector, column_sum_eigen_vector = eigen_vector.sum(), np.sum(eigen_vector,axis=0)
+
+    for _ in range(eigen_vector.shape[1]):
+      part_eigen_vector.append(column_sum_eigen_vector[_]/total_sum_eigen_vector)
+
+    for _ in range(eigen_vector.shape[1]):
+      normalize_eigen_vector[_,:] = eigen_vector[_,:]*part_eigen_vector[_]
+
+    print('..... CHECK EIGENVECTOR SUM :: ',  normalize_eigen_vector.sum())
+    return normalize_eigen_vector
+    
