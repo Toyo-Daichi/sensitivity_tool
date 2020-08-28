@@ -41,7 +41,7 @@ def normalize(v, axis=-1, order=2):
   平均を0, 標準偏差を1とする正規化
   https://deepage.net/features/numpy-normalize.html
   """
-  l2 = np.linalg.norm(v, ord = order, axis=axis, keepdims=True)
+  l2 = np.linalg.norm(v, ord=order, axis=axis, keepdims=True)
   l2[l2==0] = 1
   return v/l2
 

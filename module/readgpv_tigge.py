@@ -5,6 +5,7 @@ import setup
 import scipy.linalg
 import scipy.sparse
 from scipy import integrate
+import statics_tool
 import subprocess
 
 class ReadGPV:
@@ -341,23 +342,10 @@ class Energy_NORM:
     Args:
       eigen_vector(np.ndarray): 固有ベクトル
     Returns:
-      normalize_eigen_vector(np.ndarray): 総和が１の固有ベクトル
+      normalize_eigen_vector(np.ndarray): 正規化された固有ベクトル
     """
+    normalize_eigen_vector = statics_tool.normalize(eigen_vector,axis=None) 
+    print('..... CHECK EIGENVECTOR SUM :: ', normalize_eigen_vector*normalize_eigen_vector.sum()
 
-    normalize_eigen_vector = np.empty_like(eigen_vector)
-    part_eigen_vector = []
-    total_sum_eigen_vector, column_sum_eigen_vector = eigen_vector.sum(), np.sum(eigen_vector,axis=0)
-
-    #print(column_sum_eigen_vector)
-
-    for _ in range(eigen_vector.shape[1]):
-      part_eigen_vector.append(column_sum_eigen_vector[_]/total_sum_eigen_vector)
-
-
-
-    for _ in range(eigen_vector.shape[1]):
-      normalize_eigen_vector[_,:] = eigen_vector[_,:]*part_eigen_vector[_]
-
-    print('..... CHECK EIGENVECTOR SUM :: ',  sum(part_eigen_vector), normalize_eigen_vector.sum())
     return normalize_eigen_vector
     
