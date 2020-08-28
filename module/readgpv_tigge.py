@@ -27,6 +27,10 @@ class ReadGPV:
       self.mem_list = [0]
       for imem in range(2,self.mem*2-1,2):
         self.mem_list.append(imem)
+    else:
+      self.mem_list = []
+      for imem in range(self.mem):
+        self.mem_list.append(imem)
 
   def data_kind(self):
     elem  = ( 'UGRD', 'VGRD', 'HGT', 'TMP', 'SPFH', 'PS') 
@@ -329,11 +333,12 @@ class Energy_NORM:
         eig_vec (np.ndarray]): 正規化された固有ベクトル
     """
 
-    eig_val, eig_vec = scipy.linalg.eig(array, left=False, right=True, overwrite_a=True, check_finite=True)
+    eig_val, eig_vec = scipy.linalg.eig(array, left=True, right=False, overwrite_a=True, check_finite=True)
     print('..... SUCCESS EIGEN VECTOR CALCULATION ')
-
-    for i in range(len(eig_vec)): #normalize
-      eig_vec[i] = eig_vec[i]/np.linalg.norm(eig_vec[i])
+    
+    #normalize
+    #for i in range(len(eig_vec)): 
+    #  eig_vec[i] = eig_vec[i]/np.linalg.norm(eig_vec[i])
 
     return eig_val, eig_vec
 
@@ -344,8 +349,10 @@ class Energy_NORM:
     Returns:
       normalize_eigen_vector(np.ndarray): 正規化された固有ベクトル
     """
-    normalize_eigen_vector = statics_tool.normalize(eigen_vector,axis=None) 
-    print('..... CHECK EIGENVECTOR SUM :: {:.2f}'.format(normalize_eigen_vector*normalize_eigen_vector.sum()))
+
+    normalize_eigen_vector = statics_tool.normalize(eigen_vector, axis=None) 
+    normalize_eigen_vector = normalize_eigen_vector*np.sqrt(1/normalize_eigen_vector.shape[0])
+    print('..... CHECK EIGENVECTOR SUM :: {}'.format((normalize_eigen_vector*normalize_eigen_vector).sum()))
 
     return normalize_eigen_vector
     
