@@ -152,8 +152,8 @@ if __name__ == "__main__":
   """Set basic info. """
   yyyy, mm, dd, hh, init, ft = '2018', '07', '04', '12', '00', '72'
   date = yyyy+mm+dd+hh
-  center = 'ECMWF'
-  dataset = 'TIGGE_' + center
+  center = 'JMA'
+  dataset = 'TIGGE_' + center + '_pertb_minus'
   mode = 'dry' # 'dry' or 'humid' 
   map_prj, set_prj = 'CNH', 'lcc'
   target_region = ( 20, 50, 120, 150 ) # lat_min/max, lon_min/max

@@ -18,6 +18,15 @@ class ReadGPV:
     self.elem = self.data_kind()
     self.elem_num = len(self.elem)
 
+    if 'pertb_plus' in dataset:
+      self.mem_list = [0]
+      for imem in range(1,self.mem*2-1,2):
+        self.mem_list.append(imem)
+    elif 'pertb_minus' in dataset:
+      self.mem_list = [0]
+      for imem in range(2,self.mem*2-1,2):
+        self.mem_list.append(imem)
+
   def data_kind(self):
     elem  = ( 'UGRD', 'VGRD', 'HGT', 'TMP', 'SPFH', 'PS') 
     return elem
@@ -41,14 +50,14 @@ class ReadGPV:
     """
     uwnd_data, vwnd_data, hgt_data, tmp_data, spfh_data, ps_data = self.init_array()
 
-    for imem in range(self.mem):
+    for index, imem in enumerate(self.mem_list):
       full_mem_data = self.read_gpv(data_path+'/{:03}/{}_{}hr.grd'.format(imem+1,self.date,self.init),self.elem_num,endian=endian)
-      uwnd_data[imem,:,:,:] = full_mem_data[0,:,:,:]
-      vwnd_data[imem,:,:,:] = full_mem_data[1,:,:,:]
-      hgt_data[imem,:,:,:]  = full_mem_data[2,:,:,:]
-      tmp_data[imem,:,:,:]  = full_mem_data[3,:,:,:]
-      spfh_data[imem,:,:,:] = full_mem_data[4,:,:,:]
-      ps_data[imem,:,:,:]   = full_mem_data[5,:,:,:]*0.01
+      uwnd_data[index,:,:,:] = full_mem_data[0,:,:,:]
+      vwnd_data[index,:,:,:] = full_mem_data[1,:,:,:]
+      hgt_data[index,:,:,:]  = full_mem_data[2,:,:,:]
+      tmp_data[index,:,:,:]  = full_mem_data[3,:,:,:]
+      spfh_data[index,:,:,:] = full_mem_data[4,:,:,:]
+      ps_data[index,:,:,:]   = full_mem_data[5,:,:,:]*0.01
 
     return uwnd_data, vwnd_data, hgt_data, tmp_data, spfh_data, ps_data
 
@@ -62,14 +71,14 @@ class ReadGPV:
     """
     uwnd_data, vwnd_data, hgt_data, tmp_data, spfh_data, ps_data = self.init_array()
 
-    for imem in range(self.mem):
+    for index, imem in enumerate(self.mem_list):
       full_mem_data = self.read_gpv(data_path+'/{:03}/{}_{}hr.grd'.format(imem+1,self.date,self.ft),self.elem_num,endian=endian)
-      uwnd_data[imem,:,:,:] = full_mem_data[0,:,:,:]
-      vwnd_data[imem,:,:,:] = full_mem_data[1,:,:,:]
-      hgt_data[imem,:,:,:]  = full_mem_data[2,:,:,:]
-      tmp_data[imem,:,:,:]  = full_mem_data[3,:,:,:]
-      spfh_data[imem,:,:,:] = full_mem_data[4,:,:,:]
-      ps_data[imem,:,:,:]   = full_mem_data[5,:,:,:]*0.01
+      uwnd_data[index,:,:,:] = full_mem_data[0,:,:,:]
+      vwnd_data[index,:,:,:] = full_mem_data[1,:,:,:]
+      hgt_data[index,:,:,:]  = full_mem_data[2,:,:,:]
+      tmp_data[index,:,:,:]  = full_mem_data[3,:,:,:]
+      spfh_data[index,:,:,:] = full_mem_data[4,:,:,:]
+      ps_data[index,:,:,:]   = full_mem_data[5,:,:,:]*0.01
 
     return uwnd_data, vwnd_data, hgt_data, tmp_data, spfh_data, ps_data
 
@@ -320,11 +329,11 @@ class Energy_NORM:
     """
 
     eig_val, eig_vec = scipy.linalg.eig(array, left=False, right=True, overwrite_a=True, check_finite=True)
-    print('..... SUCCESS SINGULAR VECTOR CALCULATION ')
+    print('..... SUCCESS EIGEN VECTOR CALCULATION ')
 
     for i in range(len(eig_vec)): #normalize
-      eig_vec [i] = eig_vec[i]/np.linalg.norm(eig_vec[i])
-    
+      eig_vec[i] = eig_vec[i]/np.linalg.norm(eig_vec[i])
+
     return eig_val, eig_vec
 
   def eigen_vector_normalization(self, eigen_vector):
@@ -339,12 +348,16 @@ class Energy_NORM:
     part_eigen_vector = []
     total_sum_eigen_vector, column_sum_eigen_vector = eigen_vector.sum(), np.sum(eigen_vector,axis=0)
 
+    #print(column_sum_eigen_vector)
+
     for _ in range(eigen_vector.shape[1]):
       part_eigen_vector.append(column_sum_eigen_vector[_]/total_sum_eigen_vector)
+
+
 
     for _ in range(eigen_vector.shape[1]):
       normalize_eigen_vector[_,:] = eigen_vector[_,:]*part_eigen_vector[_]
 
-    print('..... CHECK EIGENVECTOR SUM :: ',  normalize_eigen_vector.sum())
+    print('..... CHECK EIGENVECTOR SUM :: ',  sum(part_eigen_vector), normalize_eigen_vector.sum())
     return normalize_eigen_vector
     

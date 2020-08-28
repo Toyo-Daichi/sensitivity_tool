@@ -25,7 +25,7 @@ if __name__ == "__main__":
   yyyy, mm, dd, hh, ft = '2018', '07', '03', '12', '24'
   date = yyyy+mm+dd+hh
   center = 'JMA'
-  dataset = 'TIGGE_' + center
+  dataset = 'TIGGE_' + center + '_pertb_minus'
   mode = 'dry' # 'dry' or 'humid'
   map_prj, set_prj = 'CNH', 'lcc' # 'CNH', 'lcc' or 'ALL', 'cyl'
   target_region = ( 25, 50, 125, 150 ) # lat_min/max, lon_min/max

@@ -60,13 +60,17 @@ class Anl_ENSVSA:
         Z_array[(0*EN.nz*dims_xy):(1*(EN.nz*dims_xy)),imem] = pertb_uwnd[imem].reshape(-1)
         Z_array[(1*EN.nz*dims_xy):(2*(EN.nz*dims_xy)),imem] = pertb_vwnd[imem].reshape(-1)
         Z_array[(2*EN.nz*dims_xy):(3*(EN.nz*dims_xy)),imem] = svd_pertb_tmp[imem].reshape(-1)
-        Z_array[(3*EN.nz*dims_xy):(4*(EN.nz*dims_xy)),imem] = svd_pertb_spfh[imem,EN.surf-1].reshape(-1)
+        Z_array[(3*EN.nz*dims_xy):(4*(EN.nz*dims_xy)),imem] = svd_pertb_spfh[imem].reshape(-1)
         Z_array[(4*EN.nz*dims_xy):(4*(EN.nz*dims_xy)+dims_xy),imem] = svd_pertb_ps[imem,EN.surf-1].reshape(-1)
 
     array = Z_array.T @ Z_array
-    eigen_value, eigen_vector = EN.eigen_decomposion(array)
 
-    return eigen_value, eigen_vector
+    print(np.diag(array))
+
+    eigen_value, eigen_vector = EN.eigen_decomposion(array)
+    normalize_eigen_vector = EN.eigen_vector_normalization(eigen_vector)
+
+    return eigen_value, normalize_eigen_vector
 
   def making_initial_pertb_array(self, dims_xy, pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_spfh, pertb_ps, p_array, *, mode='dry', eigen_mode=10):
     Z_array, dims = self.init_Z_array(dims_xy,mode=mode)
@@ -84,7 +88,7 @@ class Anl_ENSVSA:
         Z_array[(0*EN.nz*dims_xy):(1*(EN.nz*dims_xy)),imem] = pertb_uwnd[imem].reshape(-1)
         Z_array[(1*EN.nz*dims_xy):(2*(EN.nz*dims_xy)),imem] = pertb_vwnd[imem].reshape(-1)
         Z_array[(2*EN.nz*dims_xy):(3*(EN.nz*dims_xy)),imem] = pertb_tmp[imem].reshape(-1)
-        Z_array[(3*EN.nz*dims_xy):(4*(EN.nz*dims_xy)),imem] = pertb_spfh[imem,EN.surf-1].reshape(-1)
+        Z_array[(3*EN.nz*dims_xy):(4*(EN.nz*dims_xy)),imem] = pertb_spfh[imem].reshape(-1)
         Z_array[(4*EN.nz*dims_xy):(4*(EN.nz*dims_xy)+dims_xy),imem] = pertb_ps[imem,EN.surf-1].reshape(-1)
 
     for _ in range(eigen_mode):
@@ -158,9 +162,9 @@ if __name__ == "__main__":
   """Set basic info. """
   yyyy, mm, dd, hh, init, ft = '2018', '07', '04', '12', '00', '72'
   date = yyyy+mm+dd+hh
-  center = 'JMA'
-  dataset = 'TIGGE_' + center
-  mode = 'dry' # 'dry' or 'humid'
+  center = 'ECMWF'
+  dataset = 'TIGGE_' + center + '_pertb_plus'
+  mode = 'humid' # 'dry' or 'humid'
   map_prj, set_prj = 'CNH', 'lcc'
   target_region = ( 25, 50, 125, 150 ) # lat_min/max, lon_min/max
   eigen_mode = 10
@@ -211,8 +215,10 @@ if __name__ == "__main__":
   eigen_value, p_array = DR.eigen_value_and_vector_driver(dims_xy,pertb_uwnd,pertb_vwnd,pertb_tmp,pertb_spfh,pertb_ps,mode=mode)
   print('')
 
-  print('..... @ CHECK Eigen VALUE @')
+  print('..... @ CHECK Eigen VALUE & NORMALIZE VECTOR@')
   print(eigen_value)
+  print('')
+  #print(p_array)
   print('')
 
   """Calc. Sensitivity Region"""
@@ -241,10 +247,9 @@ if __name__ == "__main__":
   #normalize
   print('..... @ MAKE NORMALIZE ENERGY NORM @')
   print('')
-  #normal_energy_norm = statics_tool.normalize(energy_norm)
-  #normal_energy_norm = statics_tool.normalize(energy_norm)
-  #normal_energy_norm = statics_tool.min_max(energy_norm)
-  #print('MIN :: ', np.min(normal_energy_norm), 'MAX :: ', np.max(normal_energy_norm))
+  #energy_norm = statics_tool.normalize(energy_norm)
+  energy_norm = statics_tool.min_max(energy_norm)
+  #print('MIN :: ', np.min(energy_norm), 'MAX :: ', np.max(energy_norm))
 
   """ Draw function NORM """
   MP.main_norm_driver(energy_norm,np.average(hgt_data,axis=0),target_region,ft,date,label_cfmt='SVD',center=center,TE_mode=mode,mode=eigen_mode, contribute=contribute)

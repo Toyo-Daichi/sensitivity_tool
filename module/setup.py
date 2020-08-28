@@ -12,10 +12,18 @@ class Setup:
       nx, ny, nz, mem = 144, 73, 4, 27
     elif self.dataset == 'TIGGE_JMA':
       nx, ny, nz, mem = 288, 145, 8, 27 
+    elif self.dataset == 'TIGGE_JMA_pertb_plus':
+      nx, ny, nz, mem = 288, 145, 8, 14
+    elif self.dataset == 'TIGGE_JMA_pertb_minus':
+      nx, ny, nz, mem = 288, 145, 8, 14
     elif self.dataset == 'TIGGE_NCEP':
       nx, ny, nz, mem = 288, 145, 8, 21 
     elif self.dataset == 'TIGGE_ECMWF':
       nx, ny, nz, mem = 288, 145, 8, 51 
+    elif self.dataset == 'TIGGE_ECMWF_pertb_plus':
+      nx, ny, nz, mem = 288, 145, 8, 26 
+    elif self.dataset == 'TIGGE_ECMWF_pertb_minus':
+      nx, ny, nz, mem = 288, 145, 8, 26 
     elif self.dataset == 'TIGGE_CMC':
       nx, ny, nz, mem = 288, 145, 8, 21 
     elif self.dataset == 'TIGGE_UKMO':
