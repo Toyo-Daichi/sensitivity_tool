@@ -221,13 +221,13 @@ class Mapping_NORM:
     mode:int=0, contribute:float=0.0  # for svd
     ):
 
-    size_x, size_y = 16, 20
+    size_x, size_y = 20, 20
     row, column = 6, 4
     press_levels = (200, 300, 500, 700, 850, 1000)
     press_indexs = (  7,   5,   4,   3,   2,    0)
 
     if label_cfmt == 'spread':
-      label_cfmt = 'spread_{}hr'.format(ft)
+      label_cfmt = 'elem_each'
       title_cfmt = 'TE spread [ J/kg ] FT={}hr, INIT={}'.format(ft,date)
       save_cfmt = '{}_TE_{}_{}'.format(center,TE_mode,label_cfmt)
     elif label_cfmt == 'adjoint':
@@ -250,8 +250,8 @@ class Mapping_NORM:
       )
 
     # UWND
-    for index, level in zip(press_indexs, press_levels):
-      ax = fig.add_subplot(row,column,1+4*index)
+    for place, (index, level) in enumerate(zip(press_indexs, press_levels)):
+      ax = fig.add_subplot(row,column,1+4*place)
       mapp = self.MP.base(projection_mode=prj)
       x, y = self.MP.coord_change(mapp, lon, lat)
 
@@ -261,8 +261,8 @@ class Mapping_NORM:
       print('..... FINISH UWND level {}hPa'.format(level))
 
     # VWND
-    for index, level in enumerate(press_levels):
-      ax = fig.add_subplot(row,column,2+4*index)
+    for place, (index, level) in enumerate(zip(press_indexs, press_levels)):
+      ax = fig.add_subplot(row,column,2+4*place)
       mapp = self.MP.base(projection_mode=prj)
       x, y = self.MP.coord_change(mapp, lon, lat)
 
@@ -272,15 +272,15 @@ class Mapping_NORM:
       print('..... FINISH VWND level {}hPa'.format(level))
 
     #TMP
-    for index, level in enumerate(press_levels):
-      ax = fig.add_subplot(row,column,3+4*index)
+    for place, (index, level) in enumerate(zip(press_indexs, press_levels)):
+      ax = fig.add_subplot(row,column,3+4*place)
       mapp = self.MP.base(projection_mode=prj)
       x, y = self.MP.coord_change(mapp, lon, lat)
 
       self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
       self.MP.norm_contourf(mapp, x, y, (pertb_tmp[index]**2)*(1004/270) ,label=label_cfmt)
       self.MP.title('TMP [ J/kg ] {}hPa '.format(level))
-      print('..... FINISH TMP level {}hPa'.format(level))
+      print('..... FINISH TMP  level {}hPa'.format(level))
 
     #PS
     ax = fig.add_subplot(row,column,24)
@@ -288,9 +288,9 @@ class Mapping_NORM:
     x, y = self.MP.coord_change(mapp, lon, lat)
 
     self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
-    self.MP.norm_contourf(mapp, x, y, ((pertb_ps[0]**2)/700)*(287*270) ,label=label_cfmt)
-    self.MP.title('SLP [ J/kg ] ')
-    print('..... FINISH SLP ')
+    self.MP.norm_contourf(mapp, x, y, ((pertb_ps**2)/800)*(287*270) ,label=label_cfmt)
+    self.MP.title('PS [ J/kg ] ')
+    print('..... FINISH PS   level surface')
 
     plt.suptitle(' Ensemble based Sensitivity Analysis ({}) Valid time: {}, Target region: JPN'.format(center,date))
     self.MP.saving(save_cfmt,'./work/')

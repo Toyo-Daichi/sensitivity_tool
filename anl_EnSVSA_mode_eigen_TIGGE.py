@@ -168,8 +168,8 @@ if __name__ == "__main__":
   date = yyyy+mm+dd+hh
   center = 'JMA'
   dataset = 'TIGGE_' + center + '_pertb_minus' #'_pertb_plus/minus' or '' 
-  mode = 'humid' # 'dry' or 'humid'
-  map_prj, set_prj = 'ALL', 'cyl' # 'CNH', 'lcc' or 'ALL', 'cyl'
+  mode = 'dry' # 'dry' or 'humid'
+  map_prj, set_prj = 'CNH', 'lcc' # 'CNH', 'lcc' or 'ALL', 'cyl'
   target_region = ( 25, 50, 125, 150 ) # lat_min/max, lon_min/max
   eigen_mode = 10
 
@@ -254,6 +254,8 @@ if __name__ == "__main__":
   #print('MIN :: ', np.min(energy_norm), 'MAX :: ', np.max(energy_norm))
 
   """ Draw function NORM """
-  MP.main_norm_driver(energy_norm,np.average(hgt_data,axis=0),target_region,ft,date,prj=set_prj,label_cfmt='SVD',center=center,TE_mode=mode,mode=eigen_mode, contribute=contribute)
+  #MP.main_norm_driver(energy_norm,np.average(hgt_data,axis=0),target_region,ft,date,prj=set_prj,label_cfmt='SVD',center=center,TE_mode=mode,mode=eigen_mode, contribute=contribute)
+  MP.each_elem_norm_dry_tigge_driver(svd_pertb_uwnd,svd_pertb_vwnd,svd_pertb_tmp,svd_pertb_ps,target_region, ft, date, center=center, TE_mode=mode)
+
 
   print('Normal END')

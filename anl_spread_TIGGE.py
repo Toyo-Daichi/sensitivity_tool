@@ -22,7 +22,7 @@ import readgpv_tigge
 
 if __name__ == "__main__":
   """Set basic info. """
-  yyyy, mm, dd, hh, ft = '2018', '07', '03', '12', '24'
+  yyyy, mm, dd, hh, ft = '2018', '07', '03', '12', '00'
   date = yyyy+mm+dd+hh
   center = 'JMA'
   dataset = 'TIGGE_' + center + '_pertb_minus'
@@ -97,6 +97,7 @@ if __name__ == "__main__":
   print('..... @ MAKE EMSEMBLE MEMBER SPREAD : MODE {} @'.format(mode))
   print('')
 
-  MP.main_norm_driver(np.average(energy_norm,axis=0),np.average(hgt_data,axis=0),target_region, ft, date, center=center, TE_mode=mode)
+  #MP.main_norm_driver(np.average(energy_norm,axis=0),np.average(hgt_data,axis=0),target_region, ft, date, center=center, TE_mode=mode)
+  MP.each_elem_norm_dry_tigge_driver(pertb_uwnd[0],pertb_vwnd[0],pertb_tmp[0],pertb_ps[0,0],target_region, ft, date, center=center, TE_mode=mode)
 
   print('Normal END')
