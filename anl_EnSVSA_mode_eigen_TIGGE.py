@@ -76,7 +76,13 @@ class Anl_ENSVSA:
 
     return eigen_value, normalize_eigen_vector
 
-  def making_initial_pertb_array(self, dims_xy, pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_spfh, pertb_ps, p_array, *, mode='dry', eigen_mode=10):
+  def making_initial_pertb_array(self, 
+    dims_xy, 
+    pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_spfh, pertb_ps, 
+    p_array,
+    *, mode='dry', 
+    start_eigen_mode=0, end_eigen_node=10
+    ):
     Z_array, dims = self.init_Z_array(dims_xy,mode=mode)
     array = np.zeros((dims,eigen_mode))
 
@@ -95,8 +101,8 @@ class Anl_ENSVSA:
         Z_array[(3*EN.nz*dims_xy):(4*(EN.nz*dims_xy)),imem] = pertb_spfh[imem].reshape(-1)
         Z_array[(4*EN.nz*dims_xy):(4*(EN.nz*dims_xy)+dims_xy),imem] = pertb_ps[imem,EN.surf-1].reshape(-1)
 
-    for _ in range(eigen_mode):
-      array[:,_] = Z_array @ p_array[:,eigen_mode]
+    for _ in range(start_eigen_mode,end_eigen_node):
+      array[:,_] = Z_array @ p_array[:,_]
 
     sum_array = np.sum(array, axis=1)
     svd_pertb_uwnd = np.zeros((EN.nz,EN.ny,EN.nx))
@@ -171,7 +177,7 @@ if __name__ == "__main__":
   mode = 'dry' # 'dry' or 'humid'
   map_prj, set_prj = 'CNH', 'lcc' # 'CNH', 'lcc' or 'ALL', 'cyl'
   target_region = ( 25, 50, 125, 150 ) # lat_min/max, lon_min/max
-  eigen_mode = 10
+  start_eigen_mode, end_eigen_mode = 0, 10
 
   """Class & parm set """
   DR = Anl_ENSVSA()
@@ -241,10 +247,14 @@ if __name__ == "__main__":
 
   print('')
   print('..... @ MAKE SENSITIVITY REGION @')
-  svd_pertb_uwnd,svd_pertb_vwnd,svd_pertb_tmp,svd_pertb_spfh,svd_pertb_ps = DR.making_initial_pertb_array(dims_xy,pertb_uwnd,pertb_vwnd,pertb_tmp,pertb_spfh,pertb_ps,p_array,mode=mode)
+  svd_pertb_uwnd,svd_pertb_vwnd,svd_pertb_tmp,svd_pertb_spfh,svd_pertb_ps =\
+  DR.making_initial_pertb_array(
+    dims_xy,pertb_uwnd,pertb_vwnd,pertb_tmp,pertb_spfh,pertb_ps,p_array,
+    mode=mode,start_eigen_mode=start_eigen_mode,end_eigen_node=end_eigen_mode
+    )
 
   energy_norm, _, _ = DR.sensitivity_driver(svd_pertb_uwnd,svd_pertb_vwnd,svd_pertb_tmp,svd_pertb_spfh,svd_pertb_ps,target_region)
-  contribute = float((np.sum(eigen_value[:eigen_mode+1])/np.sum(eigen_value))*100)
+  contribute = float((np.sum(eigen_value[start_eigen_mode:end_eigen_mode])/np.sum(eigen_value))*100)
 
   #normalize
   print('..... @ MAKE NORMALIZE ENERGY NORM @')
