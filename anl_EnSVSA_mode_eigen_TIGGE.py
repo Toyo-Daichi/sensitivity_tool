@@ -265,7 +265,7 @@ if __name__ == "__main__":
 
   """ Draw function NORM """
   MP.main_norm_driver(energy_norm,np.average(hgt_data,axis=0),target_region,ft,date,prj=set_prj,label_cfmt='SVD',center=center,TE_mode=mode,start_mode=start_eigen_mode+1, end_mode=end_eigen_mode+1, contribute=contribute)
-  #MP.each_elem_norm_dry_tigge_driver(svd_pertb_uwnd,svd_pertb_vwnd,svd_pertb_tmp,svd_pertb_ps,target_region,ft,date,center=center,TE_mode=mode)
+  MP.each_elem_norm_dry_tigge_driver(svd_pertb_uwnd,svd_pertb_vwnd,svd_pertb_tmp,svd_pertb_ps,target_region,ft,date,center=center,TE_mode=mode,)
   #MP.each_elem_norm_humid_tigge_driver(svd_pertb_uwnd,svd_pertb_vwnd,svd_pertb_tmp,svd_pertb_spfh,svd_pertb_ps,target_region,ft,date,center=center,TE_mode=mode)
 
 

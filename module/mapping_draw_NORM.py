@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 #my module
 import mapping
 import readgpv_rish, readgpv_tigge
+import statics_tool
 
 class Mapping_NORM:
   def __init__(self, dataset, map_prj):
@@ -218,7 +219,8 @@ class Mapping_NORM:
     target_region, ft, date, 
     *, prj='lcc', label_cfmt='elem_each',  # for title & colorbar
     center='JMA', TE_mode='dry',           # for savefig
-    mode:int=0, contribute:float=0.0       # for svd
+    mode:int=0, contribute:float=0.0,      # for svd
+    normalize_opt:str='on'
     ):
 
     size_x, size_y = 20, 20
@@ -237,6 +239,22 @@ class Mapping_NORM:
           area_lon_min=target_region[2], area_lon_max=target_region[3]
       )
 
+    uwnd = (pertb_uwnd[:]**2)*0.5
+    vwnd = (pertb_vwnd[:]**2)*0.5
+    tmp  = (self.EN.cp/self.EN.Tr)*((pertb_tmp[:])**2)*0.5
+    ps   = (((self.EN.R*self.EN.Tr)/self.EN.Pr)*(pertb_ps**2/self.EN.Pr)*0.5)
+    
+    if normalize_opt == 'on':
+      for _ in press_indexs:
+        uwnd = statics_tool.min_max(uwnd[_])
+        vwnd = statics_tool.min_max(vwnd[_])
+        tmp  = statics_tool.min_max(tmp[_])
+      ps = statics_tool.min_max(ps)
+      label_cfmt = 'normalize'
+
+    elif normalize_opt == 'off':
+      label_cfmt = 'elem_each'
+
     # UWND
     for place, (index, level) in enumerate(zip(press_indexs, press_levels)):
       ax = fig.add_subplot(row,column,1+4*place)
@@ -244,7 +262,7 @@ class Mapping_NORM:
       x, y = self.MP.coord_change(mapp, lon, lat)
 
       self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
-      self.MP.norm_contourf(mapp, x, y, (pertb_uwnd[index]**2)*0.5 ,label=label_cfmt)
+      self.MP.norm_contourf(mapp, x, y, uwnd[index] ,label=label_cfmt)
       self.MP.title('UWND [ J/kg ] {}hPa '.format(level))
       print('..... FINISH UWND level {:5} hPa'.format(level))
 
@@ -255,7 +273,7 @@ class Mapping_NORM:
       x, y = self.MP.coord_change(mapp, lon, lat)
 
       self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
-      self.MP.norm_contourf(mapp, x, y, (pertb_vwnd[index]**2)*0.5 ,label=label_cfmt)
+      self.MP.norm_contourf(mapp, x, y, vwnd[index] ,label=label_cfmt)
       self.MP.title('VWND [ J/kg ] {}hPa '.format(level))
       print('..... FINISH VWND level {:5} hPa'.format(level))
 
@@ -266,7 +284,7 @@ class Mapping_NORM:
       x, y = self.MP.coord_change(mapp, lon, lat)
 
       self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
-      self.MP.norm_contourf(mapp, x, y, ((self.EN.cp/self.EN.Tr)*((pertb_tmp[index])**2)*0.5) ,label=label_cfmt)
+      self.MP.norm_contourf(mapp, x, y, tmp[index], label=label_cfmt)
       self.MP.title('TMP [ J/kg ] {}hPa '.format(level))
       print('..... FINISH TMP  level {:5} hPa'.format(level))
 
@@ -276,7 +294,7 @@ class Mapping_NORM:
     x, y = self.MP.coord_change(mapp, lon, lat)
 
     self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
-    self.MP.norm_contourf(mapp, x, y,((self.EN.R*self.EN.Tr/self.EN.Pr)*(pertb_ps**2/self.EN.Pr)*0.5),label=label_cfmt)
+    self.MP.norm_contourf(mapp, x, y, ps,label=label_cfmt)
     self.MP.title('PS [ J/kg ] ')
     print('..... FINISH PS   level surface')
 
@@ -289,7 +307,8 @@ class Mapping_NORM:
     target_region, ft, date, 
     *, prj='lcc', label_cfmt='elem_each',  # for title & colorbar
     center='JMA', TE_mode='humid',         # for savefig
-    mode:int=0, contribute:float=0.0       # for svd
+    mode:int=0, contribute:float=0.0,      # for svd
+    normalize_opt:str='on'
     ):
 
     size_x, size_y = 20, 20
@@ -308,6 +327,23 @@ class Mapping_NORM:
           area_lon_min=target_region[2], area_lon_max=target_region[3]
       )
 
+    uwnd = (pertb_uwnd[:]**2)*0.5
+    vwnd = (pertb_vwnd[:]**2)*0.5
+    tmp  = (self.EN.cp/self.EN.Tr)*((pertb_tmp[:])**2)*0.5
+    spfh = (self.EN.wq*(self.EN.Lc**2)*(spfh[index]**2)/(self.EN.cp*self.EN.Tr))*0.5
+    ps   = (((self.EN.R*self.EN.Tr)/self.EN.Pr)*(pertb_ps**2/self.EN.Pr)*0.5)
+    
+    if normalize_opt == 'on':
+      for _ in press_indexs:
+        uwnd = statics_tool.min_max(uwnd[_])
+        vwnd = statics_tool.min_max(vwnd[_])
+        tmp  = statics_tool.min_max(tmp[_])
+      ps = statics_tool.min_max(ps)
+      label_cfmt = 'normalize'
+
+    elif normalize_opt == 'off':
+      label_cfmt = 'elem_each'
+
     # UWND
     for place, (index, level) in enumerate(zip(press_indexs, press_levels)):
       ax = fig.add_subplot(row,column,1+5*place)
@@ -315,7 +351,7 @@ class Mapping_NORM:
       x, y = self.MP.coord_change(mapp, lon, lat)
 
       self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
-      self.MP.norm_contourf(mapp, x, y, (pertb_uwnd[index]**2)*0.5 ,label=label_cfmt)
+      self.MP.norm_contourf(mapp, x, y, uwnd[index],label=label_cfmt)
       self.MP.title('UWND [ J/kg ] {}hPa '.format(level))
       print('..... FINISH UWND level {:5} hPa'.format(level))
 
@@ -326,7 +362,7 @@ class Mapping_NORM:
       x, y = self.MP.coord_change(mapp, lon, lat)
 
       self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
-      self.MP.norm_contourf(mapp, x, y, (pertb_vwnd[index]**2)*0.5 ,label=label_cfmt)
+      self.MP.norm_contourf(mapp, x, y, vwnd[index] ,label=label_cfmt)
       self.MP.title('VWND [ J/kg ] {}hPa '.format(level))
       print('..... FINISH VWND level {:5} hPa'.format(level))
 
@@ -337,7 +373,7 @@ class Mapping_NORM:
       x, y = self.MP.coord_change(mapp, lon, lat)
 
       self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
-      self.MP.norm_contourf(mapp, x, y, ((self.EN.cp/self.EN.Tr)*((pertb_tmp[index])**2)*0.5) ,label=label_cfmt)
+      self.MP.norm_contourf(mapp, x, y, tmp[index], label=label_cfmt)
       self.MP.title('TMP [ J/kg ] {}hPa '.format(level))
       print('..... FINISH TMP  level {:5} hPa'.format(level))
 
@@ -347,7 +383,7 @@ class Mapping_NORM:
       mapp = self.MP.base(projection_mode=prj,label_cfmt='off')
       x, y = self.MP.coord_change(mapp, lon, lat)
       self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
-      self.MP.norm_contourf(mapp, x, y,(self.EN.wq*(self.EN.Lc**2)*(pertb_spfh[index]**2)/(self.EN.cp*self.EN.Tr))*0.5,label=label_cfmt+'_spfh_ps')
+      self.MP.norm_contourf(mapp, x, y, spfh,label=label_cfmt)
       self.MP.title('SPFH [ J/kg ] {}hPa '.format(level))
       print('..... FINISH SPFH level {:5} hPa'.format(level))
 
@@ -357,7 +393,7 @@ class Mapping_NORM:
     x, y = self.MP.coord_change(mapp, lon, lat)
 
     self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
-    self.MP.norm_contourf(mapp, x, y,((self.EN.R*self.EN.Tr/self.EN.Pr)*(pertb_ps**2/self.EN.Pr)*0.5),label=label_cfmt+'_spfh_ps')
+    self.MP.norm_contourf(mapp, x, y, ps,label=label_cfmt)
     self.MP.title('PS [ J/kg ] ')
     print('..... FINISH PS   level surface')
 
