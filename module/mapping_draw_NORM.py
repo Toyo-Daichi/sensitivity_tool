@@ -109,7 +109,7 @@ class Mapping_NORM:
     *,
     prj='lcc', label_cfmt='spread',  # for title & colorbar
     center='JMA', TE_mode='dry',     # for savefig
-    mode:int=0, contribute:float=0.0  # for svd
+    start_mode:int=0, end_mode:int=0, contribute:float=0.0  # for svd
     ):
 
     """Draw sensitivity area @dry enegy norm"""
@@ -129,7 +129,7 @@ class Mapping_NORM:
       save_cfmt = '{}_TE_{}_{}_{}hr'.format(center,TE_mode,label_cfmt,ft)
     elif label_cfmt == 'SVD':
       label_cfmt = 'svd'
-      title_cfmt = ' TE MODE 1-{} contribute:{}% sensitivity [ J/kg ] FT={}hr, INIT={}'.format(mode,int(contribute),ft,date)
+      title_cfmt = ' TE MODE {}-{} contribute:{}% sensitivity [ J/kg ] FT={}hr, INIT={}'.format(start_mode, end_mode,int(contribute),ft,date)
       #title_cfmt = ' NORMALIZE TE MODE sensitivity [ J/kg ] FT={}hr, INIT={}'.format(ft,date)
       save_cfmt = '{}_TE_{}_{}_{}hr'.format(center,TE_mode,label_cfmt,ft)
 

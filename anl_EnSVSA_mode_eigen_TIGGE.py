@@ -84,7 +84,7 @@ class Anl_ENSVSA:
     start_eigen_mode=0, end_eigen_node=10
     ):
     Z_array, dims = self.init_Z_array(dims_xy,mode=mode)
-    array = np.zeros((dims,eigen_mode))
+    array = np.zeros((dims,end_eigen_mode-start_eigen_mode+1))
 
     if mode is 'dry':
       for imem in range(EN.mem-EN.ctrl):
@@ -101,8 +101,8 @@ class Anl_ENSVSA:
         Z_array[(3*EN.nz*dims_xy):(4*(EN.nz*dims_xy)),imem] = pertb_spfh[imem].reshape(-1)
         Z_array[(4*EN.nz*dims_xy):(4*(EN.nz*dims_xy)+dims_xy),imem] = pertb_ps[imem,EN.surf-1].reshape(-1)
 
-    for _ in range(start_eigen_mode,end_eigen_node):
-      array[:,_] = Z_array @ p_array[:,_]
+    for index, _ in enumerate(range(start_eigen_mode,end_eigen_node+1)):
+      array[:,index] = Z_array @ p_array[:,_]
 
     sum_array = np.sum(array, axis=1)
     svd_pertb_uwnd = np.zeros((EN.nz,EN.ny,EN.nx))
@@ -173,11 +173,11 @@ if __name__ == "__main__":
   yyyy, mm, dd, hh, init, ft = '2018', '07', '04', '12', '00', '72'
   date = yyyy+mm+dd+hh
   center = 'ECMWF'
-  dataset = 'TIGGE_' + center + 'pertb_plus' #'_pertb_plus/minus' or '' 
+  dataset = 'TIGGE_' + center + '_pertb_plus' #'_pertb_plus/minus' or '' 
   mode = 'dry' # 'dry' or 'humid'
   map_prj, set_prj = 'CNH', 'lcc' # 'CNH', 'lcc' or 'ALL', 'cyl'
   target_region = ( 25, 50, 125, 150 ) # lat_min/max, lon_min/max
-  start_eigen_mode, end_eigen_mode = 0, 10
+  start_eigen_mode, end_eigen_mode = 1,1 
 
   """Class & parm set """
   DR = Anl_ENSVSA()
@@ -254,7 +254,7 @@ if __name__ == "__main__":
     )
 
   energy_norm, _, _ = DR.sensitivity_driver(svd_pertb_uwnd,svd_pertb_vwnd,svd_pertb_tmp,svd_pertb_spfh,svd_pertb_ps,target_region)
-  contribute = float((np.sum(eigen_value[start_eigen_mode:end_eigen_mode])/np.sum(eigen_value))*100)
+  contribute = float((np.sum(eigen_value[start_eigen_mode:end_eigen_mode+1])/np.sum(eigen_value))*100)
 
   #normalize
   print('..... @ MAKE NORMALIZE ENERGY NORM @')
@@ -264,8 +264,8 @@ if __name__ == "__main__":
   #print('MIN :: ', np.min(energy_norm), 'MAX :: ', np.max(energy_norm))
 
   """ Draw function NORM """
-  #MP.main_norm_driver(energy_norm,np.average(hgt_data,axis=0),target_region,ft,date,prj=set_prj,label_cfmt='SVD',center=center,TE_mode=mode,mode=eigen_mode, contribute=contribute)
-  MP.each_elem_norm_dry_tigge_driver(svd_pertb_uwnd,svd_pertb_vwnd,svd_pertb_tmp,svd_pertb_ps,target_region,ft,date,center=center,TE_mode=mode)
+  MP.main_norm_driver(energy_norm,np.average(hgt_data,axis=0),target_region,ft,date,prj=set_prj,label_cfmt='SVD',center=center,TE_mode=mode,start_mode=start_eigen_mode+1, end_mode=end_eigen_mode+1, contribute=contribute)
+  #MP.each_elem_norm_dry_tigge_driver(svd_pertb_uwnd,svd_pertb_vwnd,svd_pertb_tmp,svd_pertb_ps,target_region,ft,date,center=center,TE_mode=mode)
   #MP.each_elem_norm_humid_tigge_driver(svd_pertb_uwnd,svd_pertb_vwnd,svd_pertb_tmp,svd_pertb_spfh,svd_pertb_ps,target_region,ft,date,center=center,TE_mode=mode)
 
 
