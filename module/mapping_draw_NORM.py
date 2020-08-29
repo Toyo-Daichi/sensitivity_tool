@@ -246,9 +246,10 @@ class Mapping_NORM:
     
     if normalize_opt == 'on':
       for _ in press_indexs:
-        uwnd = statics_tool.min_max(uwnd[_])
-        vwnd = statics_tool.min_max(vwnd[_])
-        tmp  = statics_tool.min_max(tmp[_])
+        print(type(_))
+        uwnd[_] = statics_tool.min_max(uwnd[_])
+        vwnd[_] = statics_tool.min_max(vwnd[_])
+        tmp[_]  = statics_tool.min_max(tmp[_])
       ps = statics_tool.min_max(ps)
       label_cfmt = 'normalize'
 
@@ -330,15 +331,20 @@ class Mapping_NORM:
     uwnd = (pertb_uwnd[:]**2)*0.5
     vwnd = (pertb_vwnd[:]**2)*0.5
     tmp  = (self.EN.cp/self.EN.Tr)*((pertb_tmp[:])**2)*0.5
-    spfh = (self.EN.wq*(self.EN.Lc**2)*(spfh[index]**2)/(self.EN.cp*self.EN.Tr))*0.5
+    spfh = (self.EN.wq*(self.EN.Lc**2)*(pertb_spfh[:]**2)/(self.EN.cp*self.EN.Tr))*0.5
     ps   = (((self.EN.R*self.EN.Tr)/self.EN.Pr)*(pertb_ps**2/self.EN.Pr)*0.5)
     
     if normalize_opt == 'on':
-      for _ in press_indexs:
-        uwnd = statics_tool.min_max(uwnd[_])
-        vwnd = statics_tool.min_max(vwnd[_])
-        tmp  = statics_tool.min_max(tmp[_])
-      ps = statics_tool.min_max(ps)
+      #for _ in press_indexs:
+      #  uwnd[_] = statics_tool.min_max(uwnd[_])
+      #  vwnd[_] = statics_tool.min_max(vwnd[_])
+      #  tmp[_]  = statics_tool.min_max(tmp[_])
+      #  spfh[_] = statics_tool.min_max(spfh[_])
+      uwnd = statics_tool.min_max(uwnd)
+      vwnd = statics_tool.min_max(vwnd)
+      tmp  = statics_tool.min_max(tmp)
+      spfh = statics_tool.min_max(spfh)
+      ps   = statics_tool.min_max(ps)
       label_cfmt = 'normalize'
 
     elif normalize_opt == 'off':
@@ -383,7 +389,7 @@ class Mapping_NORM:
       mapp = self.MP.base(projection_mode=prj,label_cfmt='off')
       x, y = self.MP.coord_change(mapp, lon, lat)
       self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
-      self.MP.norm_contourf(mapp, x, y, spfh,label=label_cfmt)
+      self.MP.norm_contourf(mapp, x, y, spfh[index],label=label_cfmt)
       self.MP.title('SPFH [ J/kg ] {}hPa '.format(level))
       print('..... FINISH SPFH level {:5} hPa'.format(level))
 
@@ -395,7 +401,7 @@ class Mapping_NORM:
     self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
     self.MP.norm_contourf(mapp, x, y, ps,label=label_cfmt)
     self.MP.title('PS [ J/kg ] ')
-    print('..... FINISH PS   level surface')
+    print('..... FINISH PS   level   surface')
 
     plt.suptitle(' Ensemble based Sensitivity Analysis ({}) Valid time: {}, Target region: JPN'.format(center,date))
     self.MP.saving(save_cfmt,'./work/')
