@@ -22,11 +22,11 @@ import readgpv_tigge
 
 if __name__ == "__main__":
   """Set basic info. """
-  yyyy, mm, dd, hh, ft = '2018', '07', '03', '12', '00'
+  yyyy, mm, dd, hh, ft = '2018', '07', '04', '12', '00'
   date = yyyy+mm+dd+hh
   center = 'JMA'
-  dataset = 'TIGGE_' + center + '_pertb_minus'
-  mode = 'dry' # 'dry' or 'humid'
+  dataset = 'TIGGE_' + center + '_pertb_plus'
+  mode = 'humid' # 'dry' or 'humid'
   map_prj, set_prj = 'CNH', 'lcc' # 'CNH', 'lcc' or 'ALL', 'cyl'
   target_region = ( 25, 50, 125, 150 ) # lat_min/max, lon_min/max
 
@@ -74,6 +74,8 @@ if __name__ == "__main__":
   lon_grd = lon_max_index-lon_min_index +1
   dims = lat_grd*lon_grd
 
+
+  print(pertb_ps[:,0])
   for imem in range(0,EN.mem-EN.ctrl,1):
     if mode is 'dry':
       energy_norm[imem], physical_term[imem], potential_term[imem] =\
@@ -97,7 +99,25 @@ if __name__ == "__main__":
   print('..... @ MAKE EMSEMBLE MEMBER SPREAD : MODE {} @'.format(mode))
   print('')
 
-  #MP.main_norm_driver(np.average(energy_norm,axis=0),np.average(hgt_data,axis=0),target_region, ft, date, center=center, TE_mode=mode)
-  MP.each_elem_norm_dry_tigge_driver(pertb_uwnd[0],pertb_vwnd[0],pertb_tmp[0],pertb_ps[0,0],target_region, ft, date, center=center, TE_mode=mode)
+  #total norm
+  MP.main_norm_driver(np.average(energy_norm,axis=0),np.average(hgt_data,axis=0),target_region, ft, date, center=center, TE_mode=mode)
+
+  #each elem norm
+  #MP.each_elem_norm_dry_tigge_driver(
+  #  np.average(pertb_uwnd),
+  #  np.average(pertb_vwnd),
+  #  np.average(pertb_tmp),
+  #  np.aerage(pertb_ps[0,:]),
+  #  target_region, ft, date, center=center, TE_mode=mode
+  #  )
+
+  #MP.each_elem_norm_humid_tigge_driver(
+  #  np.average(pertb_uwnd,axis=0),
+  #  np.average(pertb_vwnd,axis=0),
+  #  np.average(pertb_tmp,axis=0),
+  #  np.average(pertb_spfh,axis=0),
+  #  np.average(pertb_ps[0,:],axis=0),
+  #  target_region,ft,date,center=center,TE_mode=mode
+  #  )
 
   print('Normal END')

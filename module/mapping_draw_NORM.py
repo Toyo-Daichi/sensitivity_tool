@@ -214,7 +214,7 @@ class Mapping_NORM:
     plt.show()
 
   def each_elem_norm_dry_tigge_driver(self, 
-    pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_spfh, pertb_ps, # pertbuation data
+    pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_ps, # pertbuation data
     target_region, ft, date, 
     *, prj='lcc', label_cfmt='elem_each',  # for title & colorbar
     center='JMA', TE_mode='dry',           # for savefig
@@ -222,7 +222,7 @@ class Mapping_NORM:
     ):
 
     size_x, size_y = 20, 20
-    row, column = 6, 5
+    row, column = 6, 4 
     press_levels = (200, 300, 500, 700, 850, 1000)
     press_indexs = (  7,   5,   4,   3,   2,    0)
 
@@ -266,23 +266,12 @@ class Mapping_NORM:
       x, y = self.MP.coord_change(mapp, lon, lat)
 
       self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
-      self.MP.norm_contourf(mapp, x, y, ((self.EN.cp/self.EN.Tr)*((pertb_tmp)**2)*0.5) ,label=label_cfmt)
+      self.MP.norm_contourf(mapp, x, y, ((self.EN.cp/self.EN.Tr)*((pertb_tmp[index])**2)*0.5) ,label=label_cfmt)
       self.MP.title('TMP [ J/kg ] {}hPa '.format(level))
       print('..... FINISH TMP  level {:5} hPa'.format(level))
 
-    #SPFH
-    for place, (index, level) in enumerate(zip(press_indexs, press_levels)):
-      ax = fig.add_subplot(row,column,4+4*place)
-      mapp = self.MP.base(projection_mode=prj,label_cfmt='off')
-      x, y = self.MP.coord_change(mapp, lon, lat)
-
-      self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
-      self.MP.norm_contourf(mapp, x, y,(self.EN.wq*(self.EN.Lc**2)*(pertb_spfh**2)/(self.EN.cp*self.EN.Tr))*0.5,label=label_cfmt)
-      self.MP.title('SPFH [ J/kg ] {}hPa '.format(level))
-      print('..... FINISH TMP  level {:5} hPa'.format(level))
-
     #PS
-    ax = fig.add_subplot(row,column,30)
+    ax = fig.add_subplot(row,column,24)
     mapp = self.MP.base(projection_mode=prj,label_cfmt='off')
     x, y = self.MP.coord_change(mapp, lon, lat)
 
@@ -296,7 +285,7 @@ class Mapping_NORM:
     plt.show()
 
   def each_elem_norm_humid_tigge_driver(self, 
-    pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_ps, # pertbuation data
+    pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_spfh, pertb_ps, # pertbuation data
     target_region, ft, date, 
     *, prj='lcc', label_cfmt='elem_each',  # for title & colorbar
     center='JMA', TE_mode='humid',         # for savefig
@@ -304,7 +293,7 @@ class Mapping_NORM:
     ):
 
     size_x, size_y = 20, 20
-    row, column = 6, 4
+    row, column = 6, 5 
     press_levels = (200, 300, 500, 700, 850, 1000)
     press_indexs = (  7,   5,   4,   3,   2,    0)
 
@@ -321,7 +310,7 @@ class Mapping_NORM:
 
     # UWND
     for place, (index, level) in enumerate(zip(press_indexs, press_levels)):
-      ax = fig.add_subplot(row,column,1+4*place)
+      ax = fig.add_subplot(row,column,1+5*place)
       mapp = self.MP.base(projection_mode=prj,label_cfmt='off')
       x, y = self.MP.coord_change(mapp, lon, lat)
 
@@ -332,7 +321,7 @@ class Mapping_NORM:
 
     # VWND
     for place, (index, level) in enumerate(zip(press_indexs, press_levels)):
-      ax = fig.add_subplot(row,column,2+4*place)
+      ax = fig.add_subplot(row,column,2+5*place)
       mapp = self.MP.base(projection_mode=prj,label_cfmt='off')
       x, y = self.MP.coord_change(mapp, lon, lat)
 
@@ -343,22 +332,32 @@ class Mapping_NORM:
 
     #TMP
     for place, (index, level) in enumerate(zip(press_indexs, press_levels)):
-      ax = fig.add_subplot(row,column,3+4*place)
+      ax = fig.add_subplot(row,column,3+5*place)
       mapp = self.MP.base(projection_mode=prj,label_cfmt='off')
       x, y = self.MP.coord_change(mapp, lon, lat)
 
       self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
-      self.MP.norm_contourf(mapp, x, y, ((self.EN.cp/self.EN.Tr)*((pertb_tmp)**2)*0.5) ,label=label_cfmt)
+      self.MP.norm_contourf(mapp, x, y, ((self.EN.cp/self.EN.Tr)*((pertb_tmp[index])**2)*0.5) ,label=label_cfmt)
       self.MP.title('TMP [ J/kg ] {}hPa '.format(level))
       print('..... FINISH TMP  level {:5} hPa'.format(level))
 
+    #SPFH
+    for place, (index, level) in enumerate(zip(press_indexs, press_levels)):
+      ax = fig.add_subplot(row,column,4+5*place)
+      mapp = self.MP.base(projection_mode=prj,label_cfmt='off')
+      x, y = self.MP.coord_change(mapp, lon, lat)
+      self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
+      self.MP.norm_contourf(mapp, x, y,(self.EN.wq*(self.EN.Lc**2)*(pertb_spfh[index]**2)/(self.EN.cp*self.EN.Tr))*0.5,label=label_cfmt+'_spfh_ps')
+      self.MP.title('SPFH [ J/kg ] {}hPa '.format(level))
+      print('..... FINISH SPFH level {:5} hPa'.format(level))
+
     #PS
-    ax = fig.add_subplot(row,column,24)
+    ax = fig.add_subplot(row,column,30)
     mapp = self.MP.base(projection_mode=prj,label_cfmt='off')
     x, y = self.MP.coord_change(mapp, lon, lat)
 
     self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
-    self.MP.norm_contourf(mapp, x, y,((self.EN.R*self.EN.Tr/self.EN.Pr)*(pertb_ps**2/self.EN.Pr)*0.5),label=label_cfmt)
+    self.MP.norm_contourf(mapp, x, y,((self.EN.R*self.EN.Tr/self.EN.Pr)*(pertb_ps**2/self.EN.Pr)*0.5),label=label_cfmt+'_spfh_ps')
     self.MP.title('PS [ J/kg ] ')
     print('..... FINISH PS   level surface')
 

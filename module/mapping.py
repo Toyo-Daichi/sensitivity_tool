@@ -197,6 +197,9 @@ class Mapping:
     elif label == 'elem_each':
       #levels = [7.5, 10.0, 15.0, 30.0, 50.0, 70.0, 100.0]
       levels = [7.5, 10.0, 15.0, 30.0, 50.0, 70.0, 100.0]
+
+    elif label == 'elem_each_spfh_ps':
+      levels = [0.25, 0.5, 1.0, 1.5, 2.0, 3.0, 5.0]
     
     colors = ['#FFFFFF', '#00FFFF', '#000080', '#228B22', '#FFFF00', '#FF8000', '#FF0000', '#FF00FF']
     cmap = plt.contourf(x, y, data, levels, colors=colors, extend='both')
