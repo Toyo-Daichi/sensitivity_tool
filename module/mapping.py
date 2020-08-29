@@ -50,7 +50,7 @@ class Mapping:
       self.area = area
       self.lat_0, self.lon_0 = 0, 180
 
-  def base(self, *, projection_mode='lcc'):
+  def base(self, *, projection_mode='lcc', label_cfmt='on'):
     
     if projection_mode is 'lcc':
       mapping = Basemap( 
@@ -71,8 +71,12 @@ class Mapping:
     mapping.drawcoastlines(color='black', linewidth=0.5)
 
     if 'NH' in self.area:
-      mapping.drawmeridians(np.arange(0, 360, 15),  labels=[False, False, False, True], fontsize='small', color='gray', linewidth=0.5)
-      mapping.drawparallels(np.arange(-90, 90, 15), labels=[True, False, False, False], fontsize='small', color='gray', linewidth=0.5)
+      if label_cfmt == 'on':
+        mapping.drawmeridians(np.arange(0, 360, 15),  labels=[False, False, False, True], fontsize='small', color='gray', linewidth=0.5)
+        mapping.drawparallels(np.arange(-90, 90, 15), labels=[True, False, False, False], fontsize='small', color='gray', linewidth=0.5)
+      elif label_cfmt == 'off':
+        mapping.drawmeridians(np.arange(0, 360, 15),  labels=[False, False, False, False], fontsize='small', color='gray', linewidth=0.5)
+        mapping.drawparallels(np.arange(-90, 90, 15), labels=[False, False, False, False], fontsize='small', color='gray', linewidth=0.5)
 
     elif 'JPN' in self.area:
       mapping.drawmeridians(np.arange(0, 360, 5),  labels=[False, False, False, True], fontsize='small', color='gray', linewidth=0.5)
@@ -81,7 +85,7 @@ class Mapping:
     elif self.area == 'ALL':
       mapping.drawmeridians(np.arange(0, 360, 40),  labels=[False, False, False, True], fontsize='small', color='gray', linewidth=0.5)
       mapping.drawparallels(np.arange(-90, 90, 25), labels=[False, False, False, True], fontsize='small', color='gray', linewidth=0.5)
-      
+
     return mapping
 
   def coord_change(self, basemap, x, y):
