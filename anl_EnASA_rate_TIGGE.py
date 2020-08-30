@@ -152,11 +152,12 @@ if __name__ == "__main__":
   """Set basic info. """
   yyyy, mm, dd, hh, init, ft = '2018', '07', '04', '12', '00', '72'
   date = yyyy+mm+dd+hh
-  center = 'JMA'
+  center = 'ECMWF'
   dataset = 'TIGGE_' + center + '_pertb_plus'
   mode = 'dry' # 'dry' or 'humid' 
   map_prj, set_prj = 'CNH', 'lcc'
-  target_region = ( 20, 50, 120, 150 ) # lat_min/max, lon_min/max
+  #target_region = ( 20, 50, 120, 150 ) # lat_min/max, lon_min/max
+  target_region = ( 30, 37.5, 125, 140 ) # lat_min/max, lon_min/max
 
   """Class & parm set """
   DR = Anl_ENASA()
@@ -211,6 +212,6 @@ if __name__ == "__main__":
   """ Draw function NORM """
   MP.main_norm_driver(energy_norm,np.average(hgt_data,axis=0),target_region,ft,date,label_cfmt='adjoint',TE_mode=mode)
   #MP.each_elem_norm_dry_tigge_driver  (ave_pertb_uwnd,ave_pertb_vwnd,ave_pertb_tmp,ave_pertb_ps,target_region,ft,date,center=center,TE_mode=mode)
-  #MP.each_elem_norm_humid_tigge_driver(ave_pertb_uwnd,ave_pertb_vwnd,ave_pertb_tmp,ave_pertb_spfh,ave_pertb_ps,target_region,ft,date,center=center,TE_mode=mode)
+  MP.each_elem_norm_humid_tigge_driver(ave_pertb_uwnd,ave_pertb_vwnd,ave_pertb_tmp,ave_pertb_spfh,ave_pertb_ps,target_region,ft,date,center=center,TE_mode=mode)
 
   print('Normal END')

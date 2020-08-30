@@ -2,21 +2,25 @@
 # Grib2 TIGGE data -> Grads format
 
 # set parm.
-yyyy=2018; e_yyyy=2018
-mm=7     ; e_mm=7
-dd=5     ; e_dd=5
-hh=12    ; e_hh=12
-
-center='JMA' #'JMA', 'NCEP', 'ECMWF', 'CMC', ('UKMO' ->  not include Q)
+#center_list=( 'JMA' ) 
+center_list=( 'JMA' 'ECMWF' 'NCEP' 'CMC' ) #('UKMO' ->  not include Q)
 #ft_list=( 'anl' )
 ft_list=( 'anl' '24' '48' '72' )
 level_list=( '1000' '925' '850' '700' '500' '300' '250' '200' )
 
+#data info (from 30get_data.sh_FULL2.5deg)
+#complist="u/v/t/q/gh";#levelist="1000/925/850/700/500/300/250/200"
+
+for center in ${center_list[@]}; do
+
 indata_path=/work1/mio/tigge_full/data/1.25deg/
 outdata_path=/work3/daichi/Data/TIGGE/${center}/
 
-#data info (from 30get_data.sh_FULL2.5deg)
-#complist="u/v/t/q/gh";#levelist="1000/925/850/700/500/300/250/200"
+#set date
+yyyy=2015; e_yyyy=2015
+mm=9     ; e_mm=9
+dd=7     ; e_dd=10
+hh=12    ; e_hh=12
 
 #ensemble size
 case ${center} in
@@ -31,7 +35,7 @@ M=`printf %2.2i ${mm}`
 while [ ${dd} -le ${e_dd} ]; do
   D=`printf %2.2i ${dd}`
   H=`printf %2.2i ${hh}`
-  echo '@ READING DAY ' ${yyyy}${M}${D}${H} '@'
+  echo '@ READING DAY ' ${yyyy}${M}${D}${H} ${center} '@'
   
   o_dir=${outdata_path}/${yyyy}${M}${D}${H}/
   mkdir -p ${o_dir}
@@ -89,10 +93,11 @@ while [ ${dd} -le ${e_dd} ]; do
 
    rm ${o_dir}/*_${yyyy}${M}${D}${H}_*_level.grd ${o_dir}/*_${yyyy}${M}${D}${H}_${ft}hr.grd
    
-   sleep 5.0s
+   sleep 0.5s
   done
   dd=`expr ${dd} + 1`
 
+done
 done
 
 exit

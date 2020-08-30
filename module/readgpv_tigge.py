@@ -124,7 +124,7 @@ class Energy_NORM:
     self.Tr:float = 270.0
     self.cp:float = 1004.0
     self.R:float  = 287.0
-    self.Lc:float = 287.0
+    self.Lc:float = 2.5*1000000
     self.wq:float = 1.0
 
   def init_array(self):

@@ -170,13 +170,14 @@ class Anl_ENSVSA:
     
 if __name__ == "__main__":
   """Set basic info. """
-  yyyy, mm, dd, hh, init, ft = '2018', '07', '04', '12', '00', '72'
+  yyyy, mm, dd, hh, init, ft = '2017', '07', '05', '12', '00', '24'
   date = yyyy+mm+dd+hh
-  center = 'JMA'
+  center = 'ECMWF'
   dataset = 'TIGGE_' + center + '_pertb_plus' #'_pertb_plus/minus' or '' 
   mode = 'humid' # 'dry' or 'humid'
   map_prj, set_prj = 'CNH', 'lcc' # 'CNH', 'lcc' or 'ALL', 'cyl'
-  target_region = ( 25, 50, 125, 150 ) # lat_min/max, lon_min/max
+  target_region = ( 30, 35, 127.5, 132.5 ) # lat_min/max, lon_min/max
+  #target_region = ( 25, 50, 125, 150 ) # lat_min/max, lon_min/max
   start_eigen_mode, end_eigen_mode = 0, 9 #default is 0/9 -> 1-10 mode. 
 
   """Class & parm set """
@@ -191,6 +192,7 @@ if __name__ == "__main__":
   pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_hgt, pertb_spfh, pertb_ps = EN.data_pertb_driver(uwnd_data,vwnd_data,tmp_data,hgt_data, spfh_data,ps_data)
   lon, lat = RG.set_coordinate()
   weight_lat = RG.weight_latitude(lat)
+  normalize_region = ( 10, 70, 90, 180 ) # lat_min/max, lon_min/max
 
   print('')
   print('..... @ MAKE Pertubation array & REGION Extraction MODE:{} @'.format(mode))
@@ -259,12 +261,18 @@ if __name__ == "__main__":
   #normalize
   print('..... @ MAKE NORMALIZE ENERGY NORM @')
   print('')
+  """Normalize region setting"""
+  normalize_lat_min_index, normalize_lat_max_index, normalize_lon_min_index, lon_max_index = \
+      EN.verification_region(lon,lat,
+          area_lat_min=target_region[1], area_lat_max=target_region[0],
+          area_lon_min=target_region[2], area_lon_max=target_region[3]
+      )
   #energy_norm = statics_tool.normalize(energy_norm)
-  energy_norm = statics_tool.min_max(energy_norm)
-  #print('MIN :: ', np.min(energy_norm), 'MAX :: ', np.max(energy_norm))
+  energy_norm = statics_tool.min_max(energy_norm[ ,:])
+  print('MIN :: ', np.min(energy_norm), 'MAX :: ', np.max(energy_norm))
 
   """ Draw function NORM """
-  #MP.main_norm_driver(energy_norm,np.average(hgt_data,axis=0),target_region,ft,date,prj=set_prj,label_cfmt='SVD',center=center,TE_mode=mode,start_mode=start_eigen_mode+1, end_mode=end_eigen_mode+1, contribute=contribute)
+  MP.main_norm_driver(energy_norm,np.average(hgt_data,axis=0),target_region,ft,date,prj=set_prj,label_cfmt='SVD',center=center,TE_mode=mode,start_mode=start_eigen_mode+1, end_mode=end_eigen_mode+1, contribute=contribute)
   #MP.each_elem_norm_dry_tigge_driver(svd_pertb_uwnd,svd_pertb_vwnd,svd_pertb_tmp,svd_pertb_ps,target_region,ft,date,center=center,TE_mode=mode,)
   MP.each_elem_norm_humid_tigge_driver(svd_pertb_uwnd,svd_pertb_vwnd,svd_pertb_tmp,svd_pertb_spfh,svd_pertb_ps,target_region,ft,date,center=center,TE_mode=mode)
 
