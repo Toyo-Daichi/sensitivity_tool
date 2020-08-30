@@ -261,15 +261,13 @@ if __name__ == "__main__":
   #normalize
   print('..... @ MAKE NORMALIZE ENERGY NORM @')
   print('')
-  """Normalize region setting"""
-  normalize_lat_min_index, normalize_lat_max_index, normalize_lon_min_index, lon_max_index = \
-      EN.verification_region(lon,lat,
-          area_lat_min=target_region[1], area_lat_max=target_region[0],
-          area_lon_min=target_region[2], area_lon_max=target_region[3]
-      )
+  #normalize full ver.
   #energy_norm = statics_tool.normalize(energy_norm)
-  energy_norm = statics_tool.min_max(energy_norm[ ,:])
-  print('MIN :: ', np.min(energy_norm), 'MAX :: ', np.max(energy_norm))
+  #energy_norm = statics_tool.min_max(energy_norm[ ,:])
+  #print('MIN :: ', np.min(energy_norm), 'MAX :: ', np.max(energy_norm))
+  
+  #normalize region ver.
+  energy_norm = EN.region_normalize_norm(normalize_region, lon, lat, energy_norm)
 
   """ Draw function NORM """
   MP.main_norm_driver(energy_norm,np.average(hgt_data,axis=0),target_region,ft,date,prj=set_prj,label_cfmt='SVD',center=center,TE_mode=mode,start_mode=start_eigen_mode+1, end_mode=end_eigen_mode+1, contribute=contribute)

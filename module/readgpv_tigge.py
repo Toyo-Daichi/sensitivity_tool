@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from Users.toyo.Terminal.sensitivity_tool.anl_EnSVSA_mode_eigen_TIGGE import normalize_region
 import numpy as np
 import psutil
 import setup
@@ -355,4 +356,18 @@ class Energy_NORM:
     print('..... CHECK EIGENVECTOR SUM :: {}'.format((normalize_eigen_vector*normalize_eigen_vector).sum()))
 
     return normalize_eigen_vector
-    
+
+  def region_normalize_norm(self, normalize_region, lon, lat, array):
+    normalize_lat_min_index, normalize_lat_max_index, normalize_lon_min_index, normalize_lon_max_index = \
+      self.verification_region(lon,lat,
+          area_lat_min=normalize_region[1], area_lat_max=normalize_region[0],
+          area_lon_min=normalize_region[2], area_lon_max=normalize_region[3]
+      )
+
+    array[normalize_lat_min_index:normalize_lat_max_index+1,normalize_lon_min_index:normalize_lon_max_index+1] =\
+      statics_tool.min_max(
+        array[ normalize_lat_min_index:normalize_lat_max_index+1,
+               normalize_lon_min_index:normalize_lon_max_index+1 ]
+      )
+
+    return array
