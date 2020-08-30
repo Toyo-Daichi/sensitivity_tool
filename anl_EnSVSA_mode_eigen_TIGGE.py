@@ -170,15 +170,15 @@ class Anl_ENSVSA:
     
 if __name__ == "__main__":
   """Set basic info. """
-  yyyy, mm, dd, hh, init, ft = '2018', '07', '04', '12', '00', '72'
+  yyyy, mm, dd, hh, init, ft = '2015', '09', '08', '12', '00', '48'
   date = yyyy+mm+dd+hh
-  center = 'ECMWF'
-  dataset = 'TIGGE_' + center + '_pertb_plus' #'_pertb_plus/minus' or '' 
+  center = 'CMC'
+  dataset = 'TIGGE_' + center + '' #'_pertb_plus/minus' or '' 
   mode = 'humid' # 'dry' or 'humid'
   map_prj, set_prj = 'CNH', 'lcc' # 'CNH', 'lcc' or 'ALL', 'cyl'
   #target_region = ( 30, 35, 127.5, 132.5 ) # lat_min/max, lon_min/max
   target_region = ( 25, 50, 125, 150 ) # lat_min/max, lon_min/max
-  start_eigen_mode, end_eigen_mode = 0, 12 #default is 0/9 -> 1-10 mode. 
+  start_eigen_mode, end_eigen_mode = 0, 19 #default is 0/9 -> 1-10 mode. 
 
   """Class & parm set """
   DR = Anl_ENSVSA()
@@ -263,11 +263,11 @@ if __name__ == "__main__":
   print('')
   #normalize full ver.
   #energy_norm = statics_tool.normalize(energy_norm)
-  energy_norm = statics_tool.min_max(energy_norm)
-  print('MIN :: ', np.min(energy_norm), 'MAX :: ', np.max(energy_norm))
+  #energy_norm = statics_tool.min_max(energy_norm)
+  #print('MIN :: ', np.min(energy_norm), 'MAX :: ', np.max(energy_norm))
   
   #normalize region ver.
-  #energy_norm = EN.region_normalize_norm(normalize_region, lon, lat, energy_norm)
+  energy_norm = EN.region_normalize_norm(normalize_region, lon, lat, energy_norm)
 
   """ Draw function NORM """
   MP.main_norm_driver(energy_norm,np.average(hgt_data,axis=0),target_region,ft,date,prj=set_prj,label_cfmt='SVD',center=center,TE_mode=mode,start_mode=start_eigen_mode+1, end_mode=end_eigen_mode+1, contribute=contribute)

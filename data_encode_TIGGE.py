@@ -14,10 +14,10 @@ import subprocess
 
 if __name__ == "__main__":
   """Set basic info. """
-  yyyy, mm, dd, hh = 2017, 7, 4, 12 
+  yyyy, mm, dd, hh = 2015, 9, 8, 12 
   ft_list = (00, 24, 48, 72)
   date = '{:04}{:02}{:02}{:02}'.format(yyyy,mm,dd,hh)
-  center = 'ECMWF'
+  center = 'CMC'
   dataset = 'TIGGE_' + center 
   set_endian = 'big' 
   var_list = ('UGRD', 'VGRD', 'HGT', 'TMP', 'SPFH', 'PS')
