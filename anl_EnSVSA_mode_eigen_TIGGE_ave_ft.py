@@ -171,11 +171,11 @@ class Anl_ENSVSA:
     
 if __name__ == "__main__":
   """Set basic info. """
-  yyyy, mm, dd, hh, init = '2018', '07', '06', '12', '00'
+  yyyy, mm, dd, hh, init = '2018', '07', '04', '12', '00'
   ft_list = ('24', '48', '72') 
   date = yyyy+mm+dd+hh
-  center = 'JMA'
-  dataset = 'TIGGE_' + center + '_pertb_plus' #'_pertb_plus/minus' or '' 
+  center = 'CMC'
+  dataset = 'TIGGE_' + center + '' #'_pertb_plus/minus' or '' 
   mode = 'humid' # 'dry' or 'humid'
   map_prj, set_prj = 'CNH', 'lcc' # 'CNH', 'lcc' or 'ALL', 'cyl'
   #target_region = ( 30, 35, 127.5, 132.5 ) # lat_min/max, lon_min/max
