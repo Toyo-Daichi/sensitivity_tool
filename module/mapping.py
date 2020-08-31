@@ -42,7 +42,7 @@ class Mapping:
 
     elif area == 'CNH':
       self.area = area
-      self.lon_min, self.lon_max = 100, 200
+      self.lon_min, self.lon_max = 102, 203
       self.lat_min, self.lat_max = 10, 60 
       self.lat_0, self.lon_0 = 35, 135
 

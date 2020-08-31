@@ -170,21 +170,23 @@ class Anl_ENSVSA:
     
 if __name__ == "__main__":
   """Set basic info. """
-  yyyy, mm, dd, hh, init, ft = '2015', '09', '08', '12', '00', '48'
+  yyyy, mm, dd, hh, init, ft = '2018', '07', '03', '12', '00', '48'
   date = yyyy+mm+dd+hh
-  center = 'CMC'
-  dataset = 'TIGGE_' + center + '' #'_pertb_plus/minus' or '' 
+  center = 'JMA'
+  dataset = 'TIGGE_' + center + '_pertb_plus' #'_pertb_plus/minus' or '' 
   mode = 'humid' # 'dry' or 'humid'
   map_prj, set_prj = 'CNH', 'lcc' # 'CNH', 'lcc' or 'ALL', 'cyl'
   #target_region = ( 30, 35, 127.5, 132.5 ) # lat_min/max, lon_min/max
   target_region = ( 25, 50, 125, 150 ) # lat_min/max, lon_min/max
-  start_eigen_mode, end_eigen_mode = 0, 19 #default is 0/9 -> 1-10 mode. 
+  start_eigen_mode, end_eigen_mode = 0, 12 #default is 0/9 -> 1-10 mode. 
+  normalize_set = 'on' # 'on' or 'on_full' or 'off'
+  normalize_region = ( 17.5, 62.5, 105, 170 ) # lat_min/max, lon_min/max
 
   """Class & parm set """
   DR = Anl_ENSVSA()
   RG = readgpv_tigge.ReadGPV(dataset,date,ft)
   EN = readgpv_tigge.Energy_NORM(dataset)
-  MP = mapping_draw_NORM.Mapping_NORM(dataset,map_prj)
+  MP = mapping_draw_NORM.Mapping_NORM(dataset,date,map_prj)
 
   """Making pretubation data Vertificate TIME"""
   indir = '/work3/daichi/Data/TIGGE/' + center + '/'
@@ -192,7 +194,6 @@ if __name__ == "__main__":
   pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_hgt, pertb_spfh, pertb_ps = EN.data_pertb_driver(uwnd_data,vwnd_data,tmp_data,hgt_data, spfh_data,ps_data)
   lon, lat = RG.set_coordinate()
   weight_lat = RG.weight_latitude(lat)
-  normalize_region = ( 20, 60, 105, 170 ) # lat_min/max, lon_min/max
 
   print('')
   print('..... @ MAKE Pertubation array & REGION Extraction MODE:{} @'.format(mode))
@@ -259,20 +260,24 @@ if __name__ == "__main__":
   contribute = float((np.sum(eigen_value[start_eigen_mode:end_eigen_mode+1])/np.sum(eigen_value))*100)
 
   #normalize
-  print('..... @ MAKE NORMALIZE ENERGY NORM @')
-  print('')
-  #normalize full ver.
-  #energy_norm = statics_tool.normalize(energy_norm)
-  #energy_norm = statics_tool.min_max(energy_norm)
-  #print('MIN :: ', np.min(energy_norm), 'MAX :: ', np.max(energy_norm))
-  
-  #normalize region ver.
-  energy_norm = EN.region_normalize_norm(normalize_region, lon, lat, energy_norm)
+  if 'on' in normalize_set:
+    print('..... @ MAKE NORMALIZE ENERGY NORM @')
+    print('')
+    
+    if normalize_set is 'on_full':
+      #normalize full ver.
+      #energy_norm = statics_tool.normalize(energy_norm)
+      energy_norm = statics_tool.min_max(energy_norm)
+      print('MIN :: ', np.min(energy_norm), 'MAX :: ', np.max(energy_norm))
+    
+    elif normalize_set is 'on':
+      #normalize region ver.
+      energy_norm = EN.region_normalize_norm(normalize_region, lon, lat, energy_norm)
 
   """ Draw function NORM """
-  MP.main_norm_driver(energy_norm,np.average(hgt_data,axis=0),target_region,ft,date,prj=set_prj,label_cfmt='SVD',center=center,TE_mode=mode,start_mode=start_eigen_mode+1, end_mode=end_eigen_mode+1, contribute=contribute)
+  MP.main_norm_driver(energy_norm,np.average(hgt_data,axis=0),target_region,ft,date,prj=set_prj,label_cfmt='SVD',center=center,TE_mode=mode,start_mode=start_eigen_mode+1, end_mode=end_eigen_mode+1, contribute=contribute,normalize_set=normalize_set,normalize_region=normalize_region)
   #MP.each_elem_norm_dry_tigge_driver(svd_pertb_uwnd,svd_pertb_vwnd,svd_pertb_tmp,svd_pertb_ps,target_region,ft,date,center=center,TE_mode=mode,)
-  MP.each_elem_norm_humid_tigge_driver(svd_pertb_uwnd,svd_pertb_vwnd,svd_pertb_tmp,svd_pertb_spfh,svd_pertb_ps,target_region,ft,date,center=center,TE_mode=mode)
+  #MP.each_elem_norm_humid_tigge_driver(svd_pertb_uwnd,svd_pertb_vwnd,svd_pertb_tmp,svd_pertb_spfh,svd_pertb_ps,target_region,ft,date,center=center,TE_mode=mode)
 
 
   print('Normal END')

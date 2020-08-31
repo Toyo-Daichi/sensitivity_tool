@@ -19,6 +19,12 @@ class ReadGPV:
     self.elem = self.data_kind()
     self.elem_num = len(self.elem)
 
+    if 'JMA' in dataset:
+      if int(date) >= 2014022600:
+        pass
+      elif 2006030100 < int(date) < 2014022600:
+        self.mem = 51
+
     if 'pertb_plus' in dataset:
       self.mem_list = [0]
       for imem in range(1,self.mem*2-1,2):

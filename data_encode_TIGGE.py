@@ -14,55 +14,58 @@ import subprocess
 
 if __name__ == "__main__":
   """Set basic info. """
-  yyyy, mm, dd, hh = 2015, 9, 8, 12 
+  yyyy, mm, dd, hh = 2018, 7, 7, 12 
   ft_list = (00, 24, 48, 72)
   date = '{:04}{:02}{:02}{:02}'.format(yyyy,mm,dd,hh)
-  center = 'CMC'
-  dataset = 'TIGGE_' + center 
+  center_list = ('JMA', 'ECMWF', 'NCEP', 'CMC') 
   set_endian = 'big' 
   var_list = ('UGRD', 'VGRD', 'HGT', 'TMP', 'SPFH', 'PS')
   make_var = 1 # 0(make each var output) or 1(only full data)
-  
-  """Class & data set """
-  ST = setup.Setup(dataset)
-  nx, ny, nz, mem = ST.set_prm()
-  dims = nx*ny*nz
 
-  for ft in ft_list:
-    data_dir = '/work3/daichi/Data/TIGGE/'
-    indata = data_dir + center + '/{}{:02}{:02}{:02}/'.format(yyyy,mm,dd,hh) + '{}{:02}{:02}{:02}_{:02}hr_{:02}mem.grd'.format(yyyy,mm,dd,hh,ft,mem)
-
-    RG = readgpv_tigge.ReadGPV(dataset,date,ft)
-    data = RG.set_gpv(indata,len(var_list),endian=set_endian)
-
-    cfmt = 'f'*(dims)
-
-    for imem in range(mem):
-      outdir = data_dir+center+'/{}{:02}{:02}{:02}/{:03}/'.format(yyyy,mm,dd,hh,imem+1)
-      os.makedirs(outdir,exist_ok=True)
-
-      for ivar, name in enumerate(var_list):
-        with open(outdir+name+'.grd','wb') as ofile:
-          _data =np.ravel(data[ivar,:,imem,::-1,:])
-          grd = struct.pack(cfmt,*_data)
-          ofile.write(grd)
+  for center in center_list:
+    dataset = 'TIGGE_' + center 
     
-      try: 
-        command = ["bash","./module/cat.sh",outdir,'{:04}{:02}{:02}{:02}'.format(yyyy,mm,dd,hh),'{:02}'.format(ft),'TIGGE']
-        res = subprocess.call(command)
-        print('...... Output data on '+'{}{:02}{:02}{:02}_{:02}hr.grd'.format(yyyy,mm,dd,hh,ft)+' MEM::{:03}'.format(imem+1))
-
-      except:
-        print('suprocess.check_call() failed')
+    """Class & data set """
+    ST = setup.Setup(dataset)
+    nx, ny, nz, mem = ST.set_prm()
+    dims = nx*ny*nz
     
-      if (make_var == 1):
-        command = ["rm", outdir+'/UGRD.grd', outdir+'/VGRD.grd', outdir+'/HGT.grd', outdir+'/TMP.grd', outdir+'/SPFH.grd', outdir+'/PS.grd']
-        res = subprocess.call(command)
+    for ft in ft_list:
+      data_dir = '/work3/daichi/Data/TIGGE/'
+      indata = data_dir + center + '/{}{:02}{:02}{:02}/'.format(yyyy,mm,dd,hh) +\
+               '{}{:02}{:02}{:02}_{:02}hr_{:02}mem.grd'.format(yyyy,mm,dd,hh,ft,mem)
+
+      RG = readgpv_tigge.ReadGPV(dataset,date,ft)
+      data = RG.set_gpv(indata,len(var_list),endian=set_endian)
+
+      cfmt = 'f'*(dims)
+
+      for imem in range(mem):
+        outdir = data_dir+center+'/{}{:02}{:02}{:02}/{:03}/'.format(yyyy,mm,dd,hh,imem+1)
+        os.makedirs(outdir,exist_ok=True)
+
+        for ivar, name in enumerate(var_list):
+          with open(outdir+name+'.grd','wb') as ofile:
+            _data =np.ravel(data[ivar,:,imem,::-1,:])
+            grd = struct.pack(cfmt,*_data)
+            ofile.write(grd)
       
-    #if (make_var == 1):
-    #  command = ["rm", indata]
-    #  res = subprocess.call(command)
+        try: 
+          command = ["bash","./module/cat.sh",outdir,'{:04}{:02}{:02}{:02}'.format(yyyy,mm,dd,hh),'{:02}'.format(ft),'TIGGE']
+          res = subprocess.call(command)
+          print('...... Output data on '+'{}{:02}{:02}{:02}_{:02}hr.grd'.format(yyyy,mm,dd,hh,ft)+' MEM::{:03}'.format(imem+1))
 
-    print('*** Warinig :: PS data have 3 dimention, but same data.')
+        except:
+          print('suprocess.check_call() failed')
+      
+        if (make_var == 1):
+          command = ["rm", outdir+'/UGRD.grd', outdir+'/VGRD.grd', outdir+'/HGT.grd', outdir+'/TMP.grd', outdir+'/SPFH.grd', outdir+'/PS.grd']
+          res = subprocess.call(command)
+        
+      #if (make_var == 1):
+      #  command = ["rm", indata]
+      #  res = subprocess.call(command)
+
+      print('*** Warinig :: PS data have 3 dimention, but same data.')
 
   print('Normal END')

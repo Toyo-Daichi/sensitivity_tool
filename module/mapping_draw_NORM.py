@@ -16,13 +16,13 @@ import readgpv_rish, readgpv_tigge
 import statics_tool
 
 class Mapping_NORM:
-  def __init__(self, dataset, map_prj):
+  def __init__(self, dataset, date, map_prj):
     self.MP = mapping.Mapping(map_prj)
     if dataset == 'WFM' or dataset == 'EPSW':
       self.RG = readgpv_rish.ReadGPV(dataset,'_','_')
       self.EN = readgpv_rish.Energy_NORM(dataset)
     elif 'TIGGE' in dataset:
-      self.RG = readgpv_tigge.ReadGPV(dataset,'_','_')
+      self.RG = readgpv_tigge.ReadGPV(dataset,date,'_')
       self.EN = readgpv_tigge.Energy_NORM(dataset)
 
   def spaghetti_diagram_driver(self, 
@@ -110,7 +110,8 @@ class Mapping_NORM:
     *,
     prj='lcc', label_cfmt='spread',  # for title & colorbar
     center='JMA', TE_mode='dry',     # for savefig
-    start_mode:int=0, end_mode:int=0, contribute:float=0.0  # for svd
+    start_mode:int=0, end_mode:int=0, contribute:float=0.0,  # for svd
+    normalize_set='off', normalize_region=(0,0,0,0) # for normalize
     ):
 
     """Draw sensitivity area @dry enegy norm"""
@@ -142,6 +143,16 @@ class Mapping_NORM:
 
     #vertifcation region
     self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
+    
+    if normalize_set == 'on':
+      normal_lat_min_index, normal_lat_max_index, normal_lon_min_index, normal_lon_max_index = \
+        self.EN.verification_region(lon,lat,
+            area_lat_min=normalize_region[1], area_lat_max=normalize_region[0],
+            area_lon_min=normalize_region[2], area_lon_max=normalize_region[3]
+        )
+
+      self.MP.point_linear(mapp,x,y,normal_lon_min_index,normal_lon_max_index,normal_lat_min_index,normal_lat_max_index, color='black', ls='--')
+
     
     self.MP.norm_contourf(mapp, x, y, energy_norm, label=label_cfmt)
     self.MP.contour(mapp, x, y, hgt_data[1], elem='850hPa', font_on=1)

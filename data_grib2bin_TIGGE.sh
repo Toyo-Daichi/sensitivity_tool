@@ -3,7 +3,8 @@
 
 # set parm.
 #center_list=( 'JMA' ) 
-center_list=( 'JMA' 'ECMWF' 'NCEP' 'CMC' ) #('UKMO' ->  not include Q)
+center_list=( 'NCEP' 'CMC' ) #('UKMO' ->  not include Q)
+#center_list=( 'JMA' 'ECMWF' 'NCEP' 'CMC' ) #('UKMO' ->  not include Q)
 #ft_list=( 'anl' )
 ft_list=( 'anl' '24' '48' '72' )
 level_list=( '1000' '925' '850' '700' '500' '300' '250' '200' )
@@ -17,19 +18,26 @@ indata_path=/work1/mio/tigge_full/data/1.25deg/
 outdata_path=/work3/daichi/Data/TIGGE/${center}/
 
 #set date
-yyyy=2015; e_yyyy=2015
-mm=9     ; e_mm=9
-dd=7     ; e_dd=10
+yyyy=2017; e_yyyy=2017
+mm=7     ; e_mm=7
+dd=5     ; e_dd=6
 hh=12    ; e_hh=12
 
 #ensemble size
 case ${center} in
-  "JMA"  ) mem=27 ;;
   "NCEP" ) mem=21 ;;
   "ECMWF") mem=51 ;;
   "CMC"  ) mem=21 ;;
   "UKMO" ) mem=18 ;;
 esac
+
+if [ ${center} = 'JMA' ] && [ ${yyyy}${mm}${dd}${hh} - lt 2006030100 ]; then
+  mem=27
+elif [ ${center} = 'JMA' ] && [ ${yyyy}${mm}${dd}${hh} - lt 2014022600 ]; then
+  mem=51
+elif [ ${center} = 'JMA' ] && [ ${yyyy}${mm}${dd}${hh} - ge 2014022600 ]; then
+  mem=27
+fi
 
 M=`printf %2.2i ${mm}`
 while [ ${dd} -le ${e_dd} ]; do
