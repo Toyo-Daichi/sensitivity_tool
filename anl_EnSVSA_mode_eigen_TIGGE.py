@@ -68,10 +68,6 @@ class Anl_ENSVSA:
     print(np.diag(array))
 
     eigen_value, eigen_vector = EN.eigen_decomposion(array)
-
-    #import setup
-    #setup.save_list_ndarray(eigen_vector, './work', '/eigen')
-
     normalize_eigen_vector = EN.eigen_vector_normalization(eigen_vector)
 
     return eigen_value, normalize_eigen_vector
@@ -275,9 +271,25 @@ if __name__ == "__main__":
       energy_norm = EN.region_normalize_norm(normalize_region, lon, lat, energy_norm)
 
   """ Draw function NORM """
-  MP.main_norm_driver(energy_norm,np.average(hgt_data,axis=0),target_region,ft,date,prj=set_prj,label_cfmt='SVD',center=center,TE_mode=mode,start_mode=start_eigen_mode+1, end_mode=end_eigen_mode+1, contribute=contribute,normalize_set=normalize_set,normalize_region=normalize_region)
-  #MP.each_elem_norm_dry_tigge_driver(svd_pertb_uwnd,svd_pertb_vwnd,svd_pertb_tmp,svd_pertb_ps,target_region,ft,date,center=center,TE_mode=mode,)
-  #MP.each_elem_norm_humid_tigge_driver(svd_pertb_uwnd,svd_pertb_vwnd,svd_pertb_tmp,svd_pertb_spfh,svd_pertb_ps,target_region,ft,date,center=center,TE_mode=mode)
+  MP.main_norm_driver(
+    energy_norm,np.average(hgt_data,axis=0),target_region,ft,date,
+    prj=set_prj,label_cfmt='SVD',center=center,TE_mode=mode,
+    start_mode=start_eigen_mode+1, end_mode=end_eigen_mode+1, contribute=contribute,
+    normalize_set=normalize_set,normalize_region=normalize_region
+    )
+  
+  #MP.each_elem_norm_dry_tigge_driver(
+  # svd_pertb_uwnd,svd_pertb_vwnd,svd_pertb_tmp,svd_pertb_ps,
+  # target_region,ft,date,
+  # center=center,TE_mode=mode
+  # )
+  
+  MP.each_elem_norm_humid_tigge_driver(
+    svd_pertb_uwnd,svd_pertb_vwnd,svd_pertb_tmp,svd_pertb_spfh,svd_pertb_ps,
+    target_region,ft,date,
+    center=center,TE_mode=mode,
+    ormalize_set=normalize_set,normalize_region=normalize_region
+    )
 
 
   print('Normal END')

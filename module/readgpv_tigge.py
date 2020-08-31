@@ -379,4 +379,25 @@ class Energy_NORM:
 
     print('MIN :: ', np.min(normalize_array), 'MAX :: ', np.max(normalize_array))
 
+    return normalize_array
+
+
+  def region_normalize_3d_norm(self, normalize_region, lon, lat, array):
+    normalize_lat_min_index, normalize_lat_max_index, normalize_lon_min_index, normalize_lon_max_index = \
+      self.verification_region(lon,lat,
+          area_lat_min=normalize_region[1], area_lat_max=normalize_region[0],
+          area_lon_min=normalize_region[2], area_lon_max=normalize_region[3]
+      )
+
+    normalize_array = np.zeros_like(array)
+
+    normalize_array[:,normalize_lat_min_index:normalize_lat_max_index+1,normalize_lon_min_index:normalize_lon_max_index+1] =\
+      statics_tool.min_max(
+        array[ :,
+               normalize_lat_min_index:normalize_lat_max_index+1,
+               normalize_lon_min_index:normalize_lon_max_index+1 ]
+      )
+
+    print('MIN :: ', np.min(normalize_array), 'MAX :: ', np.max(normalize_array))
+
     return normalize_array 
