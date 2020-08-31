@@ -158,7 +158,7 @@ class Mapping_NORM:
     self.MP.contour(mapp, x, y, hgt_data[1], elem='850hPa', font_on=1)
     self.MP.title(title_cfmt, fontsize=8)
     self.MP.saving(save_cfmt,'./work/')
-    plt.show()
+    #plt.show()
 
   def average_norm_driver(self,
     energy_norm, target_region, date,
@@ -176,7 +176,7 @@ class Mapping_NORM:
     
     label_cfmt = 'svd'
     title_cfmt = ' AVERAGE TE MODE sensitivity [ J/kg ] FT=Average, INIT={}'.format(date)
-    save_cfmt = '{}_TE_{}_{}_{}hr'.format(center,TE_mode,label_cfmt,ft)
+    save_cfmt = '{}_TE_{}_{}_{}hr'.format(center,TE_mode,label_cfmt,'ave')
 
     lat_min_index, lat_max_index, lon_min_index, lon_max_index = \
       self.EN.verification_region(lon,lat,
@@ -199,7 +199,7 @@ class Mapping_NORM:
     self.MP.norm_contourf(mapp, x, y, energy_norm, label=label_cfmt)
     self.MP.title(title_cfmt, fontsize=8)
     self.MP.saving(save_cfmt,'./work/')
-    plt.show()
+    #plt.show()
 
   def each_elem_norm_dry_rish_driver(self, 
     pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_slp, # pertbuation data

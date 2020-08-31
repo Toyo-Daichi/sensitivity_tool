@@ -171,7 +171,7 @@ class Anl_ENSVSA:
     
 if __name__ == "__main__":
   """Set basic info. """
-  yyyy, mm, dd, hh, init = '2018', '07', '03', '12', '00'
+  yyyy, mm, dd, hh, init = '2018', '07', '06', '12', '00'
   ft_list = ('24', '48', '72') 
   date = yyyy+mm+dd+hh
   center = 'JMA'
@@ -187,7 +187,7 @@ if __name__ == "__main__":
   #prepare parm
   ST = setup.Setup(dataset)
   nx, ny, _, _ = ST.set_prm()
-  ave_energy_norm = np.zeros((len(ft_list),nx,ny))
+  ave_energy_norm = np.zeros((len(ft_list),ny,nx))
 
   #forecast loop
   for index, ft in enumerate(ft_list):
@@ -268,27 +268,26 @@ if __name__ == "__main__":
     energy_norm, _, _ = DR.sensitivity_driver(svd_pertb_uwnd,svd_pertb_vwnd,svd_pertb_tmp,svd_pertb_spfh,svd_pertb_ps,target_region)
     contribute = float((np.sum(eigen_value[start_eigen_mode:end_eigen_mode+1])/np.sum(eigen_value))*100)
 
-    #normalize
-    if 'on' in normalize_set:
-      print('..... @ MAKE NORMALIZE ENERGY NORM @')
-      print('')
-
-      if normalize_set is 'on_full':
-        #normalize full ver.
-        #energy_norm = statics_tool.normalize(energy_norm)
-        energy_norm = statics_tool.min_max(energy_norm)
-        print('MIN :: ', np.min(energy_norm), 'MAX :: ', np.max(energy_norm))
-
-      elif normalize_set is 'on':
-        #normalize region ver.
-        energy_norm = EN.region_normalize_norm(normalize_region, lon, lat, energy_norm)
-
     ave_energy_norm[index] = energy_norm
+    
+  #normalize
+  energy_norm = np.average(ave_energy_norm,axis=0)
+  if 'on' in normalize_set:
+    print('..... @ MAKE NORMALIZE ENERGY NORM @')
+    print('')
+
+    if normalize_set is 'on_full':
+      #normalize full ver.
+      #energy_norm = statics_tool.normalize(energy_norm)
+      energy_norm = statics_tool.min_max(energy_norm)
+      print('MIN :: ', np.min(energy_norm), 'MAX :: ', np.max(energy_norm))
+
+    elif normalize_set is 'on':
+      #normalize region ver.
+      energy_norm = EN.region_normalize_norm(normalize_region, lon, lat, energy_norm)
+
 
   """ Draw function NORM """
-  ft='ave'
-  MP.main_norm_driver(np.average(ave_energy_norm,axis=0),target_region,ft,date,prj=set_prj,label_cfmt='SVD',center=center,TE_mode=mode,start_mode=start_eigen_mode+1, end_mode=end_eigen_mode+1, contribute='None',normalize_set=normalize_set,normalize_region=normalize_region)
-  #MP.each_elem_norm_dry_tigge_driver(svd_pertb_uwnd,svd_pertb_vwnd,svd_pertb_tmp,svd_pertb_ps,target_region,ft,date,center=center,TE_mode=mode,)
-  #MP.each_elem_norm_humid_tigge_driver(svd_pertb_uwnd,svd_pertb_vwnd,svd_pertb_tmp,svd_pertb_spfh,svd_pertb_ps,target_region,ft,date,center=center,TE_mode=mode)
+  MP.average_norm_driver(energy_norm,target_region,date,prj=set_prj,label_cfmt='SVD',center=center,TE_mode=mode,normalize_set=normalize_set,normalize_region=normalize_region)
 
   print('Normal END')
