@@ -160,6 +160,47 @@ class Mapping_NORM:
     self.MP.saving(save_cfmt,'./work/')
     plt.show()
 
+  def average_norm_driver(self,
+    energy_norm, target_region, date,
+    *,
+    prj='lcc', label_cfmt='spread',       # for title & colorbar
+    center='JMA', TE_mode='dry',                    # for savefig
+    normalize_set='off', normalize_region=(0,0,0,0) # for normalize
+    ):
+
+    """Draw sensitivity area @dry enegy norm"""
+    fig, ax = plt.subplots()
+    mapp = self.MP.base(projection_mode=prj)
+    lon, lat = self.RG.set_coordinate() 
+    x, y = self.MP.coord_change(mapp, lon, lat)
+    
+    label_cfmt = 'svd'
+    title_cfmt = ' AVERAGE TE MODE sensitivity [ J/kg ] FT=Average, INIT={}'.format(date)
+    save_cfmt = '{}_TE_{}_{}_{}hr'.format(center,TE_mode,label_cfmt,ft)
+
+    lat_min_index, lat_max_index, lon_min_index, lon_max_index = \
+      self.EN.verification_region(lon,lat,
+          area_lat_min=target_region[1], area_lat_max=target_region[0],
+          area_lon_min=target_region[2], area_lon_max=target_region[3]
+      )
+
+    #vertifcation region
+    self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
+    
+    if normalize_set == 'on':
+      normal_lat_min_index, normal_lat_max_index, normal_lon_min_index, normal_lon_max_index = \
+        self.EN.verification_region(lon,lat,
+            area_lat_min=normalize_region[1], area_lat_max=normalize_region[0],
+            area_lon_min=normalize_region[2], area_lon_max=normalize_region[3]
+        )
+
+      self.MP.point_linear(mapp,x,y,normal_lon_min_index,normal_lon_max_index,normal_lat_min_index,normal_lat_max_index, color='black', ls='--')
+    
+    self.MP.norm_contourf(mapp, x, y, energy_norm, label=label_cfmt)
+    self.MP.title(title_cfmt, fontsize=8)
+    self.MP.saving(save_cfmt,'./work/')
+    plt.show()
+
   def each_elem_norm_dry_rish_driver(self, 
     pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_slp, # pertbuation data
     press_levels, target_region, ft, date,

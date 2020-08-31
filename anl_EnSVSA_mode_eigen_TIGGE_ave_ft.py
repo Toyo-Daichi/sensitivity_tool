@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created from 2020.8.26
+Created from 2020.8.31
 @author: Toyo_Daichi
 """
 
@@ -15,6 +15,7 @@ warnings.filterwarnings('ignore')
 import mapping_draw_NORM
 import readgpv_tigge
 import statics_tool
+import setup
 
 class Anl_ENSVSA:
   """Ensemble Singular Vector sensitivity anaysis(ここでは、固有値ベクトルを求める for TIGGE)
@@ -170,7 +171,8 @@ class Anl_ENSVSA:
     
 if __name__ == "__main__":
   """Set basic info. """
-  yyyy, mm, dd, hh, init, ft = '2018', '07', '03', '12', '00', '48'
+  yyyy, mm, dd, hh, init = '2018', '07', '03', '12', '00'
+  ft_list = ('24', '48', '72') 
   date = yyyy+mm+dd+hh
   center = 'JMA'
   dataset = 'TIGGE_' + center + '_pertb_plus' #'_pertb_plus/minus' or '' 
@@ -182,102 +184,111 @@ if __name__ == "__main__":
   normalize_set = 'on' # 'on' or 'on_full' or 'off'
   normalize_region = ( 17.5, 62.5, 105, 170 ) # lat_min/max, lon_min/max
 
-  """Class & parm set """
-  DR = Anl_ENSVSA()
-  RG = readgpv_tigge.ReadGPV(dataset,date,ft)
-  EN = readgpv_tigge.Energy_NORM(dataset)
-  MP = mapping_draw_NORM.Mapping_NORM(dataset,date,map_prj)
+  #prepare parm
+  ST = setup.Setup(dataset)
+  nx, ny, _, _ = ST.set_prm()
+  ave_energy_norm = np.zeros((len(ft_list),nx,ny))
 
-  """Making pretubation data Vertificate TIME"""
-  indir = '/work3/daichi/Data/TIGGE/' + center + '/'
-  uwnd_data, vwnd_data, hgt_data, tmp_data, spfh_data, ps_data = RG.data_read_ft_driver(indir+date)
-  pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_hgt, pertb_spfh, pertb_ps = EN.data_pertb_driver(uwnd_data,vwnd_data,tmp_data,hgt_data, spfh_data,ps_data)
-  lon, lat = RG.set_coordinate()
-  weight_lat = RG.weight_latitude(lat)
+  #forecast loop
+  for index, ft in enumerate(ft_list):
+    """Class & parm set """
+    DR = Anl_ENSVSA()
+    RG = readgpv_tigge.ReadGPV(dataset,date,ft)
+    EN = readgpv_tigge.Energy_NORM(dataset)
+    MP = mapping_draw_NORM.Mapping_NORM(dataset,date,map_prj)
 
-  print('')
-  print('..... @ MAKE Pertubation array & REGION Extraction MODE:{} @'.format(mode))
-  
-  for imem in range(EN.mem-EN.ctrl):
-    for i_level in range(EN.nz):
-      pertb_uwnd[imem,i_level,:,:] = pertb_uwnd[imem,i_level,:,:]*weight_lat
-      pertb_vwnd[imem,i_level,:,:] = pertb_vwnd[imem,i_level,:,:]*weight_lat
-      pertb_tmp[imem,i_level,:,:]  = pertb_tmp[imem,i_level,:,:]*weight_lat
-      pertb_spfh[imem,i_level,:,:] = pertb_spfh[imem,i_level,:,:]*weight_lat
-    pertb_ps[imem,EN.surf-1,:,:]   = pertb_ps[imem,EN.surf-1,:,:]*weight_lat
+    """Making pretubation data Vertificate TIME"""
+    indir = '/work3/daichi/Data/TIGGE/' + center + '/'
+    uwnd_data, vwnd_data, hgt_data, tmp_data, spfh_data, ps_data = RG.data_read_ft_driver(indir+date)
+    pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_hgt, pertb_spfh, pertb_ps = EN.data_pertb_driver(uwnd_data,vwnd_data,tmp_data,hgt_data, spfh_data,ps_data)
+    lon, lat = RG.set_coordinate()
+    weight_lat = RG.weight_latitude(lat)
 
-  """Target region setting"""
-  lat_min_index, lat_max_index, lon_min_index, lon_max_index = \
-      EN.verification_region(lon,lat,
-          area_lat_min=target_region[1], area_lat_max=target_region[0],
-          area_lon_min=target_region[2], area_lon_max=target_region[3]
-      )
-    
-  lat_grd = lat_max_index-lat_min_index +1
-  lon_grd = lon_max_index-lon_min_index +1
-  dims_xy = lat_grd*lon_grd
-
-  pertb_uwnd = pertb_uwnd[:,:,lat_min_index:lat_max_index+1,lon_min_index:lon_max_index+1]
-  pertb_vwnd = pertb_vwnd[:,:,lat_min_index:lat_max_index+1,lon_min_index:lon_max_index+1]
-  pertb_tmp  = pertb_tmp[:,:,lat_min_index:lat_max_index+1,lon_min_index:lon_max_index+1]
-  pertb_spfh = pertb_spfh[:,:,lat_min_index:lat_max_index+1,lon_min_index:lon_max_index+1]
-  pertb_ps   = pertb_ps[:,EN.surf-1,lat_min_index:lat_max_index+1,lon_min_index:lon_max_index+1]
-
-  print('')
-  print('..... @ MAKE Eigen VALUE & VECTOR @')
-  eigen_value, p_array = DR.eigen_value_and_vector_driver(dims_xy,pertb_uwnd,pertb_vwnd,pertb_tmp,pertb_spfh,pertb_ps,mode=mode)
-  print('')
-
-  print('..... @ CHECK Eigen VALUE & NORMALIZE VECTOR @')
-  print(eigen_value)
-  print('')
-
-  """Calc. Sensitivity Region"""
-  uwnd_data, vwnd_data, hgt_data, tmp_data, spfh_data, ps_data = RG.data_read_init_driver(indir+date)
-  pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_hgt, pertb_spfh, pertb_ps = EN.data_pertb_driver(uwnd_data,vwnd_data,tmp_data,hgt_data, spfh_data,ps_data)
-  dims_xy = EN.ny*EN.nx 
-  
-  for imem in range(EN.mem-EN.ctrl):
-    for i_level in range(EN.nz):
-      pertb_uwnd[imem,i_level,:,:] = pertb_uwnd[imem,i_level,:,:]*weight_lat
-      pertb_vwnd[imem,i_level,:,:] = pertb_vwnd[imem,i_level,:,:]*weight_lat
-      pertb_tmp[imem,i_level,:,:]  = pertb_tmp[imem,i_level,:,:]*weight_lat
-      pertb_spfh[imem,i_level,:,:] = pertb_spfh[imem,i_level,:,:]*weight_lat
-    pertb_ps[imem,EN.surf-1,:,:]   = pertb_ps[imem,EN.surf-1,:,:]*weight_lat
-  
-  print('')
-  print('..... @ MAKE Pertubation array & REGION Extraction @')
-
-  print('')
-  print('..... @ MAKE SENSITIVITY REGION @')
-  svd_pertb_uwnd,svd_pertb_vwnd,svd_pertb_tmp,svd_pertb_spfh,svd_pertb_ps =\
-  DR.making_initial_pertb_array(
-    dims_xy,pertb_uwnd,pertb_vwnd,pertb_tmp,pertb_spfh,pertb_ps,p_array,
-    mode=mode,start_eigen_mode=start_eigen_mode,end_eigen_node=end_eigen_mode
-    )
-
-  energy_norm, _, _ = DR.sensitivity_driver(svd_pertb_uwnd,svd_pertb_vwnd,svd_pertb_tmp,svd_pertb_spfh,svd_pertb_ps,target_region)
-  contribute = float((np.sum(eigen_value[start_eigen_mode:end_eigen_mode+1])/np.sum(eigen_value))*100)
-
-  #normalize
-  if 'on' in normalize_set:
-    print('..... @ MAKE NORMALIZE ENERGY NORM @')
     print('')
-    
-    if normalize_set is 'on_full':
-      #normalize full ver.
-      #energy_norm = statics_tool.normalize(energy_norm)
-      energy_norm = statics_tool.min_max(energy_norm)
-      print('MIN :: ', np.min(energy_norm), 'MAX :: ', np.max(energy_norm))
-    
-    elif normalize_set is 'on':
-      #normalize region ver.
-      energy_norm = EN.region_normalize_norm(normalize_region, lon, lat, energy_norm)
+    print('..... @ MAKE Pertubation array & REGION Extraction MODE:{} @'.format(mode))
+
+    for imem in range(EN.mem-EN.ctrl):
+      for i_level in range(EN.nz):
+        pertb_uwnd[imem,i_level,:,:] = pertb_uwnd[imem,i_level,:,:]*weight_lat
+        pertb_vwnd[imem,i_level,:,:] = pertb_vwnd[imem,i_level,:,:]*weight_lat
+        pertb_tmp[imem,i_level,:,:]  = pertb_tmp[imem,i_level,:,:]*weight_lat
+        pertb_spfh[imem,i_level,:,:] = pertb_spfh[imem,i_level,:,:]*weight_lat
+      pertb_ps[imem,EN.surf-1,:,:]   = pertb_ps[imem,EN.surf-1,:,:]*weight_lat
+
+    """Target region setting"""
+    lat_min_index, lat_max_index, lon_min_index, lon_max_index = \
+        EN.verification_region(lon,lat,
+            area_lat_min=target_region[1], area_lat_max=target_region[0],
+            area_lon_min=target_region[2], area_lon_max=target_region[3]
+        )
+
+    lat_grd = lat_max_index-lat_min_index +1
+    lon_grd = lon_max_index-lon_min_index +1
+    dims_xy = lat_grd*lon_grd
+
+    pertb_uwnd = pertb_uwnd[:,:,lat_min_index:lat_max_index+1,lon_min_index:lon_max_index+1]
+    pertb_vwnd = pertb_vwnd[:,:,lat_min_index:lat_max_index+1,lon_min_index:lon_max_index+1]
+    pertb_tmp  = pertb_tmp[:,:,lat_min_index:lat_max_index+1,lon_min_index:lon_max_index+1]
+    pertb_spfh = pertb_spfh[:,:,lat_min_index:lat_max_index+1,lon_min_index:lon_max_index+1]
+    pertb_ps   = pertb_ps[:,EN.surf-1,lat_min_index:lat_max_index+1,lon_min_index:lon_max_index+1]
+
+    print('')
+    print('..... @ MAKE Eigen VALUE & VECTOR @')
+    eigen_value, p_array = DR.eigen_value_and_vector_driver(dims_xy,pertb_uwnd,pertb_vwnd,pertb_tmp,pertb_spfh,pertb_ps,mode=mode)
+    print('')
+
+    print('..... @ CHECK Eigen VALUE & NORMALIZE VECTOR @')
+    print(eigen_value)
+    print('')
+
+    """Calc. Sensitivity Region"""
+    uwnd_data, vwnd_data, hgt_data, tmp_data, spfh_data, ps_data = RG.data_read_init_driver(indir+date)
+    pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_hgt, pertb_spfh, pertb_ps = EN.data_pertb_driver(uwnd_data,vwnd_data,tmp_data,hgt_data, spfh_data,ps_data)
+    dims_xy = EN.ny*EN.nx 
+
+    for imem in range(EN.mem-EN.ctrl):
+      for i_level in range(EN.nz):
+        pertb_uwnd[imem,i_level,:,:] = pertb_uwnd[imem,i_level,:,:]*weight_lat
+        pertb_vwnd[imem,i_level,:,:] = pertb_vwnd[imem,i_level,:,:]*weight_lat
+        pertb_tmp[imem,i_level,:,:]  = pertb_tmp[imem,i_level,:,:]*weight_lat
+        pertb_spfh[imem,i_level,:,:] = pertb_spfh[imem,i_level,:,:]*weight_lat
+      pertb_ps[imem,EN.surf-1,:,:]   = pertb_ps[imem,EN.surf-1,:,:]*weight_lat
+
+    print('')
+    print('..... @ MAKE Pertubation array & REGION Extraction @')
+
+    print('')
+    print('..... @ MAKE SENSITIVITY REGION @')
+    svd_pertb_uwnd,svd_pertb_vwnd,svd_pertb_tmp,svd_pertb_spfh,svd_pertb_ps =\
+    DR.making_initial_pertb_array(
+      dims_xy,pertb_uwnd,pertb_vwnd,pertb_tmp,pertb_spfh,pertb_ps,p_array,
+      mode=mode,start_eigen_mode=start_eigen_mode,end_eigen_node=end_eigen_mode
+      )
+
+    energy_norm, _, _ = DR.sensitivity_driver(svd_pertb_uwnd,svd_pertb_vwnd,svd_pertb_tmp,svd_pertb_spfh,svd_pertb_ps,target_region)
+    contribute = float((np.sum(eigen_value[start_eigen_mode:end_eigen_mode+1])/np.sum(eigen_value))*100)
+
+    #normalize
+    if 'on' in normalize_set:
+      print('..... @ MAKE NORMALIZE ENERGY NORM @')
+      print('')
+
+      if normalize_set is 'on_full':
+        #normalize full ver.
+        #energy_norm = statics_tool.normalize(energy_norm)
+        energy_norm = statics_tool.min_max(energy_norm)
+        print('MIN :: ', np.min(energy_norm), 'MAX :: ', np.max(energy_norm))
+
+      elif normalize_set is 'on':
+        #normalize region ver.
+        energy_norm = EN.region_normalize_norm(normalize_region, lon, lat, energy_norm)
+
+    ave_energy_norm[index] = energy_norm
 
   """ Draw function NORM """
-  MP.main_norm_driver(energy_norm,np.average(hgt_data,axis=0),target_region,ft,date,prj=set_prj,label_cfmt='SVD',center=center,TE_mode=mode,start_mode=start_eigen_mode+1, end_mode=end_eigen_mode+1, contribute=contribute,normalize_set=normalize_set,normalize_region=normalize_region)
+  ft='ave'
+  MP.main_norm_driver(np.average(ave_energy_norm,axis=0),target_region,ft,date,prj=set_prj,label_cfmt='SVD',center=center,TE_mode=mode,start_mode=start_eigen_mode+1, end_mode=end_eigen_mode+1, contribute='None',normalize_set=normalize_set,normalize_region=normalize_region)
   #MP.each_elem_norm_dry_tigge_driver(svd_pertb_uwnd,svd_pertb_vwnd,svd_pertb_tmp,svd_pertb_ps,target_region,ft,date,center=center,TE_mode=mode,)
   #MP.each_elem_norm_humid_tigge_driver(svd_pertb_uwnd,svd_pertb_vwnd,svd_pertb_tmp,svd_pertb_spfh,svd_pertb_ps,target_region,ft,date,center=center,TE_mode=mode)
-
 
   print('Normal END')
