@@ -166,17 +166,17 @@ class Anl_ENSVSA:
     
 if __name__ == "__main__":
   """Set basic info. """
-  yyyy, mm, dd, hh, init, ft = '2018', '07', '03', '12', '00', '24'
+  yyyy, mm, dd, hh, init, ft = '2018', '07', '04', '12', '00', '24'
   date = yyyy+mm+dd+hh
-  center = 'ECMWF'
+  center = 'JMA'
   dataset = 'TIGGE_' + center + '_pertb_plus' #'_pertb_plus/minus' or '' 
   mode = 'humid' # 'dry' or 'humid'
   map_prj, set_prj = 'CNH', 'lcc' # 'CNH', 'lcc' or 'ALL', 'cyl'
-  #target_region = ( 30, 35, 127.5, 132.5 ) # lat_min/max, lon_min/max
-  target_region = ( 25, 50, 125, 150 ) # lat_min/max, lon_min/max
+  target_region = ( 30, 35, 127.5, 132.5 ) # lat_min/max, lon_min/max
+  #target_region = ( 25, 50, 125, 150 ) # lat_min/max, lon_min/max
   start_eigen_mode, end_eigen_mode = 0, 12 #default is 0/9 -> 1-10 mode. 
   normalize_set = 'on' # 'on' or 'on_full' or 'off'
-  normalize_region = ( 17.5, 62.5, 105, 170 ) # lat_min/max, lon_min/max
+  normalize_region = ( 20, 50, 120, 150 ) # lat_min/max, lon_min/max
 
   """Class & parm set """
   DR = Anl_ENSVSA()
@@ -288,7 +288,7 @@ if __name__ == "__main__":
     svd_pertb_uwnd,svd_pertb_vwnd,svd_pertb_tmp,svd_pertb_spfh,svd_pertb_ps,
     target_region,ft,date,
     center=center,TE_mode=mode,
-    ormalize_set=normalize_set,normalize_region=normalize_region
+    normalize_set=normalize_set,normalize_region=normalize_region
     )
 
 

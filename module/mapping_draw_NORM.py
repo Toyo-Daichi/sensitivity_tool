@@ -158,7 +158,7 @@ class Mapping_NORM:
     self.MP.contour(mapp, x, y, hgt_data[1], elem='850hPa', font_on=1)
     self.MP.title(title_cfmt, fontsize=8)
     self.MP.saving(save_cfmt,'./work/')
-    #plt.show()
+    plt.show()
 
   def average_norm_driver(self,
     energy_norm, target_region, date,
@@ -174,7 +174,6 @@ class Mapping_NORM:
     lon, lat = self.RG.set_coordinate() 
     x, y = self.MP.coord_change(mapp, lon, lat)
     
-    label_cfmt = 'svd'
     title_cfmt = ' AVERAGE TE MODE sensitivity [ J/kg ] FT=Average, INIT={}'.format(date)
     save_cfmt = '{}_TE_{}_{}_{}hr'.format(center,TE_mode,label_cfmt,'ave')
 
@@ -369,7 +368,7 @@ class Mapping_NORM:
     press_indexs = (  7,   5,   4,   3,   2,    0)
 
     title_cfmt = 'TE [ J/kg ] FT={}hr, INIT={}'.format(ft,date)
-    save_cfmt = '{}_Each_elem_energy_{}_{}_{}_{}hr'.format(center,TE_mode,label_cfmt,date,ft)
+    save_cfmt = '{}_Each_elem_energy_{}_{}_{}hr'.format(center,TE_mode,date,ft)
 
     fig = plt.figure(figsize = (size_x, size_y))
     lon, lat = self.RG.set_coordinate() 
@@ -386,16 +385,16 @@ class Mapping_NORM:
     ps   = (((self.EN.R*self.EN.Tr)/self.EN.Pr)*(pertb_ps**2/self.EN.Pr)*0.5)
     
     if normalize_set == 'on':
-      normalize_lat_min_index, normalize_lat_max_index, normalize_lon_min_index, normalize_lon_max_index = \
-        self.verification_region(lon,lat,
+      normal_lat_min_index, normal_lat_max_index, normal_lon_min_index, normal_lon_max_index = \
+        self.EN.verification_region(lon,lat,
           area_lat_min=normalize_region[1], area_lat_max=normalize_region[0],
           area_lon_min=normalize_region[2], area_lon_max=normalize_region[3]
         )
-      uwnd = self.EN.regio_normalize_3d_norm(normalize_region,lon,lat, uwnd)
-      vwnd = self.EN.regio_normalize_3d_norm(normalize_region,lon,lat, vwnd)
-      tmp  = self.EN.regio_normalize_3d_norm(normalize_region,lon,lat, tmp)
-      spfh = self.EN.regio_normalize_3d_norm(normalize_region,lon,lat, spfh)
-      ps   = self.EN.regio_normalize_norm(normalize_region,lon,lat, ps)
+      uwnd = self.EN.region_normalize_3d_norm(normalize_region,lon,lat,uwnd)
+      vwnd = self.EN.region_normalize_3d_norm(normalize_region,lon,lat,vwnd)
+      tmp  = self.EN.region_normalize_3d_norm(normalize_region,lon,lat,tmp)
+      spfh = self.EN.region_normalize_3d_norm(normalize_region,lon,lat,spfh)
+      ps   = self.EN.region_normalize_norm(normalize_region,lon,lat,ps)
       label_cfmt = 'normalize'
 
     elif normalize_set == 'off':

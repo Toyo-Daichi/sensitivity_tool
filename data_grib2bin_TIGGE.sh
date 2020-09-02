@@ -2,11 +2,11 @@
 # Grib2 TIGGE data -> Grads format
 
 # set parm.
-#center_list=( 'JMA' ) 
-center_list=( 'NCEP' 'CMC' ) #('UKMO' ->  not include Q)
+center_list=( 'JMA' ) 
+#center_list=( 'NCEP' 'CMC' ) #('UKMO' ->  not include Q)
 #center_list=( 'JMA' 'ECMWF' 'NCEP' 'CMC' ) #('UKMO' ->  not include Q)
 #ft_list=( 'anl' )
-ft_list=( 'anl' '24' '48' '72' )
+#ft_list=( 'anl' '24' '48' '72' )
 level_list=( '1000' '925' '850' '700' '500' '300' '250' '200' )
 
 #data info (from 30get_data.sh_FULL2.5deg)
@@ -18,10 +18,14 @@ indata_path=/work1/mio/tigge_full/data/1.25deg/
 outdata_path=/work3/daichi/Data/TIGGE/${center}/
 
 #set date
-yyyy=2017; e_yyyy=2017
+yyyy=2018; e_yyyy=2018
 mm=7     ; e_mm=7
-dd=5     ; e_dd=6
+dd=3     ; e_dd=7
 hh=12    ; e_hh=12
+
+M=`printf %2.2i ${mm}`
+D=`printf %2.2i ${dd}`
+H=`printf %2.2i ${hh}`
 
 #ensemble size
 case ${center} in
@@ -31,15 +35,14 @@ case ${center} in
   "UKMO" ) mem=18 ;;
 esac
 
-if [ ${center} = 'JMA' ] && [ ${yyyy}${mm}${dd}${hh} - lt 2006030100 ]; then
+if [ "${center}" = 'JMA' ] && [ ${yyyy}${M}${D}${H}00 -lt 2006030100 ]; then
   mem=27
-elif [ ${center} = 'JMA' ] && [ ${yyyy}${mm}${dd}${hh} - lt 2014022600 ]; then
+elif [ "${center}" = 'JMA' ] && [ ${yyyy}${M}${D}${H}00 -lt 2014022600 ]; then
   mem=51
-elif [ ${center} = 'JMA' ] && [ ${yyyy}${mm}${dd}${hh} - ge 2014022600 ]; then
+elif [ "${center}" = 'JMA' ] && [ ${yyyy}${M}${D}${H}00 -ge 2014022600 ]; then
   mem=27
 fi
 
-M=`printf %2.2i ${mm}`
 while [ ${dd} -le ${e_dd} ]; do
   D=`printf %2.2i ${dd}`
   H=`printf %2.2i ${hh}`

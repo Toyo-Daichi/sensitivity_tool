@@ -160,7 +160,8 @@ class Mapping:
   def norm_contourf(self, basemap, x, y, data, *, label='normalize', cbar_on=0):
     #normalize
     if label == 'normalize':
-      levels = [0.025, 0.05, 0.1, 0.2, 0.5, 0.75, 1.0]
+      #levels = [0.025, 0.05, 0.1, 0.2, 0.5, 0.75, 1.0]
+      levels = [0.1, 0.2, 0.3, 0.4, 0.5, 0.75, 1.0]
 
     elif label == 'normalize_scope':
       levels = [0.025, 0.050, 0.075, 0.100, 0.125, 0.150, 0.200]

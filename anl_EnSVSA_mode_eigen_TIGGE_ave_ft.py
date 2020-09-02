@@ -14,8 +14,8 @@ warnings.filterwarnings('ignore')
 #my_module
 import mapping_draw_NORM
 import readgpv_tigge
-import statics_tool
 import setup
+import statics_tool
 
 class Anl_ENSVSA:
   """Ensemble Singular Vector sensitivity anaysis(ここでは、固有値ベクトルを求める for TIGGE)
