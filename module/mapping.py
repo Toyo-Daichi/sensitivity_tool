@@ -34,6 +34,12 @@ class Mapping:
       self.lat_min, self.lat_max = 29, 38
       self.lat_0, self.lon_0 = 35, 140
 
+    elif area == 'ASIAJPN':
+      self.area = area
+      self.lon_min, self.lon_max = 116, 162.5
+      self.lat_min, self.lat_max = 15, 52.5 
+      self.lat_0, self.lon_0 = 35, 140
+
     elif area == 'WNH':
       self.area = area
       self.lon_min, self.lon_max = 80, 175

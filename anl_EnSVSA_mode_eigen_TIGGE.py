@@ -171,12 +171,12 @@ if __name__ == "__main__":
   center = 'JMA'
   dataset = 'TIGGE_' + center + '_pertb_plus' #'_pertb_plus/minus' or '' 
   mode = 'humid' # 'dry' or 'humid'
-  map_prj, set_prj = 'CNH', 'lcc' # 'CNH', 'lcc' or 'ALL', 'cyl'
-  target_region = ( 30, 35, 127.5, 132.5 ) # lat_min/max, lon_min/max
+  map_prj, set_prj = 'ASIAJPN', 'lcc' # 'CNH', 'lcc' or 'ALL', 'cyl'
+  target_region = ( 30, 37.5, 127.5, 137.5 ) # lat_min/max, lon_min/max
   #target_region = ( 25, 50, 125, 150 ) # lat_min/max, lon_min/max
   start_eigen_mode, end_eigen_mode = 0, 12 #default is 0/9 -> 1-10 mode. 
   normalize_set = 'on' # 'on' or 'on_full' or 'off'
-  normalize_region = ( 20, 50, 120, 150 ) # lat_min/max, lon_min/max
+  normalize_region = ( 20, 50, 118.75, 152.5 ) # lat_min/max, lon_min/max
 
   """Class & parm set """
   DR = Anl_ENSVSA()

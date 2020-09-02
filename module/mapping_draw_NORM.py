@@ -158,7 +158,7 @@ class Mapping_NORM:
     self.MP.contour(mapp, x, y, hgt_data[1], elem='850hPa', font_on=1)
     self.MP.title(title_cfmt, fontsize=8)
     self.MP.saving(save_cfmt,'./work/')
-    plt.show()
+    #plt.show()
 
   def average_norm_driver(self,
     energy_norm, target_region, date,
