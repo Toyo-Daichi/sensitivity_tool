@@ -166,14 +166,15 @@ class Anl_ENSVSA:
     
 if __name__ == "__main__":
   """Set basic info. """
-  yyyy, mm, dd, hh, init, ft = '2018', '07', '04', '12', '00', '24'
+  yyyy, mm, dd, hh, init, ft = '2015', '09', '10', '12', '00', '24'
   date = yyyy+mm+dd+hh
-  center = 'JMA'
-  dataset = 'TIGGE_' + center + '_pertb_plus' #'_pertb_plus/minus' or '' 
+  center = 'ECMWF'
+  dataset = 'TIGGE_' + center + '_pertb_minus' #'_pertb_plus/minus' or '' 
   mode = 'humid' # 'dry' or 'humid'
   map_prj, set_prj = 'ASIAJPN', 'lcc' # 'CNH', 'lcc' or 'ALL', 'cyl'
-  target_region = ( 30, 37.5, 127.5, 137.5 ) # lat_min/max, lon_min/max
-  #target_region = ( 25, 50, 125, 150 ) # lat_min/max, lon_min/max
+  #target_region = ( 30, 37.5, 127.5, 137.5 ) # WJPN
+  target_region = ( 32.5, 40, 135, 142.5 )    # EJPN
+  #target_region = ( 25, 50, 125, 150 )       # JPN
   start_eigen_mode, end_eigen_mode = 0, 12 #default is 0/9 -> 1-10 mode. 
   normalize_set = 'on' # 'on' or 'on_full' or 'off'
   normalize_region = ( 20, 50, 118.75, 152.5 ) # lat_min/max, lon_min/max
@@ -284,12 +285,11 @@ if __name__ == "__main__":
   # center=center,TE_mode=mode
   # )
   
-  MP.each_elem_norm_humid_tigge_driver(
-    svd_pertb_uwnd,svd_pertb_vwnd,svd_pertb_tmp,svd_pertb_spfh,svd_pertb_ps,
-    target_region,ft,date,
-    center=center,TE_mode=mode,
-    normalize_set=normalize_set,normalize_region=normalize_region
-    )
-
+  #MP.each_elem_norm_humid_tigge_driver(
+  #  svd_pertb_uwnd,svd_pertb_vwnd,svd_pertb_tmp,svd_pertb_spfh,svd_pertb_ps,
+  #  target_region,ft,date,
+  #  center=center,TE_mode=mode,
+  #  normalize_set=normalize_set,normalize_region=normalize_region
+  #  )
 
   print('Normal END')

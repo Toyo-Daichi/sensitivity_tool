@@ -17,15 +17,16 @@ import readgpv_tigge
 
 """Ensemble spread anaysis(for TIGGE)
   検証時刻でのトータルエネルギーノルムを作成。
+  同時にアンサンブル摂動やスパゲッティ図も出力できる機能を追加した.
   詳細は, README.md or Enomoto et al. (2015) or Matsueda et al. (2014) に記載されている.
 """
 
 if __name__ == "__main__":
   """Set basic info. """
-  yyyy, mm, dd, hh, ft = '2018', '07', '04', '12', '00'
+  yyyy, mm, dd, hh, ft = '2015', '09', '09', '12', '00'
   date = yyyy+mm+dd+hh
   center = 'JMA'
-  dataset = 'TIGGE_' + center + '_pertb_plus'
+  dataset = 'TIGGE_' + center + ''
   mode = 'humid' # 'dry' or 'humid'
   map_prj, set_prj = 'CNH', 'lcc' # 'CNH', 'lcc' or 'ALL', 'cyl'
   target_region = ( 25, 50, 125, 150 ) # lat_min/max, lon_min/max
@@ -33,7 +34,7 @@ if __name__ == "__main__":
   """Class & parm set """
   RG = readgpv_tigge.ReadGPV(dataset,date,ft)
   EN = readgpv_tigge.Energy_NORM(dataset)
-  MP = mapping_draw_NORM.Mapping_NORM(dataset,map_prj)
+  MP = mapping_draw_NORM.Mapping_NORM(dataset,date,map_prj)
 
   """Making pretubation data"""
   indir = '/work3/daichi/Data/TIGGE/' + center + '/'
@@ -51,13 +52,13 @@ if __name__ == "__main__":
       pertb_ps[imem,i_level,:,:]   = pertb_ps[imem,i_level,:,:]*weight_lat
 
   """ Draw function SPREAD """
-  #level_layer = 2
-  #MP.spaghetti_diagram_driver(hgt_data,RG.elem[2],target_region,level_layer,ft,date,prj=set_prj,center=center,elem_cfmt='850hPa')
-  #for imem in range(EN.mem-EN.ctrl):
-  #  MP.pertubation_driver(pertb_hgt[imem],RG.elem[2],target_region,level_layer,ft,date,imem,prj=set_prj,center=center)
+  level_layer = 2
+  MP.spaghetti_diagram_driver(hgt_data,RG.elem[2],target_region,level_layer,ft,date,prj=set_prj,center=center,elem_cfmt='850hPa')
+  for imem in range(EN.mem-EN.ctrl):
+    MP.pertubation_driver(pertb_hgt[imem],RG.elem[2],target_region,level_layer,ft,date,imem,prj=set_prj,center=center)
 
-  #print('Normal END')
-  #sys.exit()
+  print('Normal END')
+  sys.exit()
 
   """Calc. Energy NORM"""
   energy_norm    = np.zeros((EN.mem-EN.ctrl,EN.ny,EN.nx))

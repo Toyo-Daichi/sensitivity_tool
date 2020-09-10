@@ -14,8 +14,8 @@ import subprocess
 
 if __name__ == "__main__":
   """Set basic info. """
-  yyyy, mm, dd, hh = 2018, 7, 7, 12 
-  ft_list = (00, 24, 48, 72)
+  yyyy, mm, dd, hh = 2017, 7, 6, 12 
+  ft_list = (00, 24, 48)
   date = '{:04}{:02}{:02}{:02}'.format(yyyy,mm,dd,hh)
   center_list = ('JMA', 'ECMWF', 'NCEP', 'CMC') 
   set_endian = 'big' 

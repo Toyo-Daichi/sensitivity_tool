@@ -170,8 +170,8 @@ class Anl_ENSVSA:
     
 if __name__ == "__main__":
   """Set basic info. """
-  yyyy, mm, dd, hh, init = '2018', '07', '03', '12', '00'
-  ft_list = ('24','48')
+  yyyy, mm, dd, hh, init = '2015', '09', '03', '12', '00'
+  ft_list = ('24')
   date = yyyy+mm+dd+hh
   mode = 'humid' # 'dry' or 'humid'
   start_eigen_mode, end_eigen_mode = 2, 2 #default is 0/9 -> 1-10 mode. 
