@@ -48,38 +48,40 @@ class ReadGPV:
     return uwnd_data, vwnd_data, tmp_data, spfh_data, hgt_data, wwnd_data, vor_data, slp_data, ps_data, rain_data 
 
   def data_read_driver(self, exp_path:str, target_date, *, endian='little'):
-    uwnd_data, vwnd_data, tmp_data, spfh_data, _, _, _, _, ps_data, _ = self.init_mem_array()
+    uwnd_data, vwnd_data, tmp_data, spfh_data, hgt_data, _, _, _, ps_data, _ = self.init_mem_array()
 
     for index, imem in enumerate(range(self.mem)):
       data_path = exp_path + '/{:03}/plevel_grd/{}00.grd'.format(imem+1, target_date)
       _full_data = self._open_gpv(data_path, endian=endian)
-      _uwnd_data, _vwnd_data, _tmp_data, _spfh_data, _, _, _, _, _ps_data, _ = self.full_data_cut(_full_data)
+      _uwnd_data, _vwnd_data, _tmp_data, _spfh_data, _hgt_data, _, _, _, _ps_data, _ = self.full_data_cut(_full_data)
       uwnd_data[index,:,:,:] = _uwnd_data[:,:,:]
       vwnd_data[index,:,:,:] = _vwnd_data[:,:,:]
       tmp_data[index,:,:,:]  =  _tmp_data[:,:,:]
       spfh_data[index,:,:,:] = _spfh_data[:,:,:]
+      hgt_data[index,:,:,:]   = _hgt_data[:,:,:]
       ps_data[index,:,:]     =   _ps_data[:,:]
 
-    return uwnd_data, vwnd_data, tmp_data, spfh_data, ps_data
+    return uwnd_data, vwnd_data, tmp_data, spfh_data, hgt_data, ps_data
 
   def full_data_cut(self, full_data:np.ndarray):
     uwnd_data, vwnd_data, tmp_data, spfh_data, hgt_data, wwnd_data, vor_data, slp_data, ps_data, rain_data = self.init_array()
 
-    # cut
+    # cut step
+
     # (1) full dataset
     uwnd_data = full_data[0:(self.surf+self.nz)*self.dims].reshape(self.surf+self.nz,self.ny,self.nx)
     vwnd_data = full_data[1*(self.surf+self.nz)*self.dims:2*((self.surf+self.nz)*self.dims)].reshape(self.surf+self.nz,self.ny,self.nx)
     tmp_data  = full_data[2*(self.surf+self.nz)*self.dims:3*((self.surf+self.nz)*self.dims)].reshape(self.surf+self.nz,self.ny,self.nx)
     split_full_dims = 3*((self.surf+self.nz)*self.dims)
-    # (1) 3d dataset (not include surface)
+    # (2) 3d dataset (not include surface)
     spfh_data = full_data[split_full_dims:(split_full_dims+(self.nz)*self.dims)].reshape(self.nz,self.ny,self.nx)
     hgt_data  = full_data[split_full_dims+(1*(self.nz)*self.dims):split_full_dims+(2*(self.nz)*self.dims)].reshape(self.nz,self.ny,self.nx)
     wwnd_data = full_data[split_full_dims+(2*(self.nz)*self.dims):split_full_dims+(3*(self.nz)*self.dims)].reshape(self.nz,self.ny,self.nx)
     split_full_dims = split_full_dims+3*(self.nz)*self.dims
-    # (2) 3d dataset (3 layer)
+    # (3) 3d dataset (3 layer)
     vor_data  = full_data[split_full_dims:(split_full_dims+3*self.dims)].reshape(3,self.ny,self.nx)
     split_full_dims = split_full_dims+3*self.dims 
-    # (3) 2ddataset
+    # (4) 2ddataset
     slp_data  = full_data[split_full_dims:(split_full_dims+1*self.dims)].reshape(self.ny,self.nx)
     ps_data   = full_data[split_full_dims+1*self.dims:(split_full_dims+2*self.dims)].reshape(self.ny,self.nx)
     rain_data = full_data[split_full_dims+2*self.dims:(split_full_dims+3*self.dims)].reshape(self.ny,self.nx)

@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 
 #my module
 import mapping
-import readgpv_rish, readgpv_tigge
+import readgpv_rish, readgpv_tigge, readgpv_nhm
 import statics_tool
 
 class Mapping_NORM:
@@ -24,6 +24,9 @@ class Mapping_NORM:
     elif 'TIGGE' in dataset:
       self.RG = readgpv_tigge.ReadGPV(dataset,date,'_')
       self.EN = readgpv_tigge.Energy_NORM(dataset)
+    elif 'NHM' in dataset:
+      self.RG = readgpv_nhm.ReadGPV(dataset)
+      self.EN = readgpv_nhm.Energy_NORM(dataset)
 
   def spaghetti_diagram_driver(self, 
     data, elem, target_region, level_layer, ft, date, 
@@ -111,7 +114,7 @@ class Mapping_NORM:
     prj='lcc', label_cfmt='spread',  # for title & colorbar
     center='JMA', TE_mode='dry',     # for savefig
     start_mode:int=0, end_mode:int=0, contribute:float=0.0,  # for svd
-    normalize_set='off', normalize_region=(0,0,0,0) # for normalize
+    normalize_set='off', normalize_region=(0,0,0,0), # for normalize
     ):
 
     """Draw sensitivity area @dry enegy norm"""
@@ -158,7 +161,51 @@ class Mapping_NORM:
     self.MP.contour(mapp, x, y, hgt_data[1], elem='850hPa', font_on=1)
     self.MP.title(title_cfmt, fontsize=8)
     self.MP.saving(save_cfmt,'./work/')
-    #plt.show()
+    plt.show()
+
+  def main_norm_driver_nhm(self,
+    energy_norm, hgt_data, target_region, ft, date, 
+    *,
+    prj='lcc', label_cfmt='spread',  # for title & colorbar
+    center='JMA', TE_mode='dry',     # for savefig
+    start_mode:int=0, end_mode:int=0, contribute:float=0.0,  # for svd
+    ):
+
+    """Draw sensitivity area @dry enegy norm"""
+    fig, ax = plt.subplots()
+    mapp = self.MP.base(projection_mode=prj)
+    lon, lat = self.RG.set_coordinate(self.RG.nx, self.RG.ny) 
+    x, y = self.MP.coord_change(mapp, lon, lat)
+    
+    if label_cfmt == 'spread':
+      label_cfmt = 'spread_{}hr'.format(ft)
+      title_cfmt = 'TE spread [ J/kg ] FT={}hr, INIT={}'.format(ft,date)
+      save_cfmt = '{}_TE_{}_{}'.format(center,TE_mode,label_cfmt)
+    elif label_cfmt == 'adjoint':
+      label_cfmt = 'adjoint'
+      title_cfmt = ' TE Adjoint sensitivity [ J/kg ] FT={}hr, INIT={}'.format(ft,date)
+      #title_cfmt = ' NORMALIZE TE Adjoint sensitivity [ J/kg ] FT={}hr, INIT={}'.format(ft,date)
+      save_cfmt = '{}_TE_{}_{}_{}hr'.format(center,TE_mode,label_cfmt,ft)
+    elif label_cfmt == 'SVD':
+      label_cfmt = 'svd'
+      title_cfmt = ' TE MODE {}-{} contribute:{}% sensitivity [ J/kg ] FT={}hr, INIT={}'.format(start_mode, end_mode,int(contribute),ft,date)
+      #title_cfmt = ' NORMALIZE TE MODE sensitivity [ J/kg ] FT={}hr, INIT={}'.format(ft,date)
+      save_cfmt = '{}_TE_{}_{}_{}hr'.format(center,TE_mode,label_cfmt,ft)
+
+    lat_min_index, lat_max_index, lon_min_index, lon_max_index = \
+      self.EN.verification_region_lambert(lon,lat,
+          area_lat_min=target_region[1], area_lat_max=target_region[0],
+          area_lon_min=target_region[2], area_lon_max=target_region[3]
+      )
+
+    #vertifcation region
+    self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
+    self.MP.norm_contourf(mapp, x, y, energy_norm, label=label_cfmt)
+    self.MP.contour(mapp, x, y, hgt_data[7], elem='850hPa', font_on=1)
+    self.MP.title(title_cfmt, fontsize=8)
+    self.MP.saving(save_cfmt,'./work/')
+    plt.show()
+
 
   def average_norm_driver(self,
     energy_norm, target_region, date,

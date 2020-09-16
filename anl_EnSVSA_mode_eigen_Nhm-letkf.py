@@ -95,7 +95,7 @@ class Anl_ENSVSA:
         Z_array[(1*EN.nz*dims_xy):(2*(EN.nz*dims_xy)),imem] = pertb_vwnd[imem].reshape(-1)
         Z_array[(2*EN.nz*dims_xy):(3*(EN.nz*dims_xy)),imem] = pertb_tmp[imem].reshape(-1)
         Z_array[(3*EN.nz*dims_xy):(4*(EN.nz*dims_xy)),imem] = pertb_spfh[imem].reshape(-1)
-        Z_array[(4*EN.nz*dims_xy):(4*(EN.nz*dims_xy)+dims_xy),imem] = pertb_ps[imem,EN.surf-1].reshape(-1)
+        Z_array[(4*EN.nz*dims_xy):(4*(EN.nz*dims_xy)+dims_xy),imem] = pertb_ps[imem].reshape(-1)
 
     for index, _ in enumerate(range(start_eigen_mode,end_eigen_node+1)):
       array[:,index] = Z_array @ p_array[:,_]
@@ -130,7 +130,7 @@ class Anl_ENSVSA:
     potential_term = np.zeros((EN.ny,EN.nx))
 
     lat_min_index, lat_max_index, lon_min_index, lon_max_index = \
-      EN.verification_region(lon,lat,
+      EN.verification_region_lambert(lon,lat,
           area_lat_min=target_region[1], area_lat_max=target_region[0],
           area_lon_min=target_region[2], area_lon_max=target_region[3]
       )
@@ -173,13 +173,14 @@ if __name__ == "__main__":
 
   mode = 'humid' # 'dry' or 'humid'
   dataset = 'NHM_WJPN'
-  exp_name, exp_type = '000_wjpn', 'Ges'
+  exp_name, exp_type, ft = '000_wjpn', 'Ges', '24'
   map_prj, set_prj = 'WJPN', 'lcc' # 'CNH', 'lcc' or 'ALL', 'cyl'
-  target_region = ( 32.5, 37.5, 127.5, 130.0 ) # lat_min/max, lon_min/max
+  target_region = ( 32.5, 35.5, 130.0, 135.0 ) # lat_min/max, lon_min/max
   start_eigen_mode, end_eigen_mode = 0, 12 #default is 0/9 -> 1-10 mode. 
 
   """Class & parm set """
   init_date, target_date, exp_date = yyyy+mm+dd+hh, t_yyyy+t_mm+t_dd+t_hh, e_yyyy+e_mm+e_dd+e_hh+'00'
+
   DR = Anl_ENSVSA()
   RG = readgpv_nhm.ReadGPV(dataset)
   EN = readgpv_nhm.Energy_NORM(dataset)
@@ -187,7 +188,7 @@ if __name__ == "__main__":
 
   """Making pretubation data Vertificate TIME"""
   indir = '/work3/daichi/Data/Nhm-letkf/exp_ctrl/{}/{}/Ges'.format(exp_name,exp_date)
-  uwnd_data, vwnd_data, tmp_data, spfh_data, ps_data = RG.data_read_driver(indir,target_date)
+  uwnd_data, vwnd_data, tmp_data, spfh_data, _, ps_data = RG.data_read_driver(indir,target_date)
   
   #(uwnd, vwndm tmp) is included surface data, so shave data.
   pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_spfh, pertb_ps = EN.data_pertb_driver(
@@ -235,8 +236,11 @@ if __name__ == "__main__":
   print('')
 
   """Calc. Sensitivity Region"""
-  uwnd_data, vwnd_data, tmp_data, spfh_data, ps_data = RG.data_read_driver(indir,init_date)
-  pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_spfh, pertb_ps = EN.data_pertb_driver(uwnd_data,vwnd_data,tmp_data,spfh_data,ps_data)
+  uwnd_data, vwnd_data, tmp_data, hgt_data, spfh_data, ps_data = RG.data_read_driver(indir,init_date)
+  #(uwnd, vwndm tmp) is included surface data, so shave data.
+  pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_spfh, pertb_ps = EN.data_pertb_driver(
+    uwnd_data[:,RG.surf:,:,:], vwnd_data[:,RG.surf:,:,:], tmp_data[:,RG.surf:,:,:],
+    spfh_data,ps_data)
   dims_xy = RG.ny*RG.nx 
   
   for imem in range(EN.mem-EN.ctrl):
@@ -268,11 +272,10 @@ if __name__ == "__main__":
   print('MIN :: ', np.min(energy_norm), 'MAX :: ', np.max(energy_norm))
     
   """ Draw function NORM """
-  MP.main_norm_driver(
-    energy_norm,np.average(hgt_data,axis=0),target_region,ft,date,
-    prj=set_prj,label_cfmt='SVD',center=center,TE_mode=mode,
+  MP.main_norm_driver_nhm(
+    energy_norm,np.average(hgt_data,axis=0),target_region,ft,init_date,
+    prj=set_prj,label_cfmt='SVD',center='NHM LETKF',TE_mode=mode,
     start_mode=start_eigen_mode+1, end_mode=end_eigen_mode+1, contribute=contribute,
-    normalize_set=normalize_set,normalize_region=normalize_region
     )
   
   #MP.each_elem_norm_dry_tigge_driver(
@@ -281,12 +284,12 @@ if __name__ == "__main__":
   # center=center,TE_mode=mode
   # )
   
-  MP.each_elem_norm_humid_tigge_driver(
-    svd_pertb_uwnd,svd_pertb_vwnd,svd_pertb_tmp,svd_pertb_spfh,svd_pertb_ps,
-    target_region,ft,date,
-    center=center,TE_mode=mode,
-    ormalize_set=normalize_set,normalize_region=normalize_region
-    )
+  #MP.each_elem_norm_humid_tigge_driver(
+  #  svd_pertb_uwnd,svd_pertb_vwnd,svd_pertb_tmp,svd_pertb_spfh,svd_pertb_ps,
+  #  target_region,ft,date,
+  #  center=center,TE_mode=mode,
+  #  ormalize_set=normalize_set,normalize_region=normalize_region
+  #  )
 
 
   print('Normal END')
