@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 import setup
+import scipy.linalg
+import scipy.sparse
+from scipy import integrate
+import statics_tool
 
 class ReadGPV:
   def __init__(self, dataset, *, read_num:int=0):
@@ -9,10 +13,7 @@ class ReadGPV:
     self.surf = 1
     self.dims = self.nx*self.ny
     self.dataset = dataset
-    if 'p_level' in dataset:
-      self.elem_list = ( 'UGRD', 'VGRD', 'TMP ', 'SPFH', 'HGT ', 'WWND', 'VOR ', 'SLP ', 'PS  ', 'RAIN')
-    elif 'm_level' in dataset:
-      self.elem_list = ( 'UGRD', 'VGRD', 'QV  ', 'QC  ', 'QR  ', 'PRS ')
+    self.elem_list = ( 'UGRD', 'VGRD', 'TMP ', 'SPFH', 'HGT ', 'WWND', 'VOR ', 'SLP ', 'PS  ', 'RAIN')
 
     if not read_num:
       print('..... @ CHECK ELEM LIST @ ')
@@ -47,9 +48,9 @@ class ReadGPV:
     return uwnd_data, vwnd_data, tmp_data, spfh_data, hgt_data, wwnd_data, vor_data, slp_data, ps_data, rain_data 
 
   def data_read_driver(self, exp_path:str, target_date, *, endian='little'):
-    uwnd_data, vwnd_data, tmp_data, spfh_data, _, _, _, _, ps_data, _ = self.init_memarray
+    uwnd_data, vwnd_data, tmp_data, spfh_data, _, _, _, _, ps_data, _ = self.init_mem_array()
 
-    for index, imem in enumerate(self.mem):
+    for index, imem in enumerate(range(self.mem)):
       data_path = exp_path + '/{:03}/plevel_grd/{}00.grd'.format(imem+1, target_date)
       _full_data = self._open_gpv(data_path, endian=endian)
       _uwnd_data, _vwnd_data, _tmp_data, _spfh_data, _, _, _, _, _ps_data, _ = self.full_data_cut(_full_data)
@@ -176,21 +177,21 @@ class Energy_NORM:
     pertb_ps_data   = np.zeros((self.mem-self.ctrl, self.ny, self.nx))
     return pertb_uwnd_data, pertb_vwnd_data, pertb_tmp_data, pertb_spfh_data, pertb_ps_data
 
-  def data_pertb_driver(self,uwnd,vwnd,tmp,hgt,spfh,ps):
+  def data_pertb_driver(self,uwnd,vwnd,tmp,spfh,ps):
     """コントロールランからの摂動の作成
     Args:
-      elem(np.ndarray): 各アンサンブルランのデータ(配列の初期がコントロールラン)
+      elem(np.ndarray): 各アンサンブルランのデータ(配列の最後がコントロールラン/アンサンブル平均)
     Returns:
       pretb_elem_data(np.ndarray): アンサンブルランのデータからコントロールランデータを引いた擾乱のデータ
     """
-    pertb_uwnd_data, pertb_vwnd_data, pertb_tmp_data, pertb_hgt_data, pertb_spfh_data, pertb_ps_data = self.init_array()
+    pertb_uwnd_data, pertb_vwnd_data, pertb_tmp_data, pertb_spfh_data, pertb_ps_data = self.init_array()
     
     for imem in range(self.mem-self.ctrl):
-      pertb_uwnd_data[imem,:,:,:] = uwnd[imem,:,:,:] - uwnd[self.mem,:,:,:]
-      pertb_vwnd_data[imem,:,:,:] = vwnd[imem,:,:,:] - vwnd[self.mem,:,:,:]
-      pertb_tmp_data[imem,:,:,:]  =  tmp[imem,:,:,:] -  tmp[self.mem,:,:,:]
-      pertb_spfh_data[imem,:,:,:] = spfh[imem,:,:,:] - spfh[self.mem,:,:,:]
-      pertb_ps_data[imem,:,:]     =   ps[imem,:,:]   -   ps[self.mem,:,:]
+      pertb_uwnd_data[imem,:,:,:] = uwnd[imem,:,:,:] - uwnd[self.mem-1,:,:,:]
+      pertb_vwnd_data[imem,:,:,:] = vwnd[imem,:,:,:] - vwnd[self.mem-1,:,:,:]
+      pertb_tmp_data[imem,:,:,:]  =  tmp[imem,:,:,:] -  tmp[self.mem-1,:,:,:]
+      pertb_spfh_data[imem,:,:,:] = spfh[imem,:,:,:] - spfh[self.mem-1,:,:,:]
+      pertb_ps_data[imem,:,:]     =   ps[imem,:,:]   -   ps[self.mem-1,:,:]
 
     return pertb_uwnd_data, pertb_vwnd_data, pertb_tmp_data, pertb_spfh_data, pertb_ps_data
 
@@ -292,11 +293,42 @@ class Energy_NORM:
       area_lon_max (float, optional): 検証領域の経度最高値. Defaults to 150.
     Retunrs:
       各値に相当する　listのindex番号.
-    Note:
-      lambert図法の気象研のoutputでは, おそらく使えないだろう...
     """
     area_lat_min_index, area_lat_max_index = np.where(lat == area_lat_min)[0][0], np.where(lat == area_lat_max)[0][0]
     area_lon_min_index, area_lon_max_index = np.where(lon == area_lon_min)[1][0], np.where(lon == area_lon_max)[1][0]
+
+    return area_lat_min_index, area_lat_max_index, \
+           area_lon_min_index, area_lon_max_index
+
+  def verification_region_lambert(self, 
+    lon, lat, *,
+    area_lat_min:float =32.5, area_lat_max:float =37.5,
+    area_lon_min:float =127.5, area_lon_max:float =130.0
+    ):
+    """検証領域のインデックス番号を返す
+    Args:
+      lon, lat (np.ndarray): 経度, 緯度のnp.ndarray
+      area_lat_min (float, optional): 検証領域の緯度最低値. Defaults to 32.5
+      area_lat_max (float, optional): 検証領域の緯度最高値. Defaults to 37.5
+      area_lon_min (float, optional): 検証領域の経度最低値. Defaults to 127.5
+      area_lon_max (float, optional): 検証領域の経度最高値. Defaults to 130.0
+    Retunrs:
+      各値に相当する　listのindex番号.
+    """
+    
+    search_lon_row, search_lat_column = lon[self.ny//2,:], lat[:, self.nx//2]
+    
+    #diff
+    lat_set_min = np.sqrt((search_lat_column - area_lat_min)**2)
+    lat_set_max = np.sqrt((search_lat_column - area_lat_max)**2)
+    lon_set_min = np.sqrt((search_lon_row - area_lon_min)**2)
+    lon_set_max = np.sqrt((search_lon_row - area_lon_max)**2)
+
+    area_lat_min_index, area_lat_max_index = np.argmin(lat_set_min), np.argmin(lat_set_max)
+    area_lon_min_index, area_lon_max_index = np.argmin(lon_set_min), np.argmin(lon_set_max)
+
+    print('...... CHECK VERTIFICATION LATITUDE,  I: {}, O: {} '.format(area_lat_min,search_lat_column[area_lat_min_index]))
+    print('...... CHECK VERTIFICATION LONGITUDE, I: {}, O: {} '.format(area_lon_min,search_lon_row[area_lon_min_index]))
 
     return area_lat_min_index, area_lat_max_index, \
            area_lon_min_index, area_lon_max_index

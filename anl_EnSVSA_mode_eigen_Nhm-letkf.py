@@ -175,11 +175,11 @@ if __name__ == "__main__":
   dataset = 'NHM_WJPN'
   exp_name, exp_type = '000_wjpn', 'Ges'
   map_prj, set_prj = 'WJPN', 'lcc' # 'CNH', 'lcc' or 'ALL', 'cyl'
-  target_region = ( 25, 50, 125, 150 ) # lat_min/max, lon_min/max
+  target_region = ( 32.5, 37.5, 127.5, 130.0 ) # lat_min/max, lon_min/max
   start_eigen_mode, end_eigen_mode = 0, 12 #default is 0/9 -> 1-10 mode. 
 
   """Class & parm set """
-  init_date, target_date, exp_date = yyyy+mm+dd+hh, t_yyyy+t_mm+t_dd+t_hh, e_yyyy+e_mm+e_dd+e_hh
+  init_date, target_date, exp_date = yyyy+mm+dd+hh, t_yyyy+t_mm+t_dd+t_hh, e_yyyy+e_mm+e_dd+e_hh+'00'
   DR = Anl_ENSVSA()
   RG = readgpv_nhm.ReadGPV(dataset)
   EN = readgpv_nhm.Energy_NORM(dataset)
@@ -188,7 +188,12 @@ if __name__ == "__main__":
   """Making pretubation data Vertificate TIME"""
   indir = '/work3/daichi/Data/Nhm-letkf/exp_ctrl/{}/{}/Ges'.format(exp_name,exp_date)
   uwnd_data, vwnd_data, tmp_data, spfh_data, ps_data = RG.data_read_driver(indir,target_date)
-  pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_spfh, pertb_ps = EN.data_pertb_driver(uwnd_data,vwnd_data,tmp_data,spfh_data,ps_data)
+  
+  #(uwnd, vwndm tmp) is included surface data, so shave data.
+  pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_spfh, pertb_ps = EN.data_pertb_driver(
+    uwnd_data[:,RG.surf:,:,:], vwnd_data[:,RG.surf:,:,:], tmp_data[:,RG.surf:,:,:],
+    spfh_data,ps_data)
+  
   lon, lat = RG.set_coordinate(RG.nx, RG.ny)
   weight_lat = RG.weight_latitude(lat)
 
@@ -205,7 +210,7 @@ if __name__ == "__main__":
 
   """Target region setting"""
   lat_min_index, lat_max_index, lon_min_index, lon_max_index = \
-      EN.verification_region(lon,lat,
+      EN.verification_region_lambert(lon,lat,
           area_lat_min=target_region[1], area_lat_max=target_region[0],
           area_lon_min=target_region[2], area_lon_max=target_region[3]
       )
@@ -241,6 +246,7 @@ if __name__ == "__main__":
       pertb_tmp[ imem,i_level,:,:] = pertb_tmp[ imem,i_level,:,:]*weight_lat
       pertb_spfh[imem,i_level,:,:] = pertb_spfh[imem,i_level,:,:]*weight_lat
     pertb_ps[imem,:,:] = pertb_ps[imem,:,:]*weight_lat
+
   
   print('')
   print('..... @ MAKE Pertubation array & REGION Extraction @')
