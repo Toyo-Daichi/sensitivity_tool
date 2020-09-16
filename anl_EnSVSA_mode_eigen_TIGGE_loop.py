@@ -170,21 +170,25 @@ class Anl_ENSVSA:
     
 if __name__ == "__main__":
   """Set basic info. """
-  yyyy, mm, dd, hh, init = '2018', '07', '04', '12', '00'
-  ft_list = ('24','48','72')
+  yyyy, mm, dd, hh, init = '2015', '09', '03', '12', '00'
+  ft_list = ('24')
   date = yyyy+mm+dd+hh
   mode = 'humid' # 'dry' or 'humid'
-  map_prj, set_prj = 'CNH', 'lcc' # 'CNH', 'lcc' or 'ALL', 'cyl'
-  #target_region = ( 30, 35, 127.5, 132.5 ) # lat_min/max, lon_min/max
-  target_region = ( 25, 50, 125, 150 ) # lat_min/max, lon_min/max
-  start_eigen_mode, end_eigen_mode = 0, 12 #default is 0/9 -> 1-10 mode. 
+  start_eigen_mode, end_eigen_mode = 2, 2 #default is 0/9 -> 1-10 mode. 
+  map_prj, set_prj = 'ASIAJPN', 'lcc' # 'CNH', 'lcc' or 'ALL', 'cyl'
+  target_region = ( 30, 37.5, 127.5, 137.5 ) # lat_min/max, lon_min/max
+  #target_region = ( 25, 50, 125, 150 ) # lat_min/max, lon_min/max
   normalize_set = 'on' # 'on' or 'on_full' or 'off'
-  normalize_region = ( 17.5, 62.5, 105, 170 ) # lat_min/max, lon_min/max
+  #normalize_region = ( 17.5, 62.5, 105, 170 ) # lat_min/max, lon_min/max
+  normalize_region = ( 20, 50, 118.75, 152.5 ) # lat_min/max, lon_min/max
 
-  center_list = ('NCEP', 'CMC')
+  center_list = ('JMA', 'ECMWF', 'NCEP', 'CMC')
 
   for center in center_list:
-    dataset = 'TIGGE_' + center + '' #'_pertb_plus/minus' or '' 
+    if center is 'JMA' or center is 'ECMWF':
+      dataset = 'TIGGE_' + center + '_pertb_plus' 
+    else:
+      dataset = 'TIGGE_' + center + '' 
 
     for ft in ft_list:
       """Class & parm set """
@@ -192,7 +196,7 @@ if __name__ == "__main__":
       RG = readgpv_tigge.ReadGPV(dataset,date,ft)
       EN = readgpv_tigge.Energy_NORM(dataset)
       MP = mapping_draw_NORM.Mapping_NORM(dataset,date,map_prj)
-
+      
       """Making pretubation data Vertificate TIME"""
       indir = '/work3/daichi/Data/TIGGE/' + center + '/'
       uwnd_data, vwnd_data, hgt_data, tmp_data, spfh_data, ps_data = RG.data_read_ft_driver(indir+date)

@@ -34,6 +34,12 @@ class Mapping:
       self.lat_min, self.lat_max = 29, 38
       self.lat_0, self.lon_0 = 35, 140
 
+    elif area == 'ASIAJPN':
+      self.area = area
+      self.lon_min, self.lon_max = 116, 162.5
+      self.lat_min, self.lat_max = 15, 52.5 
+      self.lat_0, self.lon_0 = 35, 140
+
     elif area == 'WNH':
       self.area = area
       self.lon_min, self.lon_max = 80, 175
@@ -160,7 +166,8 @@ class Mapping:
   def norm_contourf(self, basemap, x, y, data, *, label='normalize', cbar_on=0):
     #normalize
     if label == 'normalize':
-      levels = [0.025, 0.05, 0.1, 0.2, 0.5, 0.75, 1.0]
+      #levels = [0.025, 0.05, 0.1, 0.2, 0.5, 0.75, 1.0]
+      levels = [0.1, 0.2, 0.3, 0.4, 0.5, 0.75, 1.0]
 
     elif label == 'normalize_scope':
       levels = [0.025, 0.050, 0.075, 0.100, 0.125, 0.150, 0.200]
