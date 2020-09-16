@@ -27,7 +27,9 @@ class Setup:
     elif self.dataset == 'TIGGE_CMC':
       nx, ny, nz, mem = 288, 145, 8, 21 
     elif self.dataset == 'TIGGE_UKMO':
-      nx, ny, nz, mem = 288, 145, 8, 17 
+      nx, ny, nz, mem = 288, 145, 8, 17
+    elif self.dataset == 'NHM_WJPN':
+      nx, ny, nz, mem = 241, 193, 16, 51
 
     return nx, ny, nz, mem
 
@@ -38,6 +40,11 @@ class Setup:
       press_levels = np.array([1000.0, 850.0, 500.0, 300.0])
     elif 'TIGGE' in self.dataset:
       press_levels = np.array([1000.0, 925.0, 850.0, 700.0, 500.0, 300.0, 250.0, 200.0])
+    elif 'NHM' in self.dataset:
+      press_levels = np.array(
+        [1000.0, 975.0, 950.0, 925.0, 900.0, 850.0, 800.0, 700.0, 
+          600.0, 500.0, 400.0, 300.0, 250.0, 200.0, 150.0, 100.0]
+        )
     return press_levels
 
 """ simple package"""
