@@ -30,6 +30,8 @@ class Setup:
       nx, ny, nz, mem = 288, 145, 8, 17
     elif self.dataset == 'NHM_WJPN':
       nx, ny, nz, mem = 241, 193, 16, 51
+    elif self.dataset == 'NHM_JPN':
+      nx, ny, nz, mem = 630, 560, 16, 51
 
     return nx, ny, nz, mem
 

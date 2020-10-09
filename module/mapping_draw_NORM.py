@@ -190,7 +190,7 @@ class Mapping_NORM:
       label_cfmt = 'svd'
       title_cfmt = ' TE MODE {}-{} contribute:{}% sensitivity [ J/kg ] FT={}hr, INIT={}'.format(start_mode, end_mode,int(contribute),ft,date)
       #title_cfmt = ' NORMALIZE TE MODE sensitivity [ J/kg ] FT={}hr, INIT={}'.format(ft,date)
-      save_cfmt = '{}_TE_{}_{}_{}hr'.format(center,TE_mode,label_cfmt,ft)
+      save_cfmt = '{}_TE_{}_{}_{}hr_{:02}-{:02}_{}'.format(center,TE_mode,label_cfmt,ft,start_mode,end_mode,date)
 
     lat_min_index, lat_max_index, lon_min_index, lon_max_index = \
       self.EN.verification_region_lambert(lon,lat,
@@ -200,11 +200,12 @@ class Mapping_NORM:
 
     #vertifcation region
     self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
+    self.MP.point_linear(mapp,x,y,0,self.RG.nx-1,0,self.RG.ny-1, color='black', ls='--')
     self.MP.norm_contourf(mapp, x, y, energy_norm, label=label_cfmt)
-    self.MP.contour(mapp, x, y, hgt_data[7], elem='850hPa', font_on=1)
+    self.MP.contour(mapp, x, y, hgt_data[3], elem='850hPa', font_on=1)
     self.MP.title(title_cfmt, fontsize=8)
     self.MP.saving(save_cfmt,'./work/')
-    plt.show()
+    #plt.show()
 
 
   def average_norm_driver(self,
@@ -391,7 +392,7 @@ class Mapping_NORM:
     mapp = self.MP.base(projection_mode=prj,label_cfmt='off')
     x, y = self.MP.coord_change(mapp, lon, lat)
 
-    self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
+    self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index-1,lat_min_index,lat_max_index-1)
     self.MP.norm_contourf(mapp, x, y, ps,label=label_cfmt)
     self.MP.title('PS [ J/kg ] ')
     print('..... FINISH PS   level surface')

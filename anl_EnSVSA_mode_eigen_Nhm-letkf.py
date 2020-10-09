@@ -168,15 +168,15 @@ if __name__ == "__main__":
   """Set basic info. """
   yyyy = '2018'; t_yyyy = '2018' ; e_yyyy = '2018'
   mm   = '07'  ; t_mm   = '07'   ; e_mm   = '07'
-  dd   = '05'  ; t_dd   = '06'   ; e_dd   = '07'
-  hh   = '18'  ; t_hh   = '18'   ; e_hh   = '00'
+  dd   = '04'  ; t_dd   = '05'   ; e_dd   = '05'
+  hh   = '12'  ; t_hh   = '12'   ; e_hh   = '12'
 
   mode = 'humid' # 'dry' or 'humid'
-  dataset = 'NHM_WJPN'
-  exp_name, exp_type, ft = '000_wjpn', 'Ges', '24'
-  map_prj, set_prj = 'WJPN', 'lcc' # 'CNH', 'lcc' or 'ALL', 'cyl'
-  target_region = ( 32.5, 35.5, 130.0, 135.0 ) # lat_min/max, lon_min/max
-  start_eigen_mode, end_eigen_mode = 0, 12 #default is 0/9 -> 1-10 mode. 
+  dataset = 'NHM_JPN'
+  exp_name, exp_type, ft = 'exp005__JPN_05km_mem050_NEST_FCST', 'MF05km_jpn_M050', '24'
+  map_prj, set_prj = 'ASIAJPN', 'lcc' # 'CNH', 'lcc' or 'ALL', 'cyl'
+  target_region = ( 30.0, 36.5, 128.5, 136.5 ) # lat_min/max, lon_min/max
+  start_eigen_mode, end_eigen_mode = 0, 0 #default is 0/9 -> 1-10 mode. 
 
   """Class & parm set """
   init_date, target_date, exp_date = yyyy+mm+dd+hh, t_yyyy+t_mm+t_dd+t_hh, e_yyyy+e_mm+e_dd+e_hh+'00'
@@ -187,7 +187,7 @@ if __name__ == "__main__":
   MP = mapping_draw_NORM.Mapping_NORM(dataset,init_date,map_prj)
 
   """Making pretubation data Vertificate TIME"""
-  indir = '/work3/daichi/Data/Nhm-letkf/exp_ctrl/{}/{}/Ges'.format(exp_name,exp_date)
+  indir = '/data1/da01/Toyo/Data/Nhm-letkf/{}/{}/{}/Ges/'.format(exp_name,exp_type,exp_date)
   uwnd_data, vwnd_data, tmp_data, spfh_data, _, ps_data = RG.data_read_driver(indir,target_date)
   
   #(uwnd, vwndm tmp) is included surface data, so shave data.
@@ -274,7 +274,7 @@ if __name__ == "__main__":
   """ Draw function NORM """
   MP.main_norm_driver_nhm(
     energy_norm,np.average(hgt_data,axis=0),target_region,ft,init_date,
-    prj=set_prj,label_cfmt='SVD',center='NHM LETKF',TE_mode=mode,
+    prj=set_prj,label_cfmt='SVD',center='NHM_LETKF',TE_mode=mode,
     start_mode=start_eigen_mode+1, end_mode=end_eigen_mode+1, contribute=contribute,
     )
   

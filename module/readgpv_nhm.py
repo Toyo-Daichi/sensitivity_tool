@@ -47,11 +47,11 @@ class ReadGPV:
 
     return uwnd_data, vwnd_data, tmp_data, spfh_data, hgt_data, wwnd_data, vor_data, slp_data, ps_data, rain_data 
 
-  def data_read_driver(self, exp_path:str, target_date, *, endian='little'):
+  def data_read_driver(self, exp_path:str, target_date, *, endian='big'):
     uwnd_data, vwnd_data, tmp_data, spfh_data, hgt_data, _, _, _, ps_data, _ = self.init_mem_array()
 
     for index, imem in enumerate(range(self.mem)):
-      data_path = exp_path + '/{:03}/plevel_grd/{}00.grd'.format(imem+1, target_date)
+      data_path = exp_path + '/{:03}/fcst_p.grd/{}00.grd'.format(imem+1, target_date)
       _full_data = self._open_gpv(data_path, endian=endian)
       _uwnd_data, _vwnd_data, _tmp_data, _spfh_data, _hgt_data, _, _, _, _ps_data, _ = self.full_data_cut(_full_data)
       uwnd_data[index,:,:,:] = _uwnd_data[:,:,:]
@@ -88,7 +88,7 @@ class ReadGPV:
     
     return uwnd_data, vwnd_data, tmp_data, spfh_data, hgt_data, wwnd_data, vor_data, slp_data, ps_data, rain_data 
 
-  def set_coordinate(self, nx:int, ny:int, *, inv:str='off') -> np.ndarray:
+  def set_coordinate(self, nx:int, ny:int, *, inv:str='off', dtype='>f8') -> np.ndarray:
     """データの座標系取得
     Args:
         nx (int): x座標の数
@@ -96,7 +96,11 @@ class ReadGPV:
     Returns:
         np.ndarray: x座標, y座標
     """
-    path = '/work3/daichi/Data'
+    # CCS
+    #path = '/work3/daichi/Data'
+    # MRI
+    path = '/data1/da01/Toyo/Data'
+
     grd_dir = path + '/Coordinate/Nhm_grd_{:}-{:}/'.format(nx,ny)
     ifile_lat = grd_dir + 'lat_lambert.grd'
     ifile_lon = grd_dir + 'lon_lambert.grd'
@@ -104,15 +108,15 @@ class ReadGPV:
     print('...... Preparating coord. lat, lon data :: {}, {}'.format(ny,nx))
     
     with open(ifile_lon, 'rb') as ifile:
-      X = np.fromfile(ifile, dtype='float64', sep = '').reshape(ny, nx)
+      X = np.fromfile(ifile, dtype=dtype, sep = '').reshape(ny, nx)
     
     with open(ifile_lat, 'rb') as ifile:
       if ( inv is 'off' ): 
-        Y = np.fromfile(ifile, dtype='float64', sep = '').reshape(ny, nx)
+        Y = np.fromfile(ifile, dtype=dtype, sep = '').reshape(ny, nx)
       
       elif ( inv is 'on' ):
-        _Y = np.fromfile(ifile, dtype='float64', sep = '').reshape(ny, nx)
-        Y = np.flip(_Y, axis=0) 	
+        _Y = np.fromfile(ifile, dtype=dtype, sep = '').reshape(ny, nx)
+        Y = np.flip(_Y, axis=0)   
     
     return X, Y
 
