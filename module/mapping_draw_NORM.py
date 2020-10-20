@@ -511,3 +511,113 @@ class Mapping_NORM:
     plt.show()
   
 
+  def each_elem_norm_humid_Nhm_letkf_driver(self, 
+    pertb_uwnd, pertb_vwnd, pertb_tmp, pertb_spfh, pertb_ps, # pertbuation data
+    target_region, ft, date, 
+    *, prj='lcc', label_cfmt='elem_each',  # for title & colorbar
+    TE_mode='humid',                       # for savefig
+    mode:int=0, contribute:float=0.0,      # for svd
+    normalize_set='off', normalize_region=(0,0,0,0) # for normalize
+    ):
+
+    size_x, size_y = 25, 20
+    row, column = 6, 5 
+    press_levels = (200, 300, 500, 700, 850, 1000)
+    press_indexs = ( 13,  11,   9,   7,   5,    0)
+
+    title_cfmt = 'TE [ J/kg ] FT={}hr, INIT={}'.format(ft,date)
+    save_cfmt = '{}_Each_elem_energy_{}_{}_{}hr'.format('Nhm-letkf',TE_mode,date,ft)
+
+    fig = plt.figure(figsize = (size_x, size_y))
+    lon, lat = self.RG.set_coordinate() 
+    lat_min_index, lat_max_index, lon_min_index, lon_max_index = \
+      self.EN.verification_region(lon,lat,
+          area_lat_min=target_region[1], area_lat_max=target_region[0],
+          area_lon_min=target_region[2], area_lon_max=target_region[3]
+      )
+
+    uwnd = (pertb_uwnd[:]**2)*0.5
+    vwnd = (pertb_vwnd[:]**2)*0.5
+    tmp  = (self.EN.cp/self.EN.Tr)*((pertb_tmp[:])**2)*0.5
+    spfh = (self.EN.wq*(self.EN.Lc**2)*(pertb_spfh[:]**2)/(self.EN.cp*self.EN.Tr))*0.5
+    ps   = (((self.EN.R*self.EN.Tr)/self.EN.Pr)*(pertb_ps**2/self.EN.Pr)*0.5)
+    
+    if normalize_set == 'on':
+      normal_lat_min_index, normal_lat_max_index, normal_lon_min_index, normal_lon_max_index = \
+        self.EN.verification_region(lon,lat,
+          area_lat_min=normalize_region[1], area_lat_max=normalize_region[0],
+          area_lon_min=normalize_region[2], area_lon_max=normalize_region[3]
+        )
+      uwnd = self.EN.region_normalize_3d_norm(normalize_region,lon,lat,uwnd)
+      vwnd = self.EN.region_normalize_3d_norm(normalize_region,lon,lat,vwnd)
+      tmp  = self.EN.region_normalize_3d_norm(normalize_region,lon,lat,tmp)
+      spfh = self.EN.region_normalize_3d_norm(normalize_region,lon,lat,spfh)
+      ps   = self.EN.region_normalize_norm(normalize_region,lon,lat,ps)
+      label_cfmt = 'normalize'
+
+    elif normalize_set == 'off':
+      label_cfmt = 'elem_each'
+
+    # UWND
+    for place, (index, level) in enumerate(zip(press_indexs, press_levels)):
+      ax = fig.add_subplot(row,column,1+5*place)
+      mapp = self.MP.base(projection_mode=prj,label_cfmt='off')
+      x, y = self.MP.coord_change(mapp, lon, lat)
+
+      self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
+      self.MP.point_linear(mapp,x,y,0,self.RG.nx-1,0,self.RG.ny-1, color='black', ls='--')
+      self.MP.norm_contourf(mapp, x, y, uwnd[index],label=label_cfmt)
+      self.MP.title('UWND [ J/kg ] {}hPa '.format(level))
+      print('..... FINISH UWND level {:5} hPa'.format(level))
+
+    # VWND
+    for place, (index, level) in enumerate(zip(press_indexs, press_levels)):
+      ax = fig.add_subplot(row,column,2+5*place)
+      mapp = self.MP.base(projection_mode=prj,label_cfmt='off')
+      x, y = self.MP.coord_change(mapp, lon, lat)
+
+      self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
+      self.MP.point_linear(mapp,x,y,0,self.RG.nx-1,0,self.RG.ny-1, color='black', ls='--')
+      self.MP.norm_contourf(mapp, x, y, vwnd[index] ,label=label_cfmt)
+      self.MP.title('VWND [ J/kg ] {}hPa '.format(level))
+      print('..... FINISH VWND level {:5} hPa'.format(level))
+
+    #TMP
+    for place, (index, level) in enumerate(zip(press_indexs, press_levels)):
+      ax = fig.add_subplot(row,column,3+5*place)
+      mapp = self.MP.base(projection_mode=prj,label_cfmt='off')
+      x, y = self.MP.coord_change(mapp, lon, lat)
+
+      self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
+      self.MP.point_linear(mapp,x,y,0,self.RG.nx-1,0,self.RG.ny-1, color='black', ls='--')
+      self.MP.norm_contourf(mapp, x, y, tmp[index], label=label_cfmt)
+      self.MP.title('TMP [ J/kg ] {}hPa '.format(level))
+      print('..... FINISH TMP  level {:5} hPa'.format(level))
+
+    #SPFH
+    for place, (index, level) in enumerate(zip(press_indexs, press_levels)):
+      ax = fig.add_subplot(row,column,4+5*place)
+      mapp = self.MP.base(projection_mode=prj,label_cfmt='off')
+      x, y = self.MP.coord_change(mapp, lon, lat)
+      self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
+      self.MP.point_linear(mapp,x,y,0,self.RG.nx-1,0,self.RG.ny-1, color='black', ls='--')
+      self.MP.norm_contourf(mapp, x, y, spfh[index],label=label_cfmt)
+      self.MP.title('SPFH [ J/kg ] {}hPa '.format(level))
+      print('..... FINISH SPFH level {:5} hPa'.format(level))
+
+    #PS
+    ax = fig.add_subplot(row,column,30)
+    mapp = self.MP.base(projection_mode=prj,label_cfmt='off')
+    x, y = self.MP.coord_change(mapp, lon, lat)
+
+    self.MP.point_linear(mapp,x,y,lon_min_index,lon_max_index,lat_min_index,lat_max_index)
+    self.MP.point_linear(mapp,x,y,0,self.RG.nx-1,0,self.RG.ny-1, color='black', ls='--')
+    self.MP.norm_contourf(mapp, x, y, ps,label=label_cfmt)
+    self.MP.title('PS [ J/kg ] ')
+    print('..... FINISH PS   level   surface')
+
+    plt.suptitle(' Ensemble based Sensitivity Analysis ({}) Valid time: {}, Target region: JPN'.format(center,date))
+    self.MP.saving(save_cfmt,'./work/')
+    plt.show()
+  
+
