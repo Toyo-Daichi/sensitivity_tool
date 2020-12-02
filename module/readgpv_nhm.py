@@ -47,7 +47,7 @@ class ReadGPV:
 
     return uwnd_data, vwnd_data, tmp_data, spfh_data, hgt_data, wwnd_data, vor_data, slp_data, ps_data, rain_data 
 
-  def data_read_driver(self, exp_path:str, target_date, *, endian='big'):
+  def data_read_driver(self, exp_path:str, target_date:str, *, endian='big'):
     uwnd_data, vwnd_data, tmp_data, spfh_data, hgt_data, _, _, _, ps_data, _ = self.init_mem_array()
 
     for index, imem in enumerate(range(self.mem)):
@@ -56,10 +56,10 @@ class ReadGPV:
       _uwnd_data, _vwnd_data, _tmp_data, _spfh_data, _hgt_data, _, _, _, _ps_data, _ = self.full_data_cut(_full_data)
       uwnd_data[index,:,:,:] = _uwnd_data[:,:,:]
       vwnd_data[index,:,:,:] = _vwnd_data[:,:,:]
-      tmp_data[index,:,:,:]  =  _tmp_data[:,:,:]
+      tmp_data[index,:,:,:]  = _tmp_data[:,:,:]
       spfh_data[index,:,:,:] = _spfh_data[:,:,:]
-      hgt_data[index,:,:,:]   = _hgt_data[:,:,:]
-      ps_data[index,:,:]     =   _ps_data[:,:]
+      hgt_data[index,:,:,:]  = _hgt_data[:,:,:]
+      ps_data[index,:,:]     = _ps_data[:,:]
 
     return uwnd_data, vwnd_data, tmp_data, spfh_data, hgt_data, ps_data
 
